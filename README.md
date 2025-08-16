@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## License
 
-## Getting Started
+This project is proprietary software owned by **Skybridge**.  
+All rights reserved. Unauthorized use is prohibited.
 
-First, run the development server:
+## Project started folder struction
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+src/
+├── app/
+│ ├── layout.tsx
+│ ├── page.tsx  
+│
+│ ├── listings/
+│ │ ├── page.tsx
+│ │ └── [id]/page.tsx
+│
+│ ├── blog/
+│ │ ├── page.tsx
+│ │ └── [id]/page.tsx
+│
+│ ├── search/page.tsx
+│ ├── saved/page.tsx
+│
+│ ├── dashboard/
+│ │ ├── agent/
+│ │ │ ├── page.tsx
+│ │ │ ├── notifications/page.tsx
+│ │ │ └── settings/page.tsx
+│ │ └── admin/
+│ │ ├── page.tsx
+│ │ ├── notifications/page.tsx
+│ │ └── settings/page.tsx
+│
+│ ├── auth/
+│ │ ├── agent/
+│ │ │ ├── login/page.tsx
+│ │ │ └── register/page.tsx
+│ │ └── admin/login/page.tsx
+│
+│ ├── contact/
+│ │ ├── page.tsx
+│ │ └── [agentId]/page.tsx
+│
+│ ├── policy/page.tsx
+│ ├── terms/page.tsx
+│ ├── about/page.tsx
+│ ├── faq/page.tsx
+│ ├── pricing/page.tsx
+│ ├── support/page.tsx
+│ ├── chatbot/page.tsx
+│ ├── not-found.tsx
+│ └── loading.tsx
+│
+├── components/
+│ ├── Navbar.tsx
+│ ├── Footer.tsx
+│ ├── ChatbotWidget.tsx
+│ ├── CookieConsent.tsx
+│ ├── PropertyCard.tsx
+│ ├── PropertyFilter.tsx
+│ ├── DashboardSidebar.tsx
+│ ├── SearchBar.tsx
+│ ├── Pagination.tsx
+│ ├── FormInput.tsx
+│ │
+│ ├── NotificationCard.tsx
+│ ├── PricingCard.tsx
+│ ├── SupportForm.tsx
+│ └── SettingsForm.tsx
+│
+├── lib/
+│ ├── firebase.ts
+│ ├── cloudinary.ts
+│ ├── auth.ts
+│ └── firestore.ts
+│
+├── hooks/
+│ ├── useAuth.ts
+│ ├── useListings.ts
+│ ├── useSaved.ts
+│ ├── useNotifications.ts
+│ └── useChatbot.ts
+│
+├── utils/
+│ ├── formatDate.ts
+│ ├── formatCurrency.ts
+│ └── validateForm.ts
+│
+├── styles/
+│ ├── globals.css
+│ └── tailwind.css
+│
+└── types/
+├── property.ts
+├── user.ts
+├── notification.ts
+└── blog.ts
