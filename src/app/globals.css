@@ -3,13 +3,16 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --font-montserrat: 'Montserrat Fallback';
+  --font-poppins: 'Poppins Fallback'
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  
+
   --font-head: var(--font-montserrat);
   --font-body: var(--font-poppins);
 }
@@ -24,7 +27,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
 }
 
 h1,
@@ -36,6 +39,6 @@ h6 {
   font-family: var(--font-head), sans-serif;
 }
 
-p{
+p {
   font-family: var(--font-body), sans-serif;
 }

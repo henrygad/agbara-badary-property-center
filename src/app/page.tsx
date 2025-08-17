@@ -7,10 +7,10 @@ export default function Home() {
 
       </header>
       <main className="flex flex-col">
-        <h1 className="bg-red-400 text-4xl font-body">Hello World!</h1>
+        <p className="font-body text-2xl">How are you</p>
+        <h1 className="font-head text-2xl">How are you</h1>
       </main>
-      <footer className="font-head">
-        This is montserret
+      <footer className="">        
       </footer>
     </div>
   );
