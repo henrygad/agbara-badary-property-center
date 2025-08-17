@@ -1,0 +1,1 @@
+export default function PropertyCard() { return <div className='p-2 border'>Property Plan</div> }

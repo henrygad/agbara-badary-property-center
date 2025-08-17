@@ -1,0 +1,1 @@
+export default function SupportForm() { return <form><input placeholder='Describe issue' /></form> }

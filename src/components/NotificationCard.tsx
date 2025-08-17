@@ -1,0 +1,1 @@
+export default function NotificationCard() { return <div className='p-2 border'>Notification</div> }
