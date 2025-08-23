@@ -1,15 +1,7 @@
 // src/app/blog/page.tsx
+import { BlogPost } from "@/types/blogpost.types";
 import Image from "next/image";
 import Link from "next/link";
-
-type BlogPost = {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  likes: number;
-  comments: number;
-};
 
 const posts: BlogPost[] = [
   {
@@ -65,40 +57,44 @@ export default function BlogPage() {
       <h1 className="text-2xl font-bold mb-8">Latest from UrbanNest</h1>
 
       <div className="space-y-8">
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="flex flex-col md:flex-row gap-6 border-b pb-6"
-          >
-            {/* Post Content */}
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">{post.title}</h2>
-              <p className="text-gray-600 mt-2">{post.description}</p>
-              <div className="flex items-center gap-6 mt-4">
-                <Link
-                  href={`/blog/${post.id}`}
-                  className="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100"
-                >
-                  Read More
-                </Link>
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
-                  <span>❤️ {post.likes}</span>
-                  <span>💬 {post.comments}</span>
+        {
+          posts?.length ?
+          posts.map((post) => (
+            <div
+              key={post.id}
+              className="flex flex-col md:flex-row gap-6 border-b pb-6"
+            >
+              {/* Post Content */}
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold">{post.title}</h2>
+                <p className="text-gray-600 mt-2">{post.description}</p>
+                <div className="flex items-center gap-6 mt-4">
+                  <Link
+                    href={`/blog/${post.id}`}
+                    className="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100"
+                  >
+                    Read More
+                  </Link>
+                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                    <span>❤️ {post.likes}</span>
+                    <span>💬 {post.comments}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Post Image */}
-            <div className="w-full md:w-48 h-32 relative rounded-lg overflow-hidden">
-              <Image
-                src={post.image}
-                alt={post.title}
-                fill
-                className="object-cover"
-              />
+              {/* Post Image */}
+              <div className="w-full md:w-48 h-32 relative rounded-lg overflow-hidden">
+                <Image
+                  src={post.image}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          )) :
+            <div>No posts found</div>
+        }
       </div>
 
       {/* Pagination */}

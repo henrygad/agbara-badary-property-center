@@ -1,20 +1,12 @@
 // src/app/blog/page.tsx
-import Image from "next/image";
-
-type BlogPost = {
-  id: string;
-  title: string;
-  excerpt: string;
-  image: string;
-  likes: number;
-  comments: number;
-};
+import Blogpost from "@/components/Blogpost";
+import { BlogPost } from "@/types/blogpost.types";
 
 const posts: BlogPost[] = [
   {
     id: "1",
     title: "The Ultimate Guide to Buying Your First Home",
-    excerpt:
+    description:
       "Buying your first home is a significant milestone. This guide provides a step-by-step approach to navigate the process successfully, from saving for a down payment to closing the deal.",
     image: "/images/house1.png",
     likes: 192,
@@ -23,7 +15,7 @@ const posts: BlogPost[] = [
   {
     id: "2",
     title: "Top 5 Neighborhoods for Young Professionals",
-    excerpt:
+    description:
       "Discover the best neighborhoods for young professionals, offering vibrant social scenes, convenient amenities, and promising career opportunities.",
     image: "/images/house2.png",
     likes: 78,
@@ -32,7 +24,7 @@ const posts: BlogPost[] = [
   {
     id: "3",
     title: "Investing in Real Estate: A Beginner’s Guide",
-    excerpt:
+    description:
      "Learn the basics of real estate investing, including different investment strategies, risk management, and how to get started with your first property.",
     image: "/images/house3.png",
     likes: 160,
@@ -41,7 +33,7 @@ const posts: BlogPost[] = [
   {
     id: "4",
     title: "Navigating the Mortgage Process: Tips and Tricks",
-    excerpt:
+    description:
       "Demystify the mortgage process with expert advice on securing the best rates, understanding loan options, and avoiding common pitfalls.",
     image: "/images/house4.png",
     likes: 84,
@@ -50,7 +42,7 @@ const posts: BlogPost[] = [
   {
     id: "5",
     title: "The Future of Home Design: Trends to Watch",
-    excerpt:
+    description:
       "Explore the latest trends in home design, from sustainable materials to smart home technology, and how these innovations are shaping the future of residential living.",
     image: "/images/house5.png",
     likes: 105,
@@ -67,37 +59,16 @@ export default function BlogListPage() {
       {/* Blog List */}
       <div className="space-y-8">
         {posts.map((post) => (
-          <div
+          <Blogpost
             key={post.id}
-            className="flex items-center justify-between gap-6 border-b border-gray-200 pb-6"
-          >
-            {/* Text Content */}
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">{post.title}</h2>
-              <p className="text-gray-600 text-sm mt-2 line-clamp-2">
-                {post.excerpt}
-              </p>
-              <button className="mt-3 text-sm font-medium text-blue-600 hover:underline">
-                Read More
-              </button>
-
-              {/* Likes & Comments */}
-              <div className="flex items-center gap-6 text-gray-500 text-sm mt-3">
-                <span>❤️ {post.likes}</span>
-                <span>💬 {post.comments}</span>
-              </div>
-            </div>
-
-            {/* Image */}
-            <div className="w-48 h-32 relative rounded-lg overflow-hidden flex-shrink-0">
-              <Image
-                src={post.image}
-                alt={post.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          </div>
+            id={post.id}
+            title={post.title}
+            description={post.description}
+            image={post.image}
+            likes={post.likes}
+            comments={post.comments}
+            isShort={true}
+          />
         ))}
       </div>
 
