@@ -4,20 +4,20 @@ type Props = {
   accept?: string
   inputRef: React.RefObject<HTMLInputElement | null>
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void,
-  onFiles: (files: FileList | null) => void
+  handleUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
 };
 
-const InputImage = ({ multiple, accept, inputRef, onDrop, onFiles}: Props) => {
+const UploadImage = ({ multiple, accept, inputRef, onDrop, handleUpload }: Props) => {
   return (
     <div
-      className="w-full max-w-[480px] h-[200px] flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 text-center text-gray-500 hover:border-gray-400"
+      className="flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 text-center text-gray-500 hover:border-gray-400"
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
     >
       <p className="mb-3">Drag & drop images here, or</p>
       <button
         type="button"
-        className="px-3 py-1 rounded bg-blue-600 text-white cursor-pointer"
+        className="mt-4 px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
         onClick={() => inputRef.current?.click()}
       >
         Browse
@@ -28,10 +28,10 @@ const InputImage = ({ multiple, accept, inputRef, onDrop, onFiles}: Props) => {
         multiple={multiple}
         accept={accept || "image/*"}
         className="hidden"
-        onChange={(e) => onFiles(e.target.files)}
+        onChange={(e) => handleUpload(e)}
       />
     </div>
   );
 };
 
-export default InputImage;
+export default UploadImage;

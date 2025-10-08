@@ -20,51 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-// ✅ Schema with Zod
-const propertySchema = z.object({
-
-    // Basic
-    title: z.string().min(3, "Title is required"),
-    description: z.string().min(10, "Description required"),
-    price: z.number().min(1),
-    serviceCharge: z.number().optional(),
-    agencyFee: z.number().optional(),
-    legalFee: z.number().optional(),
-
-    // Location
-    state: z.string(),
-    city: z.string(),
-    area: z.string().optional(),
-    address: z.string(),
-    latitude: z.string().optional(),
-    longitude: z.string().optional(),
-
-    // Property details
-    propertyType: z.string(),
-    bedrooms: z.number().optional(),
-    bathrooms: z.number().optional(),
-    toilets: z.number().optional(),
-    parking: z.number().optional(),
-    size: z.number().optional(),
-    yearBuilt: z.number().optional(),
-    condition: z.string().optional(),
-    furnishing: z.string().optional(),
-
-    // Amenities
-    amenities: z.array(z.string()).optional(),
-
-    // Meta
-    refId: z.string(),
-    slug: z.string(),
-    listingStatus: z.enum(["Draft", "Pending", "Published", "Archived"]),
-    packageType: z.enum(["Free", "Premium", "Featured"]),
-    priority: z.number().min(1).max(10).optional(),
-    verificationStatus: z.enum(["Verified", "Unverified"]),
-    dateListed: z.string(),
-    lastUpdated: z.string(),
-    expiryDate: z.string().optional(),
-
-});
+import { propertySchema } from "@/validators/property_from_editor.validate";
 
 type PropertyFormValues = z.infer<typeof propertySchema>;
 
@@ -104,12 +60,20 @@ export default function PropertyForm() {
                     {/* 🔹 Basic Info */}
                     <div>
                         <h2 className="font-semibold text-lg mb-2">Basic Information</h2>
-                        <FormField control={form.control} name="title" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Property Title</FormLabel>
-                                <FormControl><Input placeholder="Beautiful 3-Bedroom Flat in Agbara" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Property Title</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Beautiful 3-Bedroom Flat in Agbara"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
@@ -173,7 +137,11 @@ export default function PropertyForm() {
                             <FormItem>
                                 <FormLabel>Property Type</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                    </FormControl>
                                     <SelectContent>
                                         <SelectItem value="Flat">Flat</SelectItem>
                                         <SelectItem value="Duplex">Duplex</SelectItem>

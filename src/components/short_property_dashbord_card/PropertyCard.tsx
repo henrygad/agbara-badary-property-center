@@ -13,7 +13,7 @@ export default function PropertyCard(p: PropertyTypes) {
         return words.length > limit ? words.slice(0, limit).join(" ") + "..." : text;
     };
 
-    return <Card className="p-4 flex flex-col">
+    return <Card className="flex-1  flex flex-col basis-1">
         {/* Title */}
         <CardHeader>
             <span className="flex justify-between items-start">

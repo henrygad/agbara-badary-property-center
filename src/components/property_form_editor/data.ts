@@ -1,10 +1,11 @@
 import { Amenity, PropertyTypes } from "../../types/property.types";
 
 export const AMENITIES: Amenity[] = [
-    "Parking",
+    "Parking Space",
     "Borehole",
     "Generator",
     "CCTV",
+    "Electricity",
     "Gated Estate",
     "Swimming Pool",
     "Garden",
@@ -22,65 +23,68 @@ export const AMENITIES: Amenity[] = [
     "Borehole Water",
     "Fenced",
     "Secure Area",
+    "Internet Access",
 ];
 
-export const PROPERTY_TYPES = [
-    "-",
+export const PROPERTY_TYPES = [  
     "Flat",
     "House",
     "Duplex",
     "Bungalow",
     "Terraced",
-    "Semi-detached",
+    "Semidetached",
     "Detached",
     "Shop",
     "Office",
     "Warehouse",
-    "Land",
+    "Plot",
     "Hotel",
     "Short Let",
+    "Others"
 ];
 
-export const PROPERTY_CATEGORIES = ["-", "Residential", "Commercial", "Land", "Short Let"];
-export const STATUS = ["-", "For Rent", "For Sale", "Short Let", "Sold", "Rented"];
-export const FURNISHING = ["-", "Furnished", "Semi-furnished", "Unfurnished"];
-export const CONDITION = ["-", "New", "Renovated", "Fairly Used", "Needs Renovation"];
-export const PRICE_FREQUENCY = [
-    "-",
+export const PROPERTY_CATEGORIES = ["Residential", "Commercial", "Land", "Short Let"];
+export const STATUS = ["For Rent", "For Sale", "Short Let", "Sold", "Rented"];
+export const FURNISHING = ["Furnished", "Semifurnished", "Unfurnished"];
+export const CONDITION = ["New", "Renovated", "Fairly Used", "Needs Renovation"];
+export const PRICE_FREQUENCY = [   
     "Per Year",
-    "Total Sale Price",
+    "Total Price",
     "Per Month",
     "Per Day",
 ];
-export const STATES = ["-", "Ogun", "Lagos", "Oyo", "Rivers", "Delta"]; // add as needed
-export const CITIES_LOCAL = ["-", "Agbara", "Badagry", "Igbesa", "Lusada", "Sangotedo"];
+export const STATES = ["Ogun", "Lagos", "Oyo", "Rivers", "Delta"]; // add as needed
+export const CITIES_LOCAL = ["Agbara", "Badagry", "Igbesa", "Lusada", "Sangotedo"];
 export const AVAILABILITY = ["Draft", "Pending", "Review", "Published", "unPublished", "Reject"];
 export const SIZE_UNIT = ["sqm", "sqft", "plots", "acres"];
+export const PACKAGE_TYPE = ["Free", "Featured", "Premium"];
+
+
 export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     // Basic Info    
     title: "",
     description: "",
-    category: "-",
-    type: "-",
-    status: "-",
+    category: "",
+    type: "",
+    status: "",
     // Pricing
-    price: 0,
-    priceFrequency: "-",
+    price: null,
+    priceFrequency: "",
     negotiable: false,
-    serviceCharge: 0,
-    agencyFee: 0,
-    legalFee: 0,
+    serviceCharge: null,
+    agencyFee: null,
+    legalFee: null,
     currency: "NGN",
     // Property Details
-    size: 0,
+    size: null,
     sizeUnit: "sqm",
-    bedrooms: 0,
-    bathrooms: 0,
-    toilets: 0,
-    parkingSpaces: 0,
-    furnishing: "-",
-    condition: "-",
-    yearBuilt: 0,
+    bedrooms: null,
+    bathrooms: null,
+    toilets: null,
+    parkingSpaces: null,
+    furnishing: "",
+    condition: "",
+    yearBuilt: null,
     amenities: [] as Amenity[],
     // Media
     images: [],
@@ -88,32 +92,32 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     virtualTourUrl: "",
     // Commercial Specific
     floorLevel: "",
-    totalFloors: 0,
+    totalFloors: null,
     propertyUse: "",
-    parkingCapacity: 0,
+    parkingCapacity: null,
     powerSupplyNotes: "",
-    floorArea: 0,
+    floorArea: null,
     // location
     state: "",
     city: "",
     area: "",
     street: "",
     landmark: "",
-    latitude: 0,
-    longitude: 0,
+    latitude: null,
+    longitude: null,
     // agent
     agentName: "",
-    agentPhone: 0,
+    agentPhone: null,
     agentEmail: "",
     agentCompany: "",
-    showContact: true,
+    showContact: false,
     // meta
     referenceId: "",
     availability: "Draft",
     packageType: "Free",
     seoSlug: "",
-    priorityRank: 10,
+    priorityRank: null,
     // amenities
-    createdAt: "",
-    updatedAt: "",
+    createdAt: new Date(),
+    updatedAt: undefined,
 }

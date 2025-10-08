@@ -3,22 +3,33 @@
 import { PropertyTypes } from "@/types/property.types";
 import { useEffect, useState } from "react";
 import PropertyCard from "./PropertyCard";
-import { getProperties } from "@/lib/firebase/services";
+import { getProperties } from "@/lib/firebase/property_service";
 
 export default function ShortPropertyDashbordCard() {
     const [properties, setProperties] = useState<PropertyTypes[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const fetchProperties = async () => {
-        const properties = await getProperties();
-        console.log(properties, "fetch from firebase");
-    };
+    useEffect(() => {        
+        const fetchProperties = async () => {
+            setLoading(true);
+            try {
+                const properties = await getProperties();
+                setProperties(properties);
+            } catch (error) {
+                console.error("Error fetching properties:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    useEffect(() => {
-        setProperties(JSON.parse(localStorage.getItem("properties") || "[]") as PropertyTypes[])
        fetchProperties();
     }, []);
 
-    return <div className="grid gap-4">
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    return <div className="flex flex-col gap-4">
         {
             properties.length ?
                 properties.map(p =>

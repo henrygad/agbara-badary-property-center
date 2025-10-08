@@ -1,5 +1,5 @@
 export type Amenity =
-    | "Parking"
+    | "Parking Space"
     | "Borehole"
     | "Generator"
     | "CCTV"
@@ -20,26 +20,33 @@ export type Amenity =
     | "Borehole Water"
     | "Fenced"
     | "Secure Area"
+    | "Internet Access"
+    | "Electricity"
 
-export type Status = "-" | "For Sale" | "For Rent" | "Short Let" | "Sold" | "Rented";
-export type PackageType = "-" | "Free" | "Featured" | "Premium";
-export type Furnishing = "-" | "Furnished" | "Semi-Furnished" | "Unfurnished";
-export type Condition = "-" | "New" | "Renovated" | "Fairly Used" | "Needs Renovation";
-export type PropertyCategory = "-" | "Residential" | "Commercial" | "Land" | "Short Let";
+export type Status = "" | "For Sale" | "For Rent" | "Short Let" | "Sold" | "Rented";
+export type PackageType = "Free" | "Featured" | "Premium";
+export type Furnishing = "" | "Furnished" | "Semi-Furnished" | "Unfurnished";
+export type Condition = "" | "New" | "Renovated" | "Fairly Used" | "Needs Renovation";
+export type PropertyCategory = "" | "Residential" | "Commercial" | "Land" | "Short Let";
 export type SizeUnit = "sqm" | "sqft" | "plots" | "acres";
-export type PriceFrequency = "-" | "Per Month" | "Per Year" | "Per Day" | "Total";
+export type PriceFrequency = "" | "Per Month" | "Per Year" | "Per Day" | "Total";
 export type PropertyType =
-    "-"
+    ""
     | "Flat"
     | "House"
     | "Duplex"
     | "Bungalow"
+    | "Terraced"
+    | "Semidetached"
+    | "Detached"
     | "Shop"
     | "Office"
     | "Warehouse"
     | "Hotel"
-    | "Land"
+    | "Plot"
+    | "Short Let"
     | "Other";
+
 export type Availability = "Draft" | "Pending" | "Review" | "Published" | "unPublished" | "Reject";
 
 export interface PropertyTypes {
@@ -57,31 +64,31 @@ export interface PropertyTypes {
     area: string;
     street: string;
     landmark?: string;
-    latitude?: number;
-    longitude?: number;
+    latitude?: number | null;
+    longitude?: number | null;
 
     // Pricing
-    price: number;
+    price: number | null;
     priceFrequency: PriceFrequency;
-    serviceCharge?: number;
-    agencyFee?: number;
-    legalFee?: number;
+    serviceCharge?: number | null;
+    agencyFee?: number | null;
+    legalFee?: number | null;
     negotiable: boolean;
     currency: "NGN",
 
     // Property Details
-    bedrooms?: number;
-    bathrooms?: number;
-    toilets?: number;
-    parkingSpaces?: number;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    toilets?: number | null;
+    parkingSpaces?: number | null;
     furnishing: Furnishing;
     condition: Condition;
-    yearBuilt?: number;
-    size?: number;
+    yearBuilt?: number | null;
+    size?: number | null;
     sizeUnit?: SizeUnit;
 
-    floorNumber?: number;
-    totalFloors?: number;
+    floorNumber?: number | null;
+    totalFloors?: number | null;
     floorLevel?: string;
     propertyUse?: string
 
@@ -95,13 +102,13 @@ export interface PropertyTypes {
 
     // Commercial Specific
     commercialType?: string;
-    floorArea?: number;
-    parkingCapacity?: number,
+    floorArea?: number | null;
+    parkingCapacity?: number | null,
     powerSupplyNotes?: string
 
     // Agent Info
     agentName: string;
-    agentPhone: number;
+    agentPhone: number | null;
     agentEmail: string;
     agentCompany?: string;
     showContact: boolean
@@ -111,7 +118,7 @@ export interface PropertyTypes {
     referenceId: string;
     seoSlug: string,
     packageType: PackageType;    
-    priorityRank: number
-    createdAt: Date | string;   // ISO string
-    updatedAt: Date | string;  // ISO string
+    priorityRank: number | null
+    createdAt: Date | undefined;   // ISO undefined
+    updatedAt: Date | undefined;  // ISO undefined
 }

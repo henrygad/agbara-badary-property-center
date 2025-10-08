@@ -1,32 +1,109 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Amenity, Condition, Furnishing, Status, PackageType, PriceFrequency, PropertyCategory, PropertyTypes, PropertyType, SizeUnit, Availability } from "../../types/property.types";
-import FormSectionUI from "@/ui/FormSectionUi";
-import { AMENITIES, CITIES_LOCAL, CONDITION, FURNISHING, STATUS, PRICE_FREQUENCY, PROPERTY_CATEGORIES, PROPERTY_TYPES, STATES, SIZE_UNIT, AVAILABILITY, DEFAULT_PROPERTY_FORM } from "./data";
+import { useEffect, useMemo, useState } from "react";
+import {
+    Amenity,
+    Condition,
+    Furnishing,
+    Status,
+    PackageType,
+    PriceFrequency,
+    PropertyCategory,
+    PropertyTypes,
+    PropertyType,
+    SizeUnit,
+    Availability,
+} from "../../types/property.types";
+import FormSection from "@/components/ui/FromSection";
+import {
+    AMENITIES,
+    CITIES_LOCAL,
+    CONDITION,
+    FURNISHING,
+    STATUS,
+    PRICE_FREQUENCY,
+    PROPERTY_CATEGORIES,
+    PROPERTY_TYPES,
+    STATES,
+    SIZE_UNIT,
+    AVAILABILITY,
+    DEFAULT_PROPERTY_FORM,
+    PACKAGE_TYPE,
+} from "./data";
 import Image from "next/image";
-import CustomButton from "@/ui/ButtonUi";
-import Modal from "../Modal";
-import Galary from "../galary/Index";
-import DisplayImage from "../galary/DisplayImage";
-import AddImageButton from "./AddImageButton";
-import sampleImages from "@/store/images";
+import DisplayImage from "../gallery/DisplayImage";
 import React from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { addProperty } from "@/lib/firebase/services";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel";
+import { addProperty } from "@/lib/firebase/property_service";
+import validatePropertyFields from "@/validators/property_from_editor.validate";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/components/ui/select";
+import { Textarea } from "../ui/textarea";
+import { Checkbox } from "../ui/checkbox";
+import { CustomCalendar } from "../ui/CustomCalader";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import ImageGallery from "../gallery/Index";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { Spinner } from "../ui/spinner";
+import sampleImages from "@/store/images"
+import { showError, showSuccess } from "../Toasts";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
-export default function PropertyFormEditor() {
+type Props = {
+    inComingData?: PropertyTypes,
+    inComingDataType: "DUPLICATE" | "TOUPDATE" | "NEW",
+    accountType: "ADMIN" | "AGENT",
+    imageGallery?: string[]
+}
+
+export default function PropertyFormEditor({ inComingData, inComingDataType, accountType }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
+
     const [step, setStep] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [modalGalary, setModalGalary] = useState(false);
-    const [selects, setSelects] = useState<string[]>([]);
-    const [imageGalary, setImageGalary] = useState<string[]>([]);
+
+    const [sampleImagesState, setSampleImagesState] = useState<string[]>([]);
 
     const [form, setForm] = useState<PropertyTypes>(DEFAULT_PROPERTY_FORM);
+    const [error, setError] = useState<{ errorMsg: string; isError: boolean }>({ errorMsg: "", isError: false });
+    const [loading, setLoading] = useState(false);
+
+
+    // Whiling editing a property data
+    const [changeInForm, setChangeInForm] = useState(false);
+
 
     function update<K extends keyof typeof form>(
         key: K,
         value: (typeof form)[K]
     ) {
+        if (!changeInForm) {
+            setChangeInForm(true);
+        };
+
         setForm((s) => ({ ...s, [key]: value }));
     }
 
@@ -42,13 +119,14 @@ export default function PropertyFormEditor() {
         });
     }
 
-    const formatCurrency = (value?: number) => {
+    const formatCurrency = (value?: number | null) => {
         if (!value || isNaN(value)) return "—";
         return `₦${value.toLocaleString()}`;
     };
 
-    const safeValue = (value?: string | number) => {
-        if (!value || value === "" || value === 0 || value === Infinity) return "—";
+    const safeValue = (value?: string | number | null) => {
+        if (!value || value === "" || value === null || value === Infinity)
+            return "—";
         return value;
     };
 
@@ -58,64 +136,60 @@ export default function PropertyFormEditor() {
         return copyV;
     };
 
-    const normalizeProperty = (data: PropertyTypes): PropertyTypes => {
-        const copy = { ...data };
-        // Normalize the property data as needed
-        for (const key in copy) {
-            const value = copy[key as keyof PropertyTypes];
-            // You can add normalization logic here if needed
-            if (value === null) {
-                copy[key] = 0;
-            }
-        };
-        return copy;
+    function formatDate(date: Date | undefined) {
+        if (!date) {
+            return ""
+        }
+
+        return new Date(date).toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        })
+    }
+
+    const changeSteps = (p: "Back" | "Next" | number) => {
+        if (p === "Back") {
+            setStep((s) => s - 1)
+        } else if (p === "Next") {
+            setStep((s) => s + 1)
+        } else {
+            setStep(p);
+        }
+        window.scrollTo(0, 0)
     };
 
-    // image preview handler
-    function handleImageFiles(files: FileList | null) {
-        if (!files) return;
-        const arr = Array.from(files);
-        // for speed we'll convert to local data URL previews; in production you'd upload to Cloudinary
-        arr.forEach((file) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const url = e.target?.result as string;
-                // setImages((p) => [...p, url]);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
 
-    // placeholder for cloudinary upload - replace with your unsigned upload preset or server signed flow
-    async function uploadToCloudinary(file: File) {
-        // Example: use unsigned preset
-        // const url = `https://api.cloudinary.com/v1_1/<CLOUD_NAME>/upload`;
-        // const formData = new FormData();
-        // formData.append('file', file);
-        // formData.append('upload_preset', '<UPLOAD_PRESET>');
-        // const res = await fetch(url, { method: 'POST', body: formData });
-        // const data = await res.json();
-        // return form.secure_url;
-        return "https://via.placeholder.com/600x400?text=Uploaded+Image";
-    }
+    // Form is not empty
+    const isFormDirty = Object.values(form).some((val) => val !== "");
 
+    // Save draft to local storage
+    const saveDraft = () => {
+        const getPropertyDraft = JSON.parse(localStorage.getItem("propertyDraft") || "[]");
+        localStorage.setItem("propertyDraft", JSON.stringify(
+            [
+                ...getPropertyDraft,
+                { ...form, draftId: String(Date.now() + Math.random()) }
+            ]));
+        showSuccess("Draft saved!", "Draft have been saved locally")
+        console.log("Draft saved");
+    };
+
+    const { showPrompt, setShowPrompt, handleSaveAndLeave, handleLeaveWithoutSaving, } =
+        useUnsavedChanges({ shouldBlock: isFormDirty, onSaveDraft: saveDraft });
+
+
+    // form submission handler (create new property listing to firestore)
     async function submitForm(e?: React.FormEvent) {
         e?.preventDefault();
         setLoading(true);
+
         try {
             // validate essential fields
-            if (!form.title || !form.price || !form.city) {
-                alert("Please complete title, price and city");
-                setLoading(false);
-                return;
+            const error = validatePropertyFields(form);
+            if (error.isError) {
+                throw new Error(error.errorMsg);
             }
-
-            // Example: upload images to Cloudinary - here we just simulate
-            // const uploaded = [] as string[];
-            // for (const file of filesToUpload) {
-            //   const url = await uploadToCloudinary(file);
-            //   uploaded.push(url);
-            // }
 
             // Prepare payload for your API or Firestore
             const payload: PropertyTypes = {
@@ -123,58 +197,78 @@ export default function PropertyFormEditor() {
                 referenceId: `AGB-${Date.now()}`,
             };
 
-            //const getProperties = JSON.parse(localStorage.getItem("properties") || "[]") as PropertyTypes[];
+            // Simulate API call
+            const property = await addProperty(payload);
 
-            // localStorage.setItem("properties", JSON.stringify([payload, ...getProperties]));
-            // console.log("PAYLOAD", payload);
-            // TODO: send payload to your backend or Firestore
+            // Simulate successful response
+            if (property) {
+                showSuccess("Property submitted!",
+                    `Your listing has been ${form.referenceId.trim() ? "updated" : accountType === "ADMIN" ? "created" : "submited"}.`
+                )
 
-            await addProperty(payload);
+                setForm(DEFAULT_PROPERTY_FORM);
+                setError({ errorMsg: "", isError: false });
+                changeSteps(1);
+            }
 
-
-            //setForm(DEFAULT_PROPERTY_FORM);
-            //alert("Listing saved (console shows payload)");
-            //setStep(1);
         } catch (err) {
-            console.error(err);
-            alert("Error saving listing");
+            const errorMsg = err as { message: string };
+            showError("Failed to submit", errorMsg.message);
+            setError({
+                errorMsg: errorMsg.message,
+                isError: true,
+            });
         } finally {
             setLoading(false);
         }
     }
 
-    // Load sample images on mount
-    useEffect(() => {
-        setImageGalary(sampleImages);
-    }, []);
 
-    // Get duplicate data from localStorage
     useEffect(() => {
+        // Load sample images on mount
+        setSampleImagesState(sampleImages);
+
+
+        let clearOut: NodeJS.Timeout | undefined = undefined;
+
+        // Get data to edit from localStorage
+        // Check if toEdit data is present
+        const update = localStorage.getItem("updateProperty");
+
+        if (update) {
+            const parsed = JSON.parse(update) as PropertyTypes;
+            clearOut = setTimeout(() => {
+                setForm(parsed);
+                localStorage.removeItem("updateProperty");
+            }, 200);
+        }
+
+
+        // Get duplicated data from localStorage
         // Check if duplicate data is present
         const duplicate = localStorage.getItem("duplicateProperty");
 
         if (duplicate) {
             const parsed = JSON.parse(duplicate) as PropertyTypes;
             // clear the  UID so it will generate a new one
-            // parsed.id = "";
-            // parsed.referenceId = "";
+            parsed.id = "";
+            parsed.referenceId = "";
 
-            setForm(normalizeProperty(parsed));
-            localStorage.removeItem("duplicateProperty");
-        };
+            clearOut = setTimeout(() => {
+                setForm(parsed);
+                localStorage.removeItem("duplicateProperty");
+            }, 200);
+
+        }
+
+        setIsMounted(true)
+
+        return () => clearTimeout(clearOut);
     }, []);
 
-    // Get update data from localStorage
-    useEffect(() => {
-        // Check if update data is present
-        const update = localStorage.getItem("updateProperty");
 
-        if (update) {
-            const parsed = JSON.parse(update) as PropertyTypes;
-            setForm(normalizeProperty(parsed));
-            localStorage.removeItem("updateProperty");
-        };
-    }, []);
+    if (!isMounted) return <div>Loading...</div>
+
 
     return (
         <div className="w-full bg-inherit">
@@ -182,31 +276,46 @@ export default function PropertyFormEditor() {
             <menu className="mb-6">
                 <ul className="flex items-center gap-2 text-sm text-gray-600">
                     <li
-                        className={`px-3 py-1 rounded-full ${step === 1 ? "bg-blue-600 text-white" : "bg-gray-100 cursor-pointer"}`}
+                        className={`px-3 py-1 rounded-full ${step === 1
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 cursor-pointer"
+                            }`}
                         onClick={() => setStep(1)}
                     >
                         1
                     </li>
                     <li
-                        className={`px-3 py-1 rounded-full ${step === 2 ? "bg-blue-600 text-white" : "bg-gray-100 cursor-pointer"}`}
+                        className={`px-3 py-1 rounded-full ${step === 2
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 cursor-pointer"
+                            }`}
                         onClick={() => setStep(2)}
                     >
                         2
                     </li>
                     <li
-                        className={`px-3 py-1 rounded-full ${step === 3 ? "bg-blue-600 text-white" : "bg-gray-100 cursor-pointer "}`}
+                        className={`px-3 py-1 rounded-full ${step === 3
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 cursor-pointer "
+                            }`}
                         onClick={() => setStep(3)}
                     >
                         3
                     </li>
                     <li
-                        className={`px-3 py-1 rounded-full ${step === 4 ? "bg-blue-600 text-white" : "bg-gray-100 cursor-pointer"}`}
+                        className={`px-3 py-1 rounded-full ${step === 4
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 cursor-pointer"
+                            }`}
                         onClick={() => setStep(4)}
                     >
                         4
                     </li>
                     <li
-                        className={`px-3 py-1 rounded-full ${step === 5 ? 'bg-blue-600 text-white' : 'bg-gray-100 cursor-pointer'}`}
+                        className={`px-3 py-1 rounded-full ${step === 5
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 cursor-pointer"
+                            }`}
                         onClick={() => setStep(5)}
                     >
                         5
@@ -214,758 +323,1063 @@ export default function PropertyFormEditor() {
                 </ul>
             </menu>
             {/* Property form editor */}
-            <form
-                onSubmit={submitForm}
-                className="space-y-6"
-            >
+            <form onSubmit={submitForm} className="space-y-6">
                 {/* Basic info */}
                 {step === 1 && (
-                    <FormSectionUI title="Basic Info">
+                    <FormSection title="Basic Info">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Title */}
                             <div>
-                                <label htmlFor="" className="block text-sm font-medium mb-1">
+                                <Label htmlFor="title" className="text-sm font-medium mb-1">
                                     Title
-                                </label>
-                                <input
-                                    value={form.title}
+                                </Label>
+                                <Input
+                                    id="title"
+                                    className={`w-full text-sm 
+                                        ${error.errorMsg.toLowerCase().includes("title") ? "border-red-600" : ""}
+                                        `}
+                                    placeholder="3-Bedroom Flat for Rent in Agbara Estate"
+                                    value={form.title ?? ""}
                                     onChange={(e) => {
                                         update("title", e.target.value);
-                                        update("seoSlug", fiterSEOSlug(e.target.value))
+                                        update("seoSlug", fiterSEOSlug(e.target.value));
                                     }}
-                                    className="w-full p-3 border rounded text-sm"
-                                    placeholder="3-Bedroom Flat for Rent in Agbara Estate"
                                 />
                             </div>
 
+                            {/* Category */}
                             <div>
-                                <label htmlFor="category" className="block text-sm font-medium mb-1">
+                                <Label className="block text-sm font-medium mb-1">
                                     Category
-                                </label>
-                                <select
-                                    id="category"
+                                </Label>
+                                <Select
                                     value={form.category}
-                                    onChange={(e) => update("category", e.target.value as PropertyCategory)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    defaultValue={form.category}
+                                    onValueChange={(value) =>
+                                        update("category", value as PropertyCategory)
+                                    }
                                 >
-                                    {PROPERTY_CATEGORIES.map((c) => (
-                                        <option key={c} value={c}>
-                                            {c}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger
+                                        className={`w-full cursor-pointer
+                                        ${error.errorMsg.toLowerCase().includes("category") ? "border-red-600" : ""}
+                                        `}
+                                    >
+                                        <SelectValue
+                                            placeholder="Select a category"
+                                            className="text-sm"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {PROPERTY_CATEGORIES.map((cat) => (
+                                            <SelectItem
+                                                className="cursor-pointer text-sm"
+                                                key={cat}
+                                                value={cat}
+                                            >
+                                                {cat}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
+                            {/* Type */}
                             <div>
-                                <label htmlFor="property-type" className="block text-sm font-medium mb-1">
-                                    Property Type
-                                </label>
-                                <select
-                                    id="property-type"
+                                <Label className="block text-sm font-medium mb-1">Type</Label>
+                                <Select
                                     value={form.type}
-                                    onChange={(e) => update("type", e.target.value as PropertyType)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    onValueChange={(value) =>
+                                        update("type", value as PropertyType)
+                                    }
                                 >
-                                    {PROPERTY_TYPES.map((t) => (
-                                        <option key={t} value={t}>
-                                            {t}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger
+                                        className={`w-full cursor-pointer
+                                        ${error.errorMsg.toLowerCase().includes("type") ? "border-red-600" : ""}
+                                        `}
+                                    >
+                                        <SelectValue
+                                            placeholder="Select a type"
+                                            className="text-sm"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {PROPERTY_TYPES.map((type) => (
+                                            <SelectItem
+                                                className="cursor-pointer text-sm"
+                                                key={type}
+                                                value={type}
+                                            >
+                                                {type}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
+                            {/* Status */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Property Status
-                                </label>
-                                <select
+                                <Label className="block text-sm font-medium mb-1">Status</Label>
+                                <Select
                                     value={form.status}
-                                    onChange={(e) => update("status", e.target.value as Status)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    onValueChange={(value) => update("status", value as Status)}
                                 >
-                                    {STATUS.map((s) => (
-                                        <option key={s} value={s}>
-                                            {s}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger
+                                        className={`w-full cursor-pointer
+                                        ${error.errorMsg.toLowerCase().includes("status") ? "border-red-600" : ""}
+                                        `}
+                                    >
+                                        <SelectValue
+                                            placeholder="Select a status"
+                                            className="text-sm"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {STATUS.map((status) => (
+                                            <SelectItem
+                                                className="cursor-pointer text-sm"
+                                                key={status}
+                                                value={status}
+                                            >
+                                                {status}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
+                            {/* Description */}
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="block text-sm font-medium mb-1">
                                     Description
-                                </label>
-                                <textarea
+                                </Label>
+                                <Textarea
+                                    placeholder="Provide full description, nearby landmarks, special conditions, etc."
                                     value={form.description}
                                     onChange={(e) => update("description", e.target.value)}
-                                    rows={6}
-                                    className="w-full p-3 border rounded text-sm"
-                                    placeholder="Provide full description, nearby landmarks, special conditions, etc."
+                                    className="w-full text-sm min-h-40 resize-none"
                                 />
                             </div>
                         </div>
-                    </FormSectionUI>
+                    </FormSection>
                 )}
 
                 {/* Location & Pricing */}
                 {step === 2 && (
-                    <FormSectionUI title="Location & Pricing">
+                    <FormSection title="Location & Pricing">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* State */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">State</label>
-                                <select
+                                <Label className="block text-sm font-medium mb-1">State</Label>
+                                <Select
                                     value={form.state}
-                                    onChange={(e) => update("state", e.target.value)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    onValueChange={(value) => update("state", value)}
                                 >
-                                    {STATES.map((s) => (
-                                        <option key={s} value={s}>
-                                            {s}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger
+                                        className={`w-full cursor-pointer
+                                        ${error.errorMsg.toLowerCase().includes("state") ? "border-red-600" : ""}
+                                        `}
+                                    >
+                                        <SelectValue
+                                            placeholder="Select a state"
+                                            className="text-sm"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {STATES.map((state) => (
+                                            <SelectItem
+                                                className="cursor-pointer text-sm"
+                                                key={state}
+                                                value={state}
+                                            >
+                                                {state}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
+                            {/* City */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    City / Locality
-                                </label>
-                                <select
+                                <Label className="block text-sm font-medium mb-1">City</Label>
+                                <Select
                                     value={form.city}
-                                    onChange={(e) => update("city", e.target.value)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    onValueChange={(value) => update("city", value)}
                                 >
-                                    {CITIES_LOCAL.map((c) => (
-                                        <option key={c} value={c}>
-                                            {c}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger
+                                        className={`w-full cursor-pointer
+                                        ${error.errorMsg.toLowerCase().includes("city") ? "border-red-600" : ""}
+                                        `}
+                                    >
+                                        <SelectValue
+                                            placeholder="Select a city"
+                                            className="text-sm"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {CITIES_LOCAL.map((city) => (
+                                            <SelectItem
+                                                className="cursor-pointer text-sm"
+                                                key={city}
+                                                value={city}
+                                            >
+                                                {city}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
+                            {/* Area */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Area / Street
-                                </label>
-                                <input
-                                    value={form.area}
-                                    onChange={(e) => update("area", e.target.value)}
-                                    className="w-full p-3 border rounded text-sm"
+                                <Label htmlFor="Area" className="text-sm font-medium mb-1">
+                                    Area
+                                </Label>
+                                <Input
+                                    id="Area"
+                                    className={`w-full text-sm 
+                                        ${error.errorMsg.toLowerCase().includes("area") ? "border-red-600" : ""}
+                                        `}
                                     placeholder="Agbara Estate"
+                                    value={form.area ?? ""}
+                                    onChange={(e) => update("area", e.target.value)}
                                 />
                             </div>
 
+                            {/* Street */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="Street"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Street Address
-                                </label>
-                                <input
-                                    value={form.street}
+                                </Label>
+                                <Input
+                                    id="Street"
+                                    value={form.street ?? ""}
                                     onChange={(e) => update("street", e.target.value)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    className="w-full text-sm"
                                     placeholder="House 12, Block A"
                                 />
                             </div>
 
+                            {/* Landmark */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="Landmark"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Landmark
-                                </label>
-                                <input
-                                    value={form.landmark}
+                                </Label>
+                                <Input
+                                    id="Landmark"
+                                    value={form.landmark ?? ""}
                                     onChange={(e) => update("landmark", e.target.value)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    className="w-full text-sm"
                                     placeholder="Near Vesper School"
                                 />
                             </div>
 
+                            {/* Map Coordinates */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Map Coordinates (lat,long)
-                                </label>
+                                <Label className="text-sm font-medium mb-1">
+                                    Map Coordinates (lat , long)
+                                </Label>
                                 <div className="flex gap-2">
-                                    <input
-                                        value={form.latitude}
-                                        onChange={(e) => update("latitude", Number(e.target.value))}
-                                        className="w-1/2 p-3 border rounded text-sm"
+                                    <Input
+                                        value={form.latitude === null ? "" : form.latitude ?? ""}
+                                        onChange={(e) =>
+                                            update("latitude", Number(e.target.value))
+                                        }
+                                        className="w-1/2 text-sm"
                                         placeholder="6.45"
                                         type="number"
                                     />
-                                    <input
-                                        value={form.longitude}
-                                        onChange={(e) => update("longitude", Number(e.target.value))}
-                                        className="w-1/2 p-3 border rounded text-sm"
+                                    <Input
+                                        value={
+                                            form.longitude === null ? "" : form.longitude ?? ""
+                                        }
+                                        onChange={(e) =>
+                                            update("longitude", Number(e.target.value))
+                                        }
+                                        className="w-1/2 text-sm"
                                         placeholder="3.2"
                                         type="number"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Tip: Use an external map picker to get coordinates, or
-                                    implement Mapbox/Google Maps pin later.
-                                </p>
                             </div>
 
                             <div className="md:col-span-3 space-y-4">
-                                <div className="flex gap-2 items-center">
-                                    <div className="flex-1 flex flex-col">
-                                        <label className="block text-sm font-medium mb-1">Price</label>
-                                        <input
-                                            value={form.price}
-                                            onChange={(e) => update("price", Number(e.target.value))}
-                                            className="flex-1 p-3 border rounded text-sm"
-                                            placeholder="600,000"
+                                {/* Price & Frequency */}
+                                <div>
+                                    <Label className="text-sm font-medium mb-1">Price</Label>
+                                    <div className="flex flex-col-reverse sm:flex-row gap-2">
+                                        <Input
                                             type="number"
+                                            placeholder="600,000"
+                                            className={`flex-1 text-sm py-2
+                                                     ${error.errorMsg.toLowerCase().includes("price") ? "border-red-600" : ""}
+                                                `}
+                                            value={form.price === null ? "" : form.price ?? ""}
+                                            onChange={(e) =>
+                                                update("price", Number(e.target.value))
+                                            }
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Frequency</label>
-                                        <select
+                                        <Select
                                             value={form.priceFrequency}
-                                            onChange={(e) => update("priceFrequency", e.target.value as PriceFrequency)}
-                                            className="block p-3 border rounded text-sm"
+                                            onValueChange={(value) =>
+                                                update("priceFrequency", value as PriceFrequency)
+                                            }
                                         >
-                                            {PRICE_FREQUENCY.map((p) => (
-                                                <option key={p} value={p}>
-                                                    {p}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            <SelectTrigger
+                                                className={`w-full sm:w-auto cursor-pointer
+                                                         ${error.errorMsg.toLowerCase().includes("price frequency") ? "border-red-600" : ""}
+                                                    `}
+                                            >
+                                                <SelectValue
+                                                    placeholder="Choose Frequency"
+                                                    className="text-sm"
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {PRICE_FREQUENCY.map((p) => (
+                                                    <SelectItem
+                                                        className="cursor-pointer text-sm"
+                                                        key={p}
+                                                        value={p}
+                                                    >
+                                                        {p}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 ">
+                                {/* Negotiable */}
+                                <div className="flex items-center gap-2 my-5">
+                                    <Checkbox
+                                        checked={form.negotiable}
+                                        onCheckedChange={(checked) =>
+                                            update("negotiable", !form.negotiable)
+                                        }
+                                        className="cursor-pointer"
+                                    />
+                                    <Label htmlFor="negotiable" className="block">
+                                        <span className="block text-sm font-medium text-slate-950">
+                                            Negotiable
+                                        </span>
+                                        <span className="block text-xs text-slate-500">
+                                            Allow buyers or renters to negotiate the price of this
+                                            property.
+                                        </span>
+                                    </Label>
+                                </div>
+
+                                {/* Service Charge & agent fee $ legal fee */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                     <div className="flex flex-col">
-                                        <label className="block text-sm font-medium mb-1">Service Charge</label>
-                                        <input
-                                            value={form.serviceCharge}
-                                            onChange={(e) => update("serviceCharge", Number(e.target.value))}
-                                            className="flex-1 p-3 border rounded text-sm"
+                                        <Label className="text-sm font-medium mb-1">
+                                            Service Charge
+                                        </Label>
+                                        <Input
+                                            value={
+                                                form.serviceCharge === null
+                                                    ? ""
+                                                    : form.serviceCharge ?? ""
+                                            }
+                                            onChange={(e) =>
+                                                update("serviceCharge", Number(e.target.value))
+                                            }
+                                            className="flex-1 text-sm py-2"
                                             placeholder="20,000"
                                             type="number"
                                         />
-
                                     </div>
                                     <div className="flex flex-col">
-                                        <label className="block text-sm font-medium mb-1">Agency Fee</label>
-                                        <input
-                                            value={form.agencyFee}
-                                            onChange={(e) => update("agencyFee", Number(e.target.value))}
-                                            className="flex-1 p-3 border rounded text-sm"
+                                        <Label className="text-sm font-medium mb-1">
+                                            Agency Fee
+                                        </Label>
+                                        <Input
+                                            value={
+                                                form.agencyFee === null ? "" : form.agencyFee ?? ""
+                                            }
+                                            onChange={(e) =>
+                                                update("agencyFee", Number(e.target.value))
+                                            }
+                                            className="flex-1 text-sm py-2"
                                             placeholder="100,000"
                                             type="number"
                                         />
-
                                     </div>
                                     <div className="flex flex-col">
-                                        <label className="block text-sm font-medium mb-1">Legal Fee</label>
-                                        <input
-                                            value={form.legalFee}
-                                            onChange={(e) => update("legalFee", Number(e.target.value))}
-                                            className="flex-1 p-3 border rounded text-sm"
+                                        <Label className="text-sm font-medium mb-1">
+                                            Legal Fee
+                                        </Label>
+                                        <Input
+                                            value={
+                                                form.legalFee === null ? "" : form.legalFee ?? ""
+                                            }
+                                            onChange={(e) =>
+                                                update("legalFee", Number(e.target.value))
+                                            }
+                                            className="flex-1 text-sm py-2"
                                             placeholder="10,0000"
                                             type="number"
                                         />
-
                                     </div>
                                 </div>
-
-                                <div className="flex items-center gap-4 mt-2">
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            checked={form.negotiable}
-                                            onChange={(e) => update("negotiable", e.target.checked)}
-                                        />{" "}
-                                        Negotiable
-                                    </label>
-                                </div>
                             </div>
-
                         </div>
-                    </FormSectionUI>
+                    </FormSection>
                 )}
 
                 {/* Property Details & Amenities */}
                 {step === 3 && (
-                    <FormSectionUI title=" Property Details & Amenities">
+                    <FormSection title=" Property Details & Amenities">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Bedrooms */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Bedrooms
-                                </label>
-                                <input
+                                <Label className="text-sm font-medium mb-1">Bedrooms</Label>
+                                <Input
                                     type="number"
-                                    value={form.bedrooms}
+                                    value={form.bedrooms === null ? "" : form.bedrooms ?? ""}
                                     onChange={(e) => update("bedrooms", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
+                                    className="w-full text-sm"
                                     placeholder="3"
                                     min={0}
                                 />
                             </div>
 
+                            {/* Bathrooms */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Bathrooms
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="number"
-                                    value={form.bathrooms}
-                                    onChange={(e) => update("bathrooms", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
+                                    value={form.bathrooms === null ? "" : form.bathrooms ?? ""}
+                                    onChange={(e) =>
+                                        update("bathrooms", Number(e.target.value))
+                                    }
+                                    className="w-full text-sm"
                                     placeholder="3"
                                     min={0}
                                 />
                             </div>
 
+                            {/* Toilets */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Toilets
-                                </label>
-                                <input
+                                <Label className="text-sm font-medium mb-1">Toilets</Label>
+                                <Input
                                     type="number"
-                                    value={form.toilets}
+                                    value={form.toilets === null ? "" : form.toilets ?? ""}
                                     onChange={(e) => update("toilets", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
+                                    className="w-full text-sm"
                                     placeholder="4"
                                     min={0}
                                 />
                             </div>
 
+                            {/* Parking Space */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Parking Spaces
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="number"
-                                    value={form.parkingSpaces}
-                                    onChange={(e) => update("parkingSpaces", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
+                                    value={
+                                        form.parkingSpaces === null
+                                            ? ""
+                                            : form.parkingSpaces ?? ""
+                                    }
+                                    onChange={(e) =>
+                                        update("parkingSpaces", Number(e.target.value))
+                                    }
+                                    className="w-full text-sm"
                                     placeholder="2"
                                     min={0}
                                 />
                             </div>
+
+                            {/* Parking Capacity */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Parking Capacity
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="number"
-                                    value={form.parkingCapacity}
-                                    onChange={(e) => update("parkingCapacity", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
+                                    value={
+                                        form.parkingCapacity === null
+                                            ? ""
+                                            : form.parkingCapacity ?? ""
+                                    }
+                                    onChange={(e) =>
+                                        update("parkingCapacity", Number(e.target.value))
+                                    }
+                                    className="w-full text-sm"
                                     placeholder="15"
                                     min={0}
                                 />
                             </div>
 
+                            {/* Furnishing */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Furnishing
-                                </label>
-                                <select
+                                </Label>
+                                <Select
                                     value={form.furnishing}
-                                    onChange={(e) => update("furnishing", e.target.value as Furnishing)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    onValueChange={(value) =>
+                                        update("furnishing", value as Furnishing)
+                                    }
                                 >
-                                    {FURNISHING.map((f) => (
-                                        <option key={f} value={f}>
-                                            {f}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full cursor-pointer">
+                                        <SelectValue
+                                            placeholder="Select furnishing"
+                                            className="text-sm"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {FURNISHING.map((f) => (
+                                            <SelectItem
+                                                key={f}
+                                                value={f}
+                                                className="cursor-pointer text-sm"
+                                            >
+                                                {f}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
+                            {/* Condition */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Condition
-                                </label>
-                                <select
+                                </Label>
+                                <Select
                                     value={form.condition}
-                                    onChange={(e) => update("condition", e.target.value as Condition)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    onValueChange={(value) =>
+                                        update("condition", value as Condition)
+                                    }
                                 >
-                                    {CONDITION.map((c) => (
-                                        <option key={c} value={c}>
-                                            {c}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full cursor-pointer">
+                                        <SelectValue
+                                            placeholder="Select condition"
+                                            className="text-sm"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {CONDITION.map((c) => (
+                                            <SelectItem
+                                                key={c}
+                                                value={c}
+                                                className="cursor-pointer text-sm"
+                                            >
+                                                {c}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
+                            {/* Property Size */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Property Size
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
+                                </Label>
+                                <div className="flex flex-col-reverse sm:flex-row gap-2">
+                                    <Input
                                         type="number"
-                                        value={form.size}
+                                        value={form.size === null ? "" : form.size ?? ""}
                                         onChange={(e) => update("size", Number(e.target.value))}
-                                        className="flex-1 p-3 border rounded text-sm w-0"
+                                        className="flex-1 text-sm py-2"
                                         placeholder="120"
                                     />
-                                    <select
+                                    <Select
                                         value={form.sizeUnit}
-                                        onChange={(e) => update("sizeUnit", e.target.value as SizeUnit)}
-                                        className="p-3 border rounded"
-                                    >
-                                        {
-                                            SIZE_UNIT.map(v =>
-                                                <option value={v} key={v}>{v}</option>
-                                            )
+                                        onValueChange={(value) =>
+                                            update("sizeUnit", value as SizeUnit)
                                         }
-                                    </select>
+                                    >
+                                        <SelectTrigger className="w-full sm:w-auto cursor-pointer">
+                                            <SelectValue placeholder="Unit" className="text-sm" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {SIZE_UNIT.map((s) => (
+                                                <SelectItem
+                                                    className="text-sm cursor-pointer"
+                                                    value={s}
+                                                    key={s}
+                                                >
+                                                    {s}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
 
+                            {/* Year built */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Year Built
-                                </label>
-                                <input
-                                    value={form.yearBuilt}
-                                    onChange={(e) => update("yearBuilt", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
-                                    placeholder="2015"
+                                </Label>
+                                <Input
                                     type="number"
+                                    value={form.yearBuilt === null ? "" : form.yearBuilt ?? ""}
+                                    onChange={(e) =>
+                                        update("yearBuilt", Number(e.target.value))
+                                    }
+                                    className="w-full text-sm"
+                                    placeholder="2015"
                                 />
                             </div>
 
+                            {/* Floor Level */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Floor Level
-                                </label>
-                                <input
-                                    value={form.floorLevel}
+                                </Label>
+                                <Input
+                                    value={
+                                        form.floorLevel === null ? "" : form.floorLevel ?? ""
+                                    }
                                     onChange={(e) => update("floorLevel", e.target.value)}
-                                    className="w-full p-3 border rounded text-sm"
+                                    className="w-full text-sm"
                                     placeholder="Ground / 1st / 2nd"
                                 />
                             </div>
 
+                            {/* Total Floors */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Total Floors
-                                </label>
-                                <input
-                                    value={form.totalFloors}
-                                    onChange={(e) => update("totalFloors", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
+                                </Label>
+                                <Input
+                                    type="number"
+                                    value={
+                                        form.totalFloors === null ? "" : form.totalFloors ?? ""
+                                    }
+                                    onChange={(e) =>
+                                        update("totalFloors", Number(e.target.value))
+                                    }
+                                    className="w-full text-sm"
                                     placeholder="3"
-                                    type="number"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Floor Area
-                                </label>
-                                <input
-                                    value={form.floorArea}
-                                    onChange={(e) => update("floorArea", Number(e.target.value))}
-                                    className="w-full p-3 border rounded text-sm"
-                                    placeholder="2000"
-                                    type="number"
                                 />
                             </div>
 
+                            {/* Floor Area */}
+                            <div>
+                                <Label className="text-sm font-medium mb-1">
+                                    Floor Area
+                                </Label>
+                                <Input
+                                    type="number"
+                                    value={form.floorArea === null ? "" : form.floorArea ?? ""}
+                                    onChange={(e) =>
+                                        update("floorArea", Number(e.target.value))
+                                    }
+                                    className="w-full text-sm"
+                                    placeholder="2000"
+                                />
+                            </div>
+
+                            {/* Amenities    */}
                             <div className="md:col-span-3">
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Amenities
-                                </label>
+                                </Label>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     {AMENITIES.map((amen) => (
-                                        <label
+                                        <Label
                                             key={amen}
-                                            className={`p-2 border rounded flex items-center gap-2 ${form.amenities.includes(amen)
-                                                ? "bg-blue-50 border-blue-300"
-                                                : ""
-                                                }`}
+                                            className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950 cursor-pointer"
                                         >
-                                            <input
-                                                type="checkbox"
-                                                checked={form.amenities.includes(amen)}
-                                                onChange={() => toggleAmenity(amen)}
+                                            <Checkbox
+                                                id={amen}
+                                                defaultChecked={form.amenities?.includes(
+                                                    amen as Amenity
+                                                )}
+                                                onCheckedChange={(checked) => toggleAmenity(amen)}
+                                                className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
                                             />
-                                            <span className="text-sm">{amen}</span>
-                                        </label>
+                                            <div className="grid gap-1.5 font-mudium">
+                                                <p className="text-sm leading-none font-medium">
+                                                    {amen}
+                                                </p>
+                                            </div>
+                                        </Label>
                                     ))}
                                 </div>
                             </div>
                         </div>
-                    </FormSectionUI>
+                    </FormSection>
                 )}
 
                 {/* Media & Agent Info */}
                 {step === 4 && (
-                    <FormSectionUI title="Media & Agent Details">
-                        <div className="flex flex-col gap-4">
+                    <FormSection title="Media & Agent Details">
+                        <div className="w-full space-y-6">
+                            {/* Images */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Property Images
-                                </label>
-                                <div className="mt-3 flex max-w-full scroll-smooth overflow-x-auto overflow-y-hidden bg-slate-50 rounded-sm px-4 py-2">
-                                    <div className="flex justify-start items-center gap-4">
-                                        {
-                                            form.images?.length ?
-                                                form.images.map((src, idx) => (
-                                                    <DisplayImage
-                                                        key={idx}
-                                                        className="w-[100px] h-[100px]"
-                                                        img={src}
-                                                        remove={(i) => {
-                                                            update("images", form.images.filter(fi => fi !== i));
-                                                        }}
-                                                    />
-                                                )) :
-                                                null
+                                <Label className="text-sm font-medium mb-1">
+                                    Display Images
+                                </Label>
+                                <ScrollArea
+                                    className="w-full whitespace-nowrap rounded border p-2 max-w-[280px] sm:max-w-[320px] md:max-w-full"
+                                >
+                                    <div className="flex gap-2">
+                                        {form.images?.length ?
+                                            form.images.map((src, idx) => (
+                                                <DisplayImage
+                                                    key={idx}
+                                                    className="w-[160px] h-[160px]"
+                                                    src={src}
+                                                    alt={src}
+                                                    handleremove={true}
+                                                    remove={(i) => {
+                                                        update(
+                                                            "images",
+                                                            form.images.filter((fi) => fi !== i)
+                                                        );
+                                                    }}
+                                                />
+                                            )) :
+                                            null
                                         }
-                                        <AddImageButton
-                                            onClick={() => setModalGalary(true)}
+                                        <ImageGallery
+                                            galleryImages={sampleImagesState}
+                                            setGalleryImages={setSampleImagesState}
+                                            setGetSelected={(img) => update("images", [...form.images, ...img])}
                                         />
                                     </div>
-                                </div>
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Tip: You should upload images to Cloudinary or S3 and sto re
-                                    URLs. This demo uses local previews only.
-                                </p>
+                                    <ScrollBar orientation="horizontal" />
+                                </ScrollArea>
                             </div>
+
+                            {/* Video / Virtual Tour Link */}
                             <div>
-                                <label className="block text-sm font-medium mb-1">
+                                <Label className="text-sm font-medium mb-1">
                                     Video / Virtual Tour Link (optional)
-                                </label>
-                                <input
-                                    value={form.videoUrl}
+                                </Label>
+                                <Input
+                                    value={form.videoUrl ?? ""}
                                     onChange={(e) => update("videoUrl", e.target.value)}
                                     placeholder="YouTube link or 360 tour URL"
-                                    className="w-full p-3 border rounded text-sm"
+                                    className="w-full text-sm"
                                 />
+                                <p className="block text-xs text-gray-500 text-center text-wrap mt-1">
+                                    Please upload your property video to <span className="text-red-500 font-medium">YouTube</span> and share the link here.
+                                </p>
+
                             </div>
 
+                            {/* Agent / Owner details */}
                             <div>
-                                <label className="block text-sm font-medium mb-1 mt-4">
+                                <Label className="text-sm font-medium mb-1 mt-4">
                                     Agent / Owner
-                                </label>
+                                </Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <input
+                                    <Input
                                         value={form.agentName}
                                         onChange={(e) => update("agentName", e.target.value)}
-                                        className="w-full p-3 border rounded mb-2 text-sm"
+                                        className="w-full text-sm"
                                         placeholder="Agent name"
                                     />
-                                    <input
-                                        value={form.agentPhone}
-                                        onChange={(e) => update("agentPhone", Number(e.target.value))}
-                                        className="w-full p-3 border rounded mb-2 text-sm"
+                                    <Input
+                                        type="phonenumber"
+                                        value={
+                                            form.agentPhone === null ? "" : form.agentPhone ?? ""
+                                        }
+                                        onChange={(e) => {
+                                            if (isNaN(Number(e.target.value))) return;
+                                            update("agentPhone", Number(e.target.value));
+                                        }}
+                                        className="w-full text-sm"
                                         placeholder="Phone number"
-                                        type="number"
                                     />
-                                    <input
+                                    <Input
+                                        type="email"
                                         value={form.agentEmail}
                                         onChange={(e) => update("agentEmail", e.target.value)}
-                                        className="w-full p-3 border rounded mb-2 text-sm"
+                                        className="w-full text-sm"
                                         placeholder="Email"
                                     />
-                                    <input
+                                    <Input
                                         value={form.agentCompany}
                                         onChange={(e) => update("agentCompany", e.target.value)}
-                                        className="w-full p-3 border rounded mb-2 text-sm"
+                                        className="w-full text-sm"
                                         placeholder="Company name"
                                     />
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            checked={form.showContact}
-                                            onChange={(e) => update("showContact", e.target.checked)}
-                                        />{" "}
-                                        Show contact publicly
-                                    </label>
+                                    <div className="flex gap-2">
+                                        <Checkbox
+                                            defaultChecked={form.showContact}
+                                            onCheckedChange={(checked) => {
+                                                update("showContact", !form.showContact);
+                                            }}
+                                            className="cursor-pointer"
+                                        />
+                                        <Label htmlFor="negotiable" className="block">
+                                            <span className="block text-sm font-medium text-slate-950">
+                                                Show contact publicly
+                                            </span>
+                                        </Label>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex-1 flex flex-col mt-4">
-                                <label className="block text-sm font-medium mb-4">
-                                    Meta / Listing Management
-                                </label>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 items-center">
+                            {/* Meta / Listing Management */}
+                            <div className="flex-1  mt-4">
+                                <Label className="text-base font-medium mt-1">
+                                    Meta / Listing Management
+                                </Label>
+
+                                <div className="space-y-4 md:grid md:grid-col-2 md:gap-4 mt-4">
                                     {/* SEO Slug */}
                                     <div className="flex-1 flex flex-col col-span-2">
-                                        <label htmlFor="seoSlug" className="block text-xs font-medium mb-1">SEO Slug</label>
-                                        <input
+                                        <Label
+                                            htmlFor="seoSlug"
+                                            className="text-sm font-medium mb-1"
+                                        >
+                                            SEO Slug
+                                        </Label>
+                                        <Input
                                             id="seoSlug"
                                             placeholder="3-bedroom-flat-agbara"
                                             value={form.seoSlug}
-                                            // onChange={(e) => update("seoSlug", e.target.value)}
-                                            className="p-3 border rounded flex-1 text-sm"
+                                            className="flex-1 text-sm py-2"
                                             readOnly
                                         />
-                                        <p className="text-xs text-gray-500 block mt-1">Used for clean property URLs</p>
+                                        <p className="text-xs text-slate-400 block mt-1">
+                                            Used for clean property URLs
+                                        </p>
                                     </div>
 
                                     {/* Reference ID */}
                                     <div className="flex flex-col">
-                                        <label htmlFor="referenceId" className="block text-xs font-medium mb-1">
+                                        <Label
+                                            htmlFor="referenceId"
+                                            className="text-sm font-medium mb-1"
+                                        >
                                             Reference ID
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             id="referenceId"
                                             placeholder="AGB-20250922-001"
                                             value={form.referenceId}
                                             onChange={(e) => update("referenceId", e.target.value)}
                                             readOnly
-                                            className="p-3 border rounded flex-1 text-sm"
+                                            className="flex-1 text-sm py-2"
                                         />
                                     </div>
 
                                     {/* Listing Status */}
                                     <div className="flex flex-col">
-                                        <label className="block text-xs font-medium mb-1">Availability</label>
-                                        <select
+                                        <Label className="text-sm font-medium mb-1">
+                                            Availability
+                                        </Label>
+                                        <Select
                                             value={form.availability}
-                                            onChange={(e) => update("availability", e.target.value as Availability)}
-                                            className="p-3 border rounded text-sm"
-                                        >
-                                            {
-                                                AVAILABILITY.map(v =>
-                                                    <option value={v} key={v}>{v}</option>
-                                                )
+                                            onValueChange={(value) =>
+                                                update("availability", value as Availability)
                                             }
-                                        </select>
+                                        >
+                                            <SelectTrigger className="w-full cursor-pointer">
+                                                <SelectValue
+                                                    placeholder="Select status"
+                                                    className="text-sm"
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {AVAILABILITY.map((s) => (
+                                                    <SelectItem
+                                                        className="cursor-pointer text-sm"
+                                                        value={s}
+                                                        key={s}
+                                                    >
+                                                        {s}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
 
                                     {/* Package Type */}
                                     <div className="flex flex-col">
-                                        <label className="block text-xs font-medium mb-1">Package Type</label>
-                                        <select
+                                        <Label className="text-sm font-medium mb-1">
+                                            Package Type
+                                        </Label>
+                                        <Select
                                             value={form.packageType}
-                                            onChange={(e) => update("packageType", e.target.value as PackageType)}
-                                            className="p-3 border rounded text-sm"
+                                            onValueChange={(value) =>
+                                                update("packageType", value as PackageType)
+                                            }
                                         >
-                                            <option value="free">Free</option>
-                                            <option value="premium">Premium</option>
-                                            <option value="featured">Featured</option>
-                                        </select>
+                                            <SelectTrigger className="w-full cursor-pointer">
+                                                <SelectValue
+                                                    placeholder="Select package type"
+                                                    className="text-sm"
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {PACKAGE_TYPE.map((p) => (
+                                                    <SelectItem
+                                                        className="cursor-pointer text-sm"
+                                                        value={p}
+                                                        key={p}
+                                                    >
+                                                        {p}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
 
                                     {/* Priority Rank */}
                                     <div className="flex flex-col">
-                                        <label htmlFor="priorityRank" className="block text-xs font-medium mb-1">Priority Rank</label>
-                                        <input
+                                        <Label
+                                            htmlFor="priorityRank"
+                                            className="text-sm font-medium mb-1"
+                                        >
+                                            Priority Rank
+                                        </Label>
+                                        <Input
                                             id="priorityRank"
                                             type="number"
                                             min={1}
                                             max={10}
                                             placeholder="1-10"
-                                            value={form.priorityRank}
-                                            onChange={(e) => update("priorityRank", Number(e.target.value))}
-                                            className="p-3 border rounded flex-1 text-sm"
-
+                                            value={
+                                                form.priorityRank === null
+                                                    ? ""
+                                                    : form.priorityRank ?? ""
+                                            }
+                                            onChange={(e) =>
+                                                update("priorityRank", Number(e.target.value))
+                                            }
+                                            className="flex-1 text-sm py-2"
                                         />
-                                        {/* <p className="text-xs text-gray-500">Higher rank = appears earlier in search results</p> */}
+                                        <p className="block mt-1 text-xs text-slate-500">
+                                            Higher rank means appearing earlier in search results
+                                        </p>
                                     </div>
 
                                     {/* Date Listed */}
-                                    <div className="flex flex-col">
-                                        <label htmlFor="createdAt" className="block text-xs font-medium mb-1">Date Listed</label>
-                                        <input
-                                            id="createdAt"
-                                            type="date"
-                                            // defaultValue={new Date().toISOString().slice(0, 10)}
-                                            value={form.createdAt as string}
-                                            onChange={(e) => update("createdAt", e.target.value)}
-                                            className="p-3 border rounded flex-1 text-sm"
+                                    <div className="flex flex-col items-center col-span-2 w-full">
+                                        <CustomCalendar
+                                            date={form.createdAt}
+                                            setDate={(date) => update("createdAt", date)}
                                         />
                                     </div>
-
-                                    {/* Last Updated */}
-                                    <div className="flex flex-col">
-                                        <label htmlFor="updatedAt" className="block text-xs font-medium mb-1">Last Updated</label>
-                                        <input
-                                            id="updatedAt"
-                                            type="date"
-                                            // defaultValue={new Date().toISOString().slice(0, 10)}
-                                            value={form.updatedAt as string}
-                                            onChange={(e) => update("updatedAt", e.target.value)}
-                                            className="p-3 border rounded flex-1 text-sm"
-                                        />
-                                    </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-                    </FormSectionUI>
+                    </FormSection>
                 )}
 
                 {/* Preview & Confirm */}
                 {step === 5 && (
-                    <FormSectionUI title="Preview Your Listing">
-                        <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+                    <FormSection title="Preview Your Listing">
+                        <div>
                             {/* Gallery Slider */}
-                            {form.images?.length ? (
-                                <Carousel className="w-full">
-                                    <CarouselContent>
-                                        {form.images.map((url, i) => (
-                                            <CarouselItem key={i}>
-                                                <div className="relative w-full h-80">
-                                                    <Image
-                                                        key={i}
-                                                        src={url}
-                                                        alt={`preview-${i}`}
-                                                        fill
-                                                        className="w-full  h-80  object-cover rounded-lg shadow-sm"
-                                                    />
-                                                </div>
-                                            </CarouselItem>
-                                        ))}
-                                    </CarouselContent>
-                                    <CarouselPrevious type="button" className="h-20 w-20 cursor-pointer  text-red-700 bg-amber-500" />
-                                    <CarouselNext type="button" className="h-20 w-20 cursor-pointer text-red-700 bg-amber-500" />
-                                </Carousel>
-                            ) : (
-                                <div className="w-full h-72 bg-gray-100 flex items-center justify-center text-gray-500">
-                                    No Image Uploaded
-                                </div>
-                            )}
+                            <div>
+                                {form.images?.length ? (
+                                    <Carousel className="w-full">
+                                        <CarouselContent>
+                                            {form.images.map((url, i) => (
+                                                <CarouselItem key={i}>
+                                                    <div className="relative w-full h-80">
+                                                        <Image
+                                                            key={i}
+                                                            src={url}
+                                                            alt={`preview-${i}`}
+                                                            fill
+                                                            className="w-full  h-80  object-cover rounded-lg shadow-sm"
+                                                        />
+                                                    </div>
+                                                </CarouselItem>
+                                            ))}
+                                        </CarouselContent>
+                                        <CarouselPrevious
+                                            type="button"
+                                            className="h-10 w-10 left-1 cursor-pointer  text-red-700 bg-amber-500"
+                                        />
+                                        <CarouselNext
+                                            type="button"
+                                            className="h-10 w-10 right-1 cursor-pointer text-red-700 bg-amber-500"
+                                        />
+                                    </Carousel>
+                                ) : (
+                                    <div className="w-full h-72 bg-gray-100 flex items-center justify-center text-gray-500">
+                                        No Image Uploaded
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Content */}
-                            <div className="p-6 space-y-6">
+                            <div className="space-y-6 mt-4">
+
                                 {/* Title & Price */}
                                 <div>
                                     <div className="flex justify-between flex-wrap items-center gap-4">
-                                        <h1 className="text-2xl font-bold text-gray-800">
+                                        <h1 className="text-2xl font-medium text-gray-800">
                                             {form.title || "Untitled Property"}
                                         </h1>
-                                        <p className="text-xl font-semibold text-green-700">
+                                        <p className="text-xl font-medium text-green-700">
                                             {formatCurrency(form.price)}{" "}
-                                            {form.priceFrequency && form.priceFrequency !== "Total"
+                                            {form.price && form.priceFrequency
                                                 ? ` / ${form.priceFrequency}`
                                                 : ""}
                                         </p>
                                     </div>
-                                    <p className="text-sm font-medium text-wrap px-1 py-3 text-slate-700">
+                                    {form.negotiable &&
+                                        <div className="flex justify-end">
+                                            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                                                Negotiable
+                                            </span>
+                                        </div>
+                                    }
+                                    <p className="text-sm font-medium text-wrap p-2 text-slate-700">
                                         {form.description || "Provide description"}
                                     </p>
                                 </div>
 
                                 {/* Fees */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-700">
-                                    <p><strong>Service Charge</strong>: {formatCurrency(form.serviceCharge)}</p>
-                                    <p><strong>Agency Fee</strong>: {formatCurrency(form.agencyFee)}</p>
-                                    <p><strong>Legal Fee</strong>: {formatCurrency(form.legalFee)}</p>
-                                    <p><strong>Status</strong>: {safeValue(form.status)}</p>
+                                    <p>
+                                        <strong>Service Charge</strong>:{" "}
+                                        {formatCurrency(form.serviceCharge)}
+                                    </p>
+                                    <p>
+                                        <strong>Agency Fee</strong>:{" "}
+                                        {formatCurrency(form.agencyFee)}
+                                    </p>
+                                    <p>
+                                        <strong>Legal Fee</strong>:{" "}
+                                        {formatCurrency(form.legalFee)}
+                                    </p>
+                                    <p>
+                                        <strong>Status</strong>: {safeValue(form.status)}
+                                    </p>
                                 </div>
 
                                 {/* Meta Info */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div className="space-y-1">
                                         <p>
-                                            <strong>Availability:</strong> {form.title.trim() ? safeValue(form.availability) : "-"}
+                                            <strong>Availability:</strong>{" "}
+                                            {form.title.trim() ? safeValue(form.availability) : "-"}
                                         </p>
                                         <p>
-                                            <strong>Priority Rank:</strong> {form.title.trim() ? safeValue(form.priorityRank) : "-"}
+                                            <strong>Priority Rank:</strong>{" "}
+                                            {form.title.trim() ? safeValue(form.priorityRank) : "-"}
                                         </p>
                                         <p>
-                                            <strong>Ref ID:</strong> {form.availability != "Draft" && safeValue(form.referenceId)}
+                                            <strong>Ref ID:</strong>{" "}
+                                            {form.availability != "Draft" &&
+                                                safeValue(form.referenceId)}
                                         </p>
                                         <p>
                                             <strong>Catigory:</strong> {safeValue(form.category)}
@@ -992,10 +1406,12 @@ export default function PropertyFormEditor() {
                                             <strong>Toilets:</strong> {safeValue(form.toilets)}
                                         </p>
                                         <p>
-                                            <strong>Parking Spaces:</strong> {safeValue(form.parkingSpaces)}
+                                            <strong>Parking Spaces:</strong>{" "}
+                                            {safeValue(form.parkingSpaces)}
                                         </p>
                                         <p>
-                                            <strong>Parking Capacity:</strong> {safeValue(form.parkingCapacity)}
+                                            <strong>Parking Capacity:</strong>{" "}
+                                            {safeValue(form.parkingCapacity)}
                                         </p>
                                     </div>
                                 </div>
@@ -1012,7 +1428,8 @@ export default function PropertyFormEditor() {
                                         <strong>Floor Level:</strong> {safeValue(form.floorLevel)}
                                     </p>
                                     <p>
-                                        <strong>Total Floors:</strong> {safeValue(form.totalFloors)}
+                                        <strong>Total Floors:</strong>{" "}
+                                        {safeValue(form.totalFloors)}
                                     </p>
                                     <p>
                                         <strong>Floor Area:</strong> {safeValue(form.floorArea)}
@@ -1021,14 +1438,16 @@ export default function PropertyFormEditor() {
                                         <strong>Year Built:</strong> {safeValue(form.yearBuilt)}
                                     </p>
                                     <p>
-                                        <strong>Size:</strong>{" "}
-                                        {safeValue(form.size)} {safeValue(form.size) !== "—" && safeValue(form.sizeUnit)}
+                                        <strong>Size:</strong> {safeValue(form.size)}{" "}
+                                        {safeValue(form.size) !== "—" && safeValue(form.sizeUnit)}
                                     </p>
                                 </div>
 
                                 {/* Amenities */}
                                 <div>
-                                    <h2 className="font-semibold text-gray-800 mb-2">Amenities</h2>
+                                    <h2 className="font-medium text-gray-800 mb-2">
+                                        Amenities
+                                    </h2>
                                     {form.amenities?.length ? (
                                         <ul className="grid grid-cols-2 gap-2 text-sm text-gray-700">
                                             {form.amenities.map((a, i) => (
@@ -1038,140 +1457,136 @@ export default function PropertyFormEditor() {
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="text-gray-500 text-sm">No amenities specified</p>
+                                            <p className="text-gray-500 text-sm">
+                                                No amenities specified
+                                            </p>
                                     )}
                                 </div>
 
                                 {/* Agent Info */}
                                 <div>
-                                    <h2 className="font-semibold text-gray-800 mb-2">
+                                    <h2 className="font-medium text-gray-800 mb-2">
                                         Agent Information
                                     </h2>
                                     <p className="text-sm font-medium text-slate-700">
-                                        {safeValue(form.agentName)} | {safeValue(form.agentPhone)} |{" "}
-                                        {safeValue(form.agentEmail)}
+                                        {safeValue(form.agentName)} | {safeValue(form.agentPhone)}{" "}
+                                        | {safeValue(form.agentEmail)}
                                     </p>
-                                    <p className="text-sm font-medium text-slate-700">{safeValue(form.agentCompany)}</p>
+                                    <p className="text-sm font-medium text-slate-700">
+                                        {safeValue(form.agentCompany)}
+                                    </p>
                                 </div>
 
                                 {/* Dates */}
                                 <div className="text-sm text-gray-500 border-t pt-3">
                                     <p>
-                                        Date Listed:{" "}
+                                        Listed on{" "}
                                         {form.createdAt
-                                            ? new Date(form.createdAt).toLocaleDateString()
-                                            : "—"}
-                                    </p>
-                                    <p>
-                                        Last Updated:{" "}
-                                        {form.updatedAt
-                                            ? new Date(form.updatedAt).toLocaleDateString()
-                                            : "—"}
+                                            ? formatDate(form.createdAt)
+                                            : "—"
+                                        }
                                     </p>
                                 </div>
 
                                 {/* Seo Slug */}
                                 <div className="mt-2">
-                                    <p className="text-xs text-slate-700">{safeValue(form.seoSlug)}</p>
+                                    <p className="text-xs text-slate-700">
+                                        {safeValue(form.seoSlug)}
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                    </FormSectionUI>
+                    </FormSection>
                 )}
 
+                {/* Navigation buttons */}
                 <div className="flex items-center justify-between">
                     {step > 1 && (
-                        <CustomButton
+                        <Button
                             type="button"
-                            onClick={() => setStep((s) => s - 1)}
-                            className="rounded-2xl stroke-slate-800 bg-slate-200"
+                            variant="outline"
+                            className="flex gap-2 cursor-pointer"
+                            onClick={() => changeSteps("Back")}
                         >
-                            Back
-                        </CustomButton>
+                            <ArrowLeftIcon className="h-5 w-5" />  Back
+                        </Button>
                     )}
                     {step < 5 && (
                         <div className="flex justify-end items-center w-full">
-                            <CustomButton
+                            <Button
                                 type="button"
-                                onClick={() => setStep((s) => s + 1)}
-                                className="bg-blue-600 text-white rounded-2xl"
+                                variant="outline"
+                                className="flex gap-2 cursor-pointer"
+                                onClick={() => changeSteps("Next")}
                             >
-                                Next
-                            </CustomButton>
+                                Next <ArrowRightIcon className="h-5 w-5" />
+                            </Button>
                         </div>
                     )}
-
                 </div>
 
-                <div className="w-full flex justify-center items-center mt-10">
-                    {step === 5 && <div>
-                        <CustomButton
-                            type="submit"
-                            disabled={loading}
-                            className="bg-green-700 text-white rounded-lg font-bold px-24"
-                        >
-                            {loading ? "Sending..." : "Send Listing"}
-                        </CustomButton>
-                    </div>
-                    }
-                </div>
+                {/* Create | Update new listing button */}
+                {step === 5 &&
+                    ((form.title.trim() && !form.referenceId.trim()) ||
+                        (changeInForm && form.referenceId.trim())) ?
+                    <div className="sticky bottom-0 left right-0">
+                        <div className="w-full h-full flex justify-center">
+                            <Button
+                                type="submit"
+                                size="sm"
+                                variant="outline"
+                                disabled={loading}
+                                className="bg-green-800 text-white text-base px-24 py-5 cursor-pointer shadow border"
+                            >
+                                {form.referenceId.trim() ?
+                                    <>
+                                        {loading ? <>< Spinner /> Updating Property... </> : "Update Property"}
+                                    </> :
+                                    <>
+                                        {loading ? <>< Spinner /> Submiting Property... </> :
+                                            accountType === "ADMIN" ? "Create Property" : "Submit Property"}
+                                    </>
+                                }
+                            </Button>
 
+                        </div>
+                    </div> :
+                    null
+                }
             </form>
+            {/* Unsaved Changes Alert */}
+            <AlertDialog open={showPrompt} onOpenChange={setShowPrompt}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Unsaved changes detected</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You have unsaved data in your property listing form.
+                            Do you want to save it as a draft before leaving?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex gap-2">
+                        <AlertDialogAction
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={handleSaveAndLeave}
+                        >
+                            Save & Leave
+                        </AlertDialogAction>
+                        <AlertDialogAction
+                            className="bg-gray-500 hover:bg-gray-600 text-white"
+                            onClick={handleLeaveWithoutSaving}
+                        >
+                            Leave Without Saving
+                        </AlertDialogAction>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
-            {/* Image Galary Modal */}
-            <Modal
-                isOpen={modalGalary}
-                setIsOpen={setModalGalary}
-            >
-                <div className="w-full flex flex-col min-h-screen bg-white">
-                    {/*Modal Header */}
-                    <div className="flex justify-between items-center h-[7vh] px-2 border border-slate-400 shadow">
-                        <div className="flex items-center gap-10">
-                            <button
-                                className="inline-block text-base font-bold text-red-900 cursor-pointer"
-                                onClick={() => {
-                                    setSelects([]);
-                                    setModalGalary(false);
-                                }}
-                            >
-                                X
-                            </button>
-                            <span className="inline-block">
-                                <h2>Image Galary</h2>
-                            </span>
-                        </div>
-                        {selects.length ? <div>
-                            <h5>Selected {selects.length}</h5>
-                        </div> : null}
-                    </div>
-                    {/* Modal body */}
-                    <div className="flex-1 max-h-full overflow-y-auto overflow-x-hidden p-8">
-                        <Galary
-                            imageGalary={imageGalary}
-                            setImageGalary={setImageGalary}
-                            selects={selects}
-                            setSelects={setSelects}
-                        />
-                    </div>
-                    {/* Modal footer */}
-                    <div className="py-4 pr-2 border border-slate-400 shadow h-[7vh]">
-                        <div className="flex-1 flex justify-end items-center">
-                            <CustomButton
-                                type="button"
-                                onClick={() => {
-                                    update("images", [...form.images, ...selects]);
-                                    setSelects([]);
-                                    setModalGalary(false);
-                                }}
-                            >
-                                Add
-                            </CustomButton>
-                        </div>
-                    </div>
-                </div>
-            </Modal >
-        </div >
+        </div>
     );
 };
 
+
 // swiper.js courosel.
+
+/// save image url to fiessatire
