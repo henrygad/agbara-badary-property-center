@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 export default function Modal(
-    { children, isOpen, setIsOpen }:
+    { children, isOpen}:
         { children: ReactElement, isOpen: boolean, setIsOpen: (b: boolean) => void }
 ) {
     return <div id="modal" className="relative">

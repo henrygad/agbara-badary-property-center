@@ -3,32 +3,34 @@
 import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 import { Trash2 } from "lucide-react";
+import ImageTypes from "@/types/image.types";
 
 type Props = {
     src: string,
     alt?: string
     className?: string,
-    selected?: string[],
-    setSelected?: Dispatch<SetStateAction<string[]>>
+    metaData?: ImageTypes,
+    selected?: ImageTypes[],
+    setSelected?: Dispatch<SetStateAction<ImageTypes[]>>
     remove?: (i: string) => void
     handleremove?: boolean
 };
 
-const DisplayImage = ({ src, alt = "demo", selected, setSelected = () => { }, remove = () => null, handleremove, className }: Props) => {
+const DisplayImage = ({ src, alt = "demo", metaData, selected, setSelected = () => { }, remove = () => null, handleremove, className }: Props) => {
 
     // advance feature are, display full image, and able to edit image size (crop)
     return <div
-        className={`relative rounded-lg overflow-hidden border-2 cursor-pointer shadow ${selected?.includes(src)
+        className={`relative overflow-hidden cursor-pointer ${selected?.includes(metaData!)
             ? "border-blue-500"
             : "border-transparent"
             } ${className || ""}`}
-        onClick={_ =>
+        onClick={() =>
             setSelected(pre => {
                 const copy = new Set(pre);
-                if (copy.has(src)) {
-                    copy.delete(src);
+                if (copy.has(metaData!)) {
+                    copy.delete(metaData!);
                 } else {
-                    copy.add(src);
+                    copy.add(metaData!);
                 }
                 return Array.from(copy);
             })
@@ -41,9 +43,9 @@ const DisplayImage = ({ src, alt = "demo", selected, setSelected = () => { }, re
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U1ZTVlNSIgLz4="
             sizes="100%"
-            className="w-full h-auto object-cover rounded-lg"
+            className="w-full h-auto object-cover"
         />
-        {selected?.includes(src) && (
+        {selected?.includes(metaData!) && (
             <div className="absolute inset-0 bg-blue-500/30 flex items-center justify-center text-white font-bold">
                 ✓
             </div>

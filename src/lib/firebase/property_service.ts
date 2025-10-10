@@ -10,7 +10,7 @@ const formatteFireStoreDate = (data: DocumentData) => {
 }
 
 // Fetch all properties
-export async function getProperties() {
+export async function getPropertiesDb() {
     const querySnapshot = await getDocs(collection(db, "properties"))
 
     return querySnapshot.docs.map(doc => {
@@ -20,7 +20,7 @@ export async function getProperties() {
 }
 
 // Fetch single property by ID
-export async function getPropertyById(id: string) {
+export async function getPropertyByIdDb(id: string) {
     try {
         const docRef = doc(db, "properties", id);
         const docSnap = await getDoc(docRef);
@@ -37,7 +37,7 @@ export async function getPropertyById(id: string) {
 }
 
 // Create a new property
-export async function addProperty(property: PropertyTypes) {
+export async function addPropertyDb(property: PropertyTypes) {
     try {
         // Normalize payload before saving
         const normalized = {
@@ -48,6 +48,10 @@ export async function addProperty(property: PropertyTypes) {
         };
 
         const { id, ...rest } = normalized;
+
+        if (id) {
+             // do nothing
+         }
 
         // Save to Firestore
         const docRef = await addDoc(collection(db, "properties"), rest);
@@ -69,7 +73,7 @@ export async function addProperty(property: PropertyTypes) {
 };
 
 // Update property by ID
-export async function updateProperty(id: string, data: Partial<PropertyTypes>) {
+export async function updatePropertyDb(id: string, data: Partial<PropertyTypes>) {
     try {
         const docRef = doc(db, "properties", id);
         await updateDoc(docRef, { ...data, updatedAt: serverTimestamp() }); // updates only the fields you pass
@@ -88,7 +92,7 @@ export async function updateProperty(id: string, data: Partial<PropertyTypes>) {
 }
 
 // Delete property by ID
-export async function deleteProperty(id: string) {
+export async function deletePropertyDb(id: string) {
     try {
         const docRef = doc(db, "properties", id);
         await deleteDoc(docRef);

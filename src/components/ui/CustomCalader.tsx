@@ -13,18 +13,8 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { useState } from "react";
+import { formatDate } from "@/utils"
 
-function formatDate(date: Date | undefined) {
-    if (!date) {
-        return ""
-    }
-   
-    return new Date(date).toLocaleDateString("en-US", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-    })
-}
 
 function isValidDate(date: Date | undefined) {
     if (!date) {
@@ -40,14 +30,14 @@ export function CustomCalendar({ date, setDate }: { date: Date | undefined; setD
 
 
     return (
-        <div className="flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-2">
             <Label htmlFor="date" className="text-sm font-medium">Date Listed</Label>
-            <div className="relative flex gap-2">
+            <div className="w-full relative flex gap-2">
                 <Input
                     id="date"
                     value={value}
                     placeholder="June 01, 2025"
-                    className="bg-background pr-10"
+                    className="pr-10"
                     onChange={(e) => {
                         const date = new Date(e.target.value)
                         setValue(e.target.value)

@@ -15,6 +15,10 @@ const validatePropertyFields = (value: PropertyTypes) => {
                 error.errorMsg = "Title is required and should be at least 5 words.";
                 error.isError = true;
         }
+        else if (!value.seoSlug.trim()) {
+                error.errorMsg = "Slug is required and should be at least 5 words.";
+                error.isError = true;
+        }
 
         else if (!value.category.trim()) {
                 error.errorMsg = "Property Category is required.";

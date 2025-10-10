@@ -7,7 +7,7 @@ interface Props extends BlogPost {
     isShort: boolean;
 }
 
-const Blogpost = ({ id, title, description, image, likes, comments, isShort }: Props) => {
+const Blogpost = ({ id, title, description, image, likes, comments }: Props) => {
 
     return <div        
         className="flex flex-col md:flex-row gap-6 border-b pb-6"

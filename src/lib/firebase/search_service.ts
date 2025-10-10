@@ -5,7 +5,7 @@ import { db } from "./config";
 import { PropertyTypes } from "@/types/property.types";
 
 
-export async function searchProperties(params: SearchParams) {
+export async function searchPropertiesDb(params: SearchParams) {
     const conditions = [];
 
     // Build Firestore query conditions

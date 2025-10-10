@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Amenity,
     Condition,
@@ -16,14 +16,13 @@ import {
 import FormSection from "@/components/ui/FromSection";
 import {
     AMENITIES,
-    CITIES_LOCAL,
+    REGIONAL_TOWNS,
     CONDITION,
     FURNISHING,
     STATUS,
     PRICE_FREQUENCY,
     PROPERTY_CATEGORIES,
-    PROPERTY_TYPES,
-    STATES,
+    PROPERTY_TYPES,    
     SIZE_UNIT,
     AVAILABILITY,
     DEFAULT_PROPERTY_FORM,
@@ -39,7 +38,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { addProperty } from "@/lib/firebase/property_service";
+import { addPropertyDb } from "@/lib/firebase/property_service";
 import validatePropertyFields from "@/validators/property_from_editor.validate";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -56,52 +55,50 @@ import { Checkbox } from "../ui/checkbox";
 import { CustomCalendar } from "../ui/CustomCalader";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import ImageGallery from "../gallery/Index";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon} from "lucide-react";
 import { Spinner } from "../ui/spinner";
-import sampleImages from "@/store/images"
 import { showError, showSuccess } from "../Toasts";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { formatCurrency, safeValue, fiterSEOSlug, formatDate } from "@/utils";
+import { usePropertyStore } from "@/store/usePropertyStore";
+import { useImageStore } from "@/store/useImageStore";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 type Props = {
-    inComingData?: PropertyTypes,
-    inComingDataType: "DUPLICATE" | "TOUPDATE" | "NEW",
     accountType: "ADMIN" | "AGENT",
     imageGallery?: string[]
 }
 
-export default function PropertyFormEditor({ inComingData, inComingDataType, accountType }: Props) {
+export default function PropertyFormEditor({accountType }: Props) {
+    const { addProperty } = usePropertyStore();
+    const { images, addImage } = useImageStore();
+
+
     const [isMounted, setIsMounted] = useState(false);
-
     const [step, setStep] = useState(1);
-
-    const [sampleImagesState, setSampleImagesState] = useState<string[]>([]);
 
     const [form, setForm] = useState<PropertyTypes>(DEFAULT_PROPERTY_FORM);
     const [error, setError] = useState<{ errorMsg: string; isError: boolean }>({ errorMsg: "", isError: false });
     const [loading, setLoading] = useState(false);
+    const [isEdited, setIsEdited] = useState(false);
 
+    const [chooseCities, setChooseCities] = useState<string[]>(REGIONAL_TOWNS[0].cities);
 
-    // Whiling editing a property data
-    const [changeInForm, setChangeInForm] = useState(false);
+    // Form is not empty
+    const isFormDirty = Object.values(form).some((val) => val !== "");
+
+    // Hook to detect when form is not empty and save data as draft to local storage
+    //const { showPrompt, setShowPrompt, handleSaveAndLeave, handleLeaveWithoutSaving, } = useUnsavedChanges({ shouldBlock: isFormDirty, onSaveDraft: saveDraft });
+    useUnsavedChanges({ shouldBlock: isFormDirty, onSaveDraft: saveDraft });
 
 
     function update<K extends keyof typeof form>(
         key: K,
         value: (typeof form)[K]
     ) {
-        if (!changeInForm) {
-            setChangeInForm(true);
+
+        // When data passed to form is edited
+        if (!isEdited) {
+            setIsEdited(true);
         };
 
         setForm((s) => ({ ...s, [key]: value }));
@@ -119,36 +116,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
         });
     }
 
-    const formatCurrency = (value?: number | null) => {
-        if (!value || isNaN(value)) return "—";
-        return `₦${value.toLocaleString()}`;
-    };
-
-    const safeValue = (value?: string | number | null) => {
-        if (!value || value === "" || value === null || value === Infinity)
-            return "—";
-        return value;
-    };
-
-    const fiterSEOSlug = (v: string) => {
-        let copyV = v;
-        copyV = copyV.split(" ").join("-");
-        return copyV;
-    };
-
-    function formatDate(date: Date | undefined) {
-        if (!date) {
-            return ""
-        }
-
-        return new Date(date).toLocaleDateString("en-US", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-        })
-    }
-
-    const changeSteps = (p: "Back" | "Next" | number) => {
+    function changeSteps(p: "Back" | "Next" | number) {
         if (p === "Back") {
             setStep((s) => s - 1)
         } else if (p === "Next") {
@@ -159,25 +127,17 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
         window.scrollTo(0, 0)
     };
 
-
-    // Form is not empty
-    const isFormDirty = Object.values(form).some((val) => val !== "");
-
     // Save draft to local storage
-    const saveDraft = () => {
+    function saveDraft() {
         const getPropertyDraft = JSON.parse(localStorage.getItem("propertyDraft") || "[]");
         localStorage.setItem("propertyDraft", JSON.stringify(
             [
                 ...getPropertyDraft,
                 { ...form, draftId: String(Date.now() + Math.random()) }
             ]));
+        setForm(DEFAULT_PROPERTY_FORM);
         showSuccess("Draft saved!", "Draft have been saved locally")
-        console.log("Draft saved");
     };
-
-    const { showPrompt, setShowPrompt, handleSaveAndLeave, handleLeaveWithoutSaving, } =
-        useUnsavedChanges({ shouldBlock: isFormDirty, onSaveDraft: saveDraft });
-
 
     // form submission handler (create new property listing to firestore)
     async function submitForm(e?: React.FormEvent) {
@@ -194,22 +154,31 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
             // Prepare payload for your API or Firestore
             const payload: PropertyTypes = {
                 ...form,
+                seoSlug: form.seoSlug + "-" + Date.now(),
                 referenceId: `AGB-${Date.now()}`,
             };
 
+            const draftId = payload.draftId;
+
             // Simulate API call
-            const property = await addProperty(payload);
+            const property = await addPropertyDb(payload);
 
             // Simulate successful response
-            if (property) {
-                showSuccess("Property submitted!",
-                    `Your listing has been ${form.referenceId.trim() ? "updated" : accountType === "ADMIN" ? "created" : "submited"}.`
-                )
+            if (!property) return;
 
-                setForm(DEFAULT_PROPERTY_FORM);
-                setError({ errorMsg: "", isError: false });
-                changeSteps(1);
+            if (draftId) {
+                // Delete draf from store
             }
+
+            addProperty(property);
+
+            showSuccess("Property submitted!",
+                `Your listing has been ${form.referenceId.trim() ? "updated" : accountType === "ADMIN" ? "created" : "submited"}.`
+            )
+
+            setForm(DEFAULT_PROPERTY_FORM);
+            setError({ errorMsg: "", isError: false });
+            changeSteps(1);
 
         } catch (err) {
             const errorMsg = err as { message: string };
@@ -223,11 +192,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
         }
     }
 
-
     useEffect(() => {
-        // Load sample images on mount
-        setSampleImagesState(sampleImages);
-
 
         let clearOut: NodeJS.Timeout | undefined = undefined;
 
@@ -268,7 +233,6 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
 
 
     if (!isMounted) return <div>Loading...</div>
-
 
     return (
         <div className="w-full bg-inherit">
@@ -481,17 +445,18 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                     >
                                         <SelectValue
                                             placeholder="Select a state"
-                                            className="text-sm"
+                                            className="text-sm capitalize"
                                         />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {STATES.map((state) => (
+                                        {REGIONAL_TOWNS.map((state) => (
                                             <SelectItem
-                                                className="cursor-pointer text-sm"
-                                                key={state}
-                                                value={state}
+                                                className="cursor-pointer text-sm capitalize"
+                                                key={state.state}
+                                                value={state.state}
+                                                onClick={()=> setChooseCities(state.cities)}
                                             >
-                                                {state}
+                                                {state.state}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -512,13 +477,13 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                     >
                                         <SelectValue
                                             placeholder="Select a city"
-                                            className="text-sm"
+                                            className="text-sm capitalize"
                                         />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {CITIES_LOCAL.map((city) => (
+                                        {chooseCities.map((city) => (
                                             <SelectItem
-                                                className="cursor-pointer text-sm"
+                                                className="cursor-pointer text-sm capitalize"
                                                 key={city}
                                                 value={city}
                                             >
@@ -616,7 +581,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                         <Input
                                             type="number"
                                             placeholder="600,000"
-                                            className={`flex-1 text-sm py-2
+                                            className={` text-sm
                                                      ${error.errorMsg.toLowerCase().includes("price") ? "border-red-600" : ""}
                                                 `}
                                             value={form.price === null ? "" : form.price ?? ""}
@@ -659,10 +624,10 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                 <div className="flex items-center gap-2 my-5">
                                     <Checkbox
                                         checked={form.negotiable}
-                                        onCheckedChange={(checked) =>
+                                        onCheckedChange={() =>
                                             update("negotiable", !form.negotiable)
                                         }
-                                        className="cursor-pointer"
+                                        className="cursor-pointer h-6 w-6"
                                     />
                                     <Label htmlFor="negotiable" className="block">
                                         <span className="block text-sm font-medium text-slate-950">
@@ -690,7 +655,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             onChange={(e) =>
                                                 update("serviceCharge", Number(e.target.value))
                                             }
-                                            className="flex-1 text-sm py-2"
+                                            className=" text-sm"
                                             placeholder="20,000"
                                             type="number"
                                         />
@@ -706,7 +671,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             onChange={(e) =>
                                                 update("agencyFee", Number(e.target.value))
                                             }
-                                            className="flex-1 text-sm py-2"
+                                            className=" text-sm"
                                             placeholder="100,000"
                                             type="number"
                                         />
@@ -722,7 +687,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             onChange={(e) =>
                                                 update("legalFee", Number(e.target.value))
                                             }
-                                            className="flex-1 text-sm py-2"
+                                            className=" text-sm"
                                             placeholder="10,0000"
                                             type="number"
                                         />
@@ -894,7 +859,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                         type="number"
                                         value={form.size === null ? "" : form.size ?? ""}
                                         onChange={(e) => update("size", Number(e.target.value))}
-                                        className="flex-1 text-sm py-2"
+                                        className=" text-sm"
                                         placeholder="120"
                                     />
                                     <Select
@@ -1002,7 +967,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                                 defaultChecked={form.amenities?.includes(
                                                     amen as Amenity
                                                 )}
-                                                onCheckedChange={(checked) => toggleAmenity(amen)}
+                                                onCheckedChange={() => toggleAmenity(amen)}
                                                 className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
                                             />
                                             <div className="grid gap-1.5 font-mudium">
@@ -1028,21 +993,21 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                     Display Images
                                 </Label>
                                 <ScrollArea
-                                    className="w-full whitespace-nowrap rounded border p-2 max-w-[280px] sm:max-w-[320px] md:max-w-full"
+                                    className="w-full whitespace-nowrap max-w-[330px] sm:max-w-[480px] md:max-w-full"
                                 >
                                     <div className="flex gap-2">
                                         {form.images?.length ?
                                             form.images.map((src, idx) => (
                                                 <DisplayImage
                                                     key={idx}
-                                                    className="w-[160px] h-[160px]"
+                                                    className="w-[160px] h-[160px] rounded border shadow"
                                                     src={src}
                                                     alt={src}
                                                     handleremove={true}
-                                                    remove={(i) => {
+                                                    remove={(src) => {
                                                         update(
                                                             "images",
-                                                            form.images.filter((fi) => fi !== i)
+                                                            form.images.filter((img) => img !== src)
                                                         );
                                                     }}
                                                 />
@@ -1050,9 +1015,9 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             null
                                         }
                                         <ImageGallery
-                                            galleryImages={sampleImagesState}
-                                            setGalleryImages={setSampleImagesState}
-                                            setGetSelected={(img) => update("images", [...form.images, ...img])}
+                                            galleryImages={images}
+                                            setGalleryImages={(imgs) => imgs.map(img => addImage(img))}
+                                            setGetSelected={(img) => update("images", [...form.images, ...img.map(img => img.url)])}
                                         />
                                     </div>
                                     <ScrollBar orientation="horizontal" />
@@ -1088,18 +1053,25 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                         className="w-full text-sm"
                                         placeholder="Agent name"
                                     />
-                                    <Input
-                                        type="phonenumber"
-                                        value={
-                                            form.agentPhone === null ? "" : form.agentPhone ?? ""
-                                        }
-                                        onChange={(e) => {
-                                            if (isNaN(Number(e.target.value))) return;
-                                            update("agentPhone", Number(e.target.value));
-                                        }}
-                                        className="w-full text-sm"
-                                        placeholder="Phone number"
-                                    />
+                                    <div className="relative flex justify-start items-center">
+                                        <span className="absolute top-0 left-0 bottom-0 flex">
+                                            <span className="flex-1 flex justify-center items-center text-sm font-normal px-4">
+                                                +234
+                                            </span>
+                                        </span>
+                                        <Input
+                                            type="number"
+                                            value={
+                                                form.agentPhone === null ? "" : form.agentPhone ?? ""
+                                            }
+                                            onChange={(e) => {
+                                                if (isNaN(Number(e.target.value))) return;
+                                                update("agentPhone", Number(e.target.value));
+                                            }}
+                                            className="w-full text-sm pl-15"
+                                            placeholder="Phone number"
+                                        />
+                                    </div>
                                     <Input
                                         type="email"
                                         value={form.agentEmail}
@@ -1116,7 +1088,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                     <div className="flex gap-2">
                                         <Checkbox
                                             defaultChecked={form.showContact}
-                                            onCheckedChange={(checked) => {
+                                            onCheckedChange={() => {
                                                 update("showContact", !form.showContact);
                                             }}
                                             className="cursor-pointer"
@@ -1149,7 +1121,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             id="seoSlug"
                                             placeholder="3-bedroom-flat-agbara"
                                             value={form.seoSlug}
-                                            className="flex-1 text-sm py-2"
+                                            className=" text-sm"
                                             readOnly
                                         />
                                         <p className="text-xs text-slate-400 block mt-1">
@@ -1171,7 +1143,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             value={form.referenceId}
                                             onChange={(e) => update("referenceId", e.target.value)}
                                             readOnly
-                                            className="flex-1 text-sm py-2"
+                                            className=" text-sm"
                                         />
                                     </div>
 
@@ -1259,7 +1231,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             onChange={(e) =>
                                                 update("priorityRank", Number(e.target.value))
                                             }
-                                            className="flex-1 text-sm py-2"
+                                            className=" text-sm"
                                         />
                                         <p className="block mt-1 text-xs text-slate-500">
                                             Higher rank means appearing earlier in search results
@@ -1267,7 +1239,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                     </div>
 
                                     {/* Date Listed */}
-                                    <div className="flex flex-col items-center col-span-2 w-full">
+                                    <div className="flex justify-center col-span-2 w-full">
                                         <CustomCalendar
                                             date={form.createdAt}
                                             setDate={(date) => update("createdAt", date)}
@@ -1286,7 +1258,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                             {/* Gallery Slider */}
                             <div>
                                 {form.images?.length ? (
-                                    <Carousel className="w-full">
+                                    <Carousel className="w-full border rounded-lg">
                                         <CarouselContent>
                                             {form.images.map((url, i) => (
                                                 <CarouselItem key={i}>
@@ -1296,7 +1268,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                                             src={url}
                                                             alt={`preview-${i}`}
                                                             fill
-                                                            className="w-full  h-80  object-cover rounded-lg shadow-sm"
+                                                            className="w-full h-80 object-cover rounded border shadow"
                                                         />
                                                     </div>
                                                 </CarouselItem>
@@ -1457,9 +1429,9 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                             ))}
                                         </ul>
                                     ) : (
-                                            <p className="text-gray-500 text-sm">
-                                                No amenities specified
-                                            </p>
+                                        <p className="text-gray-500 text-sm">
+                                            No amenities specified
+                                        </p>
                                     )}
                                 </div>
 
@@ -1469,7 +1441,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                         Agent Information
                                     </h2>
                                     <p className="text-sm font-medium text-slate-700">
-                                        {safeValue(form.agentName)} | {safeValue(form.agentPhone)}{" "}
+                                        {safeValue(form.agentName)} | {safeValue(form.agentPhone) ? "+234" + " " + safeValue(form.agentPhone) : ""}{" "}
                                         | {safeValue(form.agentEmail)}
                                     </p>
                                     <p className="text-sm font-medium text-slate-700">
@@ -1504,7 +1476,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                     {step > 1 && (
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             className="flex gap-2 cursor-pointer"
                             onClick={() => changeSteps("Back")}
                         >
@@ -1515,7 +1487,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                         <div className="flex justify-end items-center w-full">
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="ghost"
                                 className="flex gap-2 cursor-pointer"
                                 onClick={() => changeSteps("Next")}
                             >
@@ -1528,7 +1500,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                 {/* Create | Update new listing button */}
                 {step === 5 &&
                     ((form.title.trim() && !form.referenceId.trim()) ||
-                        (changeInForm && form.referenceId.trim())) ?
+                        (isEdited && form.referenceId.trim())) ?
                     <div className="sticky bottom-0 left right-0">
                         <div className="w-full h-full flex justify-center">
                             <Button
@@ -1536,7 +1508,7 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                                 size="sm"
                                 variant="outline"
                                 disabled={loading}
-                                className="bg-green-800 text-white text-base px-24 py-5 cursor-pointer shadow border"
+                                className="bg-green-800 text-white text-base px-24 py-5 cursor-pointer shadow border max-w-[280px] overflow-hidden"
                             >
                                 {form.referenceId.trim() ?
                                     <>
@@ -1555,38 +1527,34 @@ export default function PropertyFormEditor({ inComingData, inComingDataType, acc
                 }
             </form>
             {/* Unsaved Changes Alert */}
-            <AlertDialog open={showPrompt} onOpenChange={setShowPrompt}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Unsaved changes detected</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            You have unsaved data in your property listing form.
-                            Do you want to save it as a draft before leaving?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex gap-2">
-                        <AlertDialogAction
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={handleSaveAndLeave}
-                        >
-                            Save & Leave
+            {/* <AlertDialog open={showPrompt} onOpenChange={setShowPrompt}>
+                <AlertDialogContent className="sm:max-w-md rounded-2xl">
+                    <div className="flex justify-between items-start">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                You have unsaved data. Save it as a draft before leaving?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+
+                        <button onClick={() => setShowPrompt(false)} className="p-1 rounded hover:bg-gray-100">
+                            <X className="w-5 h-5 text-gray-600" />
+                        </button>
+                    </div>
+
+                    <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
+                        <AlertDialogAction onClick={handleSaveAndLeave} className="bg-blue-600 text-white">
+                            Save Draft & Leave
                         </AlertDialogAction>
-                        <AlertDialogAction
-                            className="bg-gray-500 hover:bg-gray-600 text-white"
-                            onClick={handleLeaveWithoutSaving}
-                        >
+                        <AlertDialogAction onClick={handleLeaveWithoutSaving} className="bg-red-600 text-white">
                             Leave Without Saving
                         </AlertDialogAction>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog> */}
 
         </div>
     );
 };
 
 
-// swiper.js courosel.
-
-/// save image url to fiessatire

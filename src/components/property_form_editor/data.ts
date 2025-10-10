@@ -53,8 +53,40 @@ export const PRICE_FREQUENCY = [
     "Per Month",
     "Per Day",
 ];
-export const STATES = ["Ogun", "Lagos", "Oyo", "Rivers", "Delta"]; // add as needed
-export const CITIES_LOCAL = ["Agbara", "Badagry", "Igbesa", "Lusada", "Sangotedo"];
+
+export const REGIONAL_TOWNS = [
+    {
+        state: "Lagos",
+        cities: [
+            "Agbara",
+            "Ijanikin",                      
+            "Iba",
+            "Ilogbo-Eremi",
+            "Araromi",
+            "Ajido",
+            "Topo",
+            "Mowo",
+            "Badagry",
+            "Seme Border",
+        ]
+    },
+    {
+        state: "Ogun",
+        cities: [
+            "Agbara",
+            "Igbesa",
+            "Opic Estate",
+            "Ejila Awori",
+            "Iyesi",
+            "Ilogbo",
+            "Atan-Ota",
+            "Lusada",
+            "Ado-Odo",
+            "Idiroko",
+        ]
+    },
+];
+
 export const AVAILABILITY = ["Draft", "Pending", "Review", "Published", "unPublished", "Reject"];
 export const SIZE_UNIT = ["sqm", "sqft", "plots", "acres"];
 export const PACKAGE_TYPE = ["Free", "Featured", "Premium"];

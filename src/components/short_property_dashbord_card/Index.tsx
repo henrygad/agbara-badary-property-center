@@ -1,31 +1,21 @@
 "use client";
 
 import { PropertyTypes } from "@/types/property.types";
-import { useEffect, useState } from "react";
 import PropertyCard from "./PropertyCard";
-import { getProperties } from "@/lib/firebase/property_service";
 
-export default function ShortPropertyDashbordCard() {
-    const [properties, setProperties] = useState<PropertyTypes[]>([]);
-    const [loading, setLoading] = useState(false);
+type Props = {
+    properties: PropertyTypes[]
+    addMoreProperties: () => void
+    loadingInitial: boolean
+    loadingMore: boolean
+};
 
-    useEffect(() => {        
-        const fetchProperties = async () => {
-            setLoading(true);
-            try {
-                const properties = await getProperties();
-                setProperties(properties);
-            } catch (error) {
-                console.error("Error fetching properties:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+export default function ShortPropertyDashbordCard(
+    { properties, loadingInitial }:
+        Props
+) {   
 
-       fetchProperties();
-    }, []);
-
-    if (loading) {
+    if (loadingInitial) {
         return <div>Loading...</div>;
     }
 
@@ -33,9 +23,10 @@ export default function ShortPropertyDashbordCard() {
         {
             properties.length ?
                 properties.map(p =>
-                    <PropertyCard key={p.title} {...p} />
+                    <PropertyCard key={p.id} {...p} />
                 ) :
                 <div>No property listed yet</div>
         }
     </div>
 }
+

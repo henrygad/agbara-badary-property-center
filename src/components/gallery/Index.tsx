@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Dispatch, SetStateAction, useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import ImageUploadBox from "./AddImagePlaceholder";
 import UploadImage from "./UploadImage";
 import DisplayImage from "./DisplayImage";
@@ -10,14 +10,14 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import EmptyGallery from "./EmptyGallery";
 import { uploadImage } from "@/lib/cloudinary/services";
 import { showError, showSuccess } from "../Toasts";
-import { addImage } from "@/lib/firebase/image_service";
 import ImageTypes from "@/types/image.types";
-
+import { addImageDb } from "@/lib/firebase/image_service";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 type Props = {
-    galleryImages: string[],
-    setGalleryImages: Dispatch<SetStateAction<string[]>>,
-    setGetSelected: (s: string[]) => void
+    galleryImages: ImageTypes[],
+    setGalleryImages: (img: ImageTypes[]) => void,
+    setGetSelected: (img: ImageTypes[]) => void
 };
 
 const MAX_SIZE_MB = 5;
@@ -26,18 +26,20 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
     const router = useRouter()
     const [open, setOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const [selected, setSelected] = useState<string[]>([]);
+    const [selected, setSelected] = useState<ImageTypes[]>([]);
     const [loading, setLoading] = useState({ isLoading: true, loading: 0 });
     const galleryEleRef = useRef<HTMLDivElement>(null);
 
 
     const handleCloseModal = (v: boolean) => {
         if (v) {
-            window.history.pushState({ modal: true }, "") // Add modal to the nav history            
+            // Add modal to the nav history
+            //window.history.pushState({ modal: true }, "", window.location.href + "#");            
+            window.history.pushState({ modal: true }, "");
             setOpen(true) // Open modal
         } else {
             setSelected([]); // Cleen seleted
-            router.back(); // Clean up history
+            router.back(); // Clean up history  
             setOpen(false); // Close the modal
         }
     };
@@ -70,11 +72,13 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
                     }).map((img) => uploadImage(img))
             );
 
-            setGalleryImages((p) => ([...p, ...uploadsImages.map(img => img.url)]));
+            const imageMetaData = uploadsImages.map(img => ({ ...img, uploader: "admin" }));
+
+            setGalleryImages(imageMetaData);
             showSuccess("Property submitted!", "Image Uploaded!")
 
             // Save image metaData to fire store 
-            await Promise.all(uploadsImages.map((img) => addImage({ ...img, uploader: "amin" })));
+            await Promise.all(imageMetaData.map((img) => addImageDb(img)));
 
         } catch (err) {
             const errorMsg = err as { message: string };
@@ -116,9 +120,11 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
     useEffect(() => {
 
         const handlePopState = (event: PopStateEvent) => {
+            event.preventDefault();
             //console.log(event.state?.modal);            
             setSelected([]); // Cleen seleted
-            setOpen(false); // Close the modal                            
+            setOpen(false); // Close the modal
+
         };
 
         window.addEventListener("popstate", handlePopState);
@@ -126,12 +132,15 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
 
         return () => {
             window.removeEventListener("popstate", handlePopState);
-            //remove extra state when modal closes
-            // if (window.history.state?.modal) {
-            //     router.back();
-            // }
+            // remove extra state when modal closes
+            if (window.history.state?.modal) {
+                router.back();
+
+            }
         };
-    }, [])
+    }, [router])
+
+
 
 
     if (!open) {
@@ -140,10 +149,12 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
 
     {/* Backdrop */ }
     return (<div
-        className="fixed inset-0 z-50 bg-black/50" onClick={() => handleCloseModal(true)}>
+        className="fixed inset-0 z-50 bg-black/50 overflow-hidden"
+        onClick={() => handleCloseModal(true)}
+    >
         {/* Fullscreen overlay */}
         <div
-            className="w-full h-full flex flex-col bg-white animate-in fade-in-50 slide-in-from-bottom-10"
+            className="relative bg-white animate-in fade-in-50 slide-in-from-bottom-10"
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
@@ -163,57 +174,62 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
                     <p className="text-sm text-muted-foreground">Select images to add to your property</p>
                 </div>
             </div>
+            {/* content */}
+            <ScrollArea
+                className="w-full whitespace-nowrap flex max-h-[81vh] md:max-h-[91vh] overflow-y-auto pb-18"
+            >
+                {/* Upload section */}
+                <div className="flex justify-center items-center p-4">
+                    <UploadImage
+                        multiple
+                        accept="image/*"
+                        inputRef={inputRef}
+                        onDrop={handleDrop}
+                        handleUpload={(e) => handleUpload(e.target.files)} />
+                </div>
 
-            {/* Upload section */}
-            <div className="flex justify-center items-center p-4">
-                <UploadImage
-                    multiple
-                    accept="image/*"
-                    inputRef={inputRef}
-                    onDrop={handleDrop}
-                    handleUpload={(e) => handleUpload(e.target.files)} />
-            </div>
-
-            {/* Grid */}
-            {galleryImages.length ?
-                <div
-                    ref={galleryEleRef}
-                    className="flex-1 max-h-full p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 overflow-x-hidden overflow-y-auto"
-                >
-                    {galleryImages.map(url => (
-                        <DisplayImage
-                            key={url}
-                            src={url}
-                            selected={selected}
-                            setSelected={setSelected}
-                            handleremove={false}
-                            className="h-[180px] sm:h-[280px]"
-                        />
-                    ))}
-                    {
-                        loading.isLoading ?
-                            Array(loading.loading)
-                                .fill("")
-                                .map((_, i) =>
-                                    <div
-                                        key={`loading-${i}`}
-                                        className="h-[180px] sm:h-[280px] flex items-center justify-center bg-gray-100 rounded-lg animate-pulse"
-                                    >
-                                        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                                    </div>
-                                )
-                            :
-                            null
-                    }
-                </div> :
-                <EmptyGallery inputRef={inputRef} />
-            }
-
+                {/* Grid */}
+                {galleryImages.length ?
+                    <div
+                        ref={galleryEleRef}
+                        className="flex-1 p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3"
+                    >
+                        {galleryImages.map(img => (
+                            <DisplayImage
+                                key={img.publicId}
+                                src={img.url}
+                                metaData={img}
+                                selected={selected}
+                                setSelected={setSelected}
+                                handleremove={false}
+                                className="h-[180px] sm:h-[280px] rounded border shadow"
+                            />
+                        ))}
+                        {
+                            loading.isLoading ?
+                                Array(loading.loading)
+                                    .fill("")
+                                    .map((_, i) =>
+                                        <div
+                                            key={`loading-${i}`}
+                                            className="h-[180px] sm:h-[280px] flex items-center justify-center bg-gray-100 rounded-lg animate-pulse"
+                                        >
+                                            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                                        </div>
+                                    )
+                                :
+                                null
+                        }
+                    </div> :
+                    <EmptyGallery inputRef={inputRef} />
+                }
+                <ScrollBar orientation="vertical" />
+            </ScrollArea>
             {/* Footer */}
-            <div className="p-4 border-t flex justify-center gap-4 shadow">
+            <div className="absolute bottom-0 right-0 left-0 bg-white border-t p-4 shadow flex justify-center">
                 {selected?.length ? <Button
                     type="button"
-                    className="bg-green-800 hover:bg-green-600 hover:text-gray-800 font-medium shadow cursor-pointer"
+                    className="bg-green-800 font-medium shadow cursor-pointer"
                     disabled={selected.length === 0}
                     onClick={() => {
                         setGetSelected(selected);

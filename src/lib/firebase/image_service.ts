@@ -4,7 +4,7 @@ import { db } from "./config"
 import { collection, addDoc, serverTimestamp, getDocs, getDoc, doc, deleteDoc} from "firebase/firestore"
 
 // Fetch all properties
-export async function getImages() {
+export async function getImagesDb() {
     const querySnapshot = await getDocs(collection(db, "images"))
 
     return querySnapshot.docs.map(doc => {
@@ -14,7 +14,7 @@ export async function getImages() {
 }
 
 // Create a new property
-export async function addImage(image: ImageTypes) {
+export async function addImageDb(image: ImageTypes) {
     try {
         // Normalize payload before saving
         const normalized = {
@@ -46,7 +46,7 @@ export async function addImage(image: ImageTypes) {
 
 
 // Delete property by ID
-export async function deleteImage(id: string) {
+export async function deleteImageDb(id: string) {
     try {
         const docRef = doc(db, "images", id);
         await deleteDoc(docRef);

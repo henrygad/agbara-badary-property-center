@@ -121,4 +121,7 @@ export interface PropertyTypes {
     priorityRank: number | null
     createdAt: Date | undefined;   // ISO undefined
     updatedAt: Date | undefined;  // ISO undefined
+
+    // others
+    draftId?: string
 }
