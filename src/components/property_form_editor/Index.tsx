@@ -1502,7 +1502,7 @@ export default function PropertyFormEditor({accountType }: Props) {
                     ((form.title.trim() && !form.referenceId.trim()) ||
                         (isEdited && form.referenceId.trim())) ?
                     <div className="sticky bottom-0 left right-0">
-                        <div className="w-full h-full flex justify-center">
+                        <div className="w-full h-full flex justify-center py-2 bg-white shadow">
                             <Button
                                 type="submit"
                                 size="sm"
