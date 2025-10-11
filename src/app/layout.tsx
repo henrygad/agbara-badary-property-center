@@ -19,7 +19,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Agbara Badagry Property Center",
-  description: "Property listing web app for Agbara Badagry Property Center",
+  description: "Property listing hub in Agbara Badagry Property Center",
 };
 
 export default function RootLayout({

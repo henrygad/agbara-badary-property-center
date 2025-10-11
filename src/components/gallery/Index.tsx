@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 import ImageUploadBox from "./AddImagePlaceholder";
 import UploadImage from "./UploadImage";
@@ -13,33 +12,38 @@ import { showError, showSuccess } from "../Toasts";
 import ImageTypes from "@/types/image.types";
 import { addImageDb } from "@/lib/firebase/image_service";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import useLockScroll from "@/hooks/useLockScroll";
+import CustomButton from "../CustomButton";
 
 type Props = {
-    galleryImages: ImageTypes[],
-    setGalleryImages: (img: ImageTypes[]) => void,
-    setGetSelected: (img: ImageTypes[]) => void
+    galleryImages: ImageTypes[];
+    setGalleryImages: (img: ImageTypes[]) => void;
+    setGetSelected: (img: ImageTypes[]) => void;
 };
 
 const MAX_SIZE_MB = 5;
 
-export default function ImageGallery({ galleryImages, setGalleryImages, setGetSelected }: Props) {
-    const router = useRouter()
+export default function ImageGallery({
+    galleryImages,
+    setGalleryImages,
+    setGetSelected,
+}: Props) {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [selected, setSelected] = useState<ImageTypes[]>([]);
     const [loading, setLoading] = useState({ isLoading: true, loading: 0 });
     const galleryEleRef = useRef<HTMLDivElement>(null);
 
-
     const handleCloseModal = (v: boolean) => {
         if (v) {
             // Add modal to the nav history
-            //window.history.pushState({ modal: true }, "", window.location.href + "#");            
+            //window.history.pushState({ modal: true }, "", window.location.href + "#");
             window.history.pushState({ modal: true }, "");
-            setOpen(true) // Open modal
+            setOpen(true); // Open modal
         } else {
             setSelected([]); // Cleen seleted
-            router.back(); // Clean up history  
+            router.back(); // Clean up history
             setOpen(false); // Close the modal
         }
     };
@@ -59,7 +63,6 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
         }, 100);
 
         try {
-
             const uploadsImages = await Promise.all(
                 arrOfImageFiles
                     .filter((img) => {
@@ -69,20 +72,23 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
                         }
 
                         return true;
-                    }).map((img) => uploadImage(img))
+                    })
+                    .map((img) => uploadImage(img))
             );
 
-            const imageMetaData = uploadsImages.map(img => ({ ...img, uploader: "admin" }));
+            const imageMetaData = uploadsImages.map((img) => ({
+                ...img,
+                uploader: "admin",
+            }));
 
             setGalleryImages(imageMetaData);
-            showSuccess("Property submitted!", "Image Uploaded!")
+            showSuccess("Property submitted!", "Image Uploaded!");
 
-            // Save image metaData to fire store 
+            // Save image metaData to fire store
             await Promise.all(imageMetaData.map((img) => addImageDb(img)));
-
         } catch (err) {
             const errorMsg = err as { message: string };
-            console.error(err)
+            console.error(err);
             showError("Failed to submit", errorMsg.message);
         } finally {
             setLoading({ isLoading: false, loading: 0 });
@@ -94,155 +100,141 @@ export default function ImageGallery({ galleryImages, setGalleryImages, setGetSe
         handleUpload(e.dataTransfer.files);
     };
 
+    // Disable page from scrolling
+    useLockScroll({ open });
+
     // ESC key closes
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape" && open) {
-                setOpen(false)
+                setOpen(false);
             }
-        }
+        };
 
-        // Disable body scroll when open
-        if (open) {
-            document.body.classList.add("overflow-hidden")
-        } else {
-            document.body.classList.remove("overflow-hidden")
-        }
-
-        window.addEventListener("keydown", onKey)
+        window.addEventListener("keydown", onKey);
         return () => {
-            document.body.classList.remove("overflow-hidden")
             window.removeEventListener("keydown", onKey);
-        }
-    }, [open])
-
+        };
+    }, [open]);
 
     useEffect(() => {
-
         const handlePopState = (event: PopStateEvent) => {
             event.preventDefault();
-            //console.log(event.state?.modal);            
+            //console.log(event.state?.modal);
             setSelected([]); // Cleen seleted
             setOpen(false); // Close the modal
-
         };
 
         window.addEventListener("popstate", handlePopState);
-
 
         return () => {
             window.removeEventListener("popstate", handlePopState);
             // remove extra state when modal closes
             if (window.history.state?.modal) {
                 router.back();
-
             }
         };
-    }, [router])
-
-
-
+    }, [router]);
 
     if (!open) {
-        return <ImageUploadBox onClick={() => handleCloseModal(true)} />
+        return <ImageUploadBox onClick={() => handleCloseModal(true)} />;
     }
 
-    {/* Backdrop */ }
-    return (<div
-        className="fixed inset-0 z-50 bg-black/50 overflow-hidden"
-        onClick={() => handleCloseModal(true)}
-    >
-        {/* Fullscreen overlay */}
+    {
+        /* Backdrop */
+    }
+    return (
         <div
-            className="relative bg-white animate-in fade-in-50 slide-in-from-bottom-10"
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 bg-black/50"
+            onClick={() => handleCloseModal(true)}
         >
-            {/* Header */}
-            <div className="p-4 border-b flex justify-between items-center shadow">
-                <button
-                    type="button"
-                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer"
-                    onClick={() => handleCloseModal(false)}
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                </button>
-
-                <div className="flex-1 flex flex-col items-center">
-                    <h2 className="text-lg font-semibold">Image Gallery</h2>
-                    <p className="text-sm text-muted-foreground">Select images to add to your property</p>
-                </div>
-            </div>
-            {/* content */}
-            <ScrollArea
-                className="w-full whitespace-nowrap flex max-h-[81vh] md:max-h-[91vh] overflow-y-auto pb-18"
+            {/* Fullscreen overlay */}
+            <div
+                className="h-full max-h-full relative text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 animate-in fade-in-50 slide-in-from-bottom-10"
+                role="dialog"
+                aria-modal="true"
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* Upload section */}
-                <div className="flex justify-center items-center p-4">
-                    <UploadImage
-                        multiple
-                        accept="image/*"
-                        inputRef={inputRef}
-                        onDrop={handleDrop}
-                        handleUpload={(e) => handleUpload(e.target.files)} />
-                </div>
-
-                {/* Grid */}
-                {galleryImages.length ?
-                    <div
-                        ref={galleryEleRef}
-                        className="flex-1 p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3"
+                {/* Header */}
+                <div className="absolute top-0 right-0 left-0 h-20 px-4 border-b flex justify-between items-center shadow z-50 bg-inherit">
+                    <button
+                        type="button"
+                        className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer"
+                        onClick={() => handleCloseModal(false)}
                     >
-                        {galleryImages.map(img => (
-                            <DisplayImage
-                                key={img.publicId}
-                                src={img.url}
-                                metaData={img}
-                                selected={selected}
-                                setSelected={setSelected}
-                                handleremove={false}
-                                className="h-[180px] sm:h-[280px] rounded border shadow"
-                            />
-                        ))}
-                        {
-                            loading.isLoading ?
-                                Array(loading.loading)
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+
+                    <div className="flex-1 flex flex-col items-center">
+                        <h2 className="text-lg font-semibold">Image Gallery</h2>
+                        <p className="text-sm text-gray-700 dark:text-white ">
+                            Select images to add to your property
+                        </p>
+                    </div>
+                </div>
+                {/* content */}
+                <ScrollArea className="overflow-auto h-full max-h-full pt-20">
+                    {/* Upload section */}
+                    <div className="flex justify-center items-center p-4">
+                        <UploadImage
+                            multiple
+                            accept="image/*"
+                            inputRef={inputRef}
+                            onDrop={handleDrop}
+                            handleUpload={(e) => handleUpload(e.target.files)}
+                        />
+                    </div>
+
+                    {/* Grid */}
+                    {galleryImages.length ? (
+                        <div
+                            ref={galleryEleRef}
+                            className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 pb-10"
+                        >
+                            {galleryImages.map((img, idx) => (
+                                <DisplayImage
+                                    key={idx}
+                                    src={img.url}
+                                    metaData={img}
+                                    selected={selected}
+                                    setSelected={setSelected}
+                                    handleremove={false}
+                                    className="h-[180px] sm:h-[280px] rounded border shadow"
+                                />
+                            ))}
+                            {loading.isLoading
+                                ? Array(loading.loading)
                                     .fill("")
-                                    .map((_, i) =>
+                                    .map((_, i) => (
                                         <div
                                             key={`loading-${i}`}
                                             className="h-[180px] sm:h-[280px] flex items-center justify-center bg-gray-100 rounded-lg animate-pulse"
                                         >
                                             <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
                                         </div>
-                                    )
-                                :
-                                null
-                        }
-                    </div> :
-                    <EmptyGallery inputRef={inputRef} />
-                }
-                <ScrollBar orientation="vertical" />
-            </ScrollArea>
-            {/* Footer */}
-            <div className="absolute bottom-0 right-0 left-0 bg-white border-t p-4 shadow flex justify-center">
-                {selected?.length ? <Button
-                    type="button"
-                    className="bg-green-800 font-medium shadow cursor-pointer"
-                    disabled={selected.length === 0}
-                    onClick={() => {
-                        setGetSelected(selected);
-                        handleCloseModal(false);
-                    }}
-
-                >
-                    Add Selected Images
-                </Button>
-                    : null
-                }
+                                    ))
+                                : null}
+                        </div>
+                    ) : (
+                        <EmptyGallery inputRef={inputRef} />
+                    )}
+                    <ScrollBar orientation="vertical" />
+                </ScrollArea>
+                {/* Footer */}
+                {selected?.length ? (
+                    <div className="absolute bottom-0 right-0 left-0 h-20 shadow flex justify-center items-center">
+                        <CustomButton                                                 
+                            disabled={selected.length === 0}
+                            onClick={() => {
+                                setGetSelected(selected);
+                                handleCloseModal(false);
+                            }}
+                        >
+                           <> Add Selected Images</>
+                        </CustomButton>
+                    </div>
+                ) : null}
             </div>
         </div>
-    </div>
     );
-};
+}

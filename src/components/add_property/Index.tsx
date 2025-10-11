@@ -22,12 +22,12 @@ import {
     STATUS,
     PRICE_FREQUENCY,
     PROPERTY_CATEGORIES,
-    PROPERTY_TYPES,    
+    PROPERTY_TYPES,
     SIZE_UNIT,
     AVAILABILITY,
     DEFAULT_PROPERTY_FORM,
     PACKAGE_TYPE,
-} from "./data";
+} from "./defaultData";
 import Image from "next/image";
 import DisplayImage from "../gallery/DisplayImage";
 import React from "react";
@@ -55,20 +55,21 @@ import { Checkbox } from "../ui/checkbox";
 import { CustomCalendar } from "../ui/CustomCalader";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import ImageGallery from "../gallery/Index";
-import { ArrowLeftIcon, ArrowRightIcon} from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { Spinner } from "../ui/spinner";
 import { showError, showSuccess } from "../Toasts";
 import { formatCurrency, safeValue, fiterSEOSlug, formatDate } from "@/utils";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import { useImageStore } from "@/store/useImageStore";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import CustomButton from "../CustomButton";
 
 type Props = {
     accountType: "ADMIN" | "AGENT",
     imageGallery?: string[]
 }
 
-export default function PropertyFormEditor({accountType }: Props) {
+export default function PropertyFormEditor({ accountType }: Props) {
     const { addProperty } = usePropertyStore();
     const { images, addImage } = useImageStore();
 
@@ -129,8 +130,8 @@ export default function PropertyFormEditor({accountType }: Props) {
 
     // Save draft to local storage
     function saveDraft() {
-        const getPropertyDraft = JSON.parse(localStorage.getItem("propertyDraft") || "[]");
-        localStorage.setItem("propertyDraft", JSON.stringify(
+        const getPropertyDraft = JSON.parse(localStorage.getItem("property-draft") || "[]");
+        localStorage.setItem("property-draft", JSON.stringify(
             [
                 ...getPropertyDraft,
                 { ...form, draftId: String(Date.now() + Math.random()) }
@@ -238,53 +239,22 @@ export default function PropertyFormEditor({accountType }: Props) {
         <div className="w-full bg-inherit">
             {/* Steps */}
             <menu className="mb-6">
-                <ul className="flex items-center gap-2 text-sm text-gray-600">
-                    <li
-                        className={`px-3 py-1 rounded-full ${step === 1
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 cursor-pointer"
-                            }`}
-                        onClick={() => setStep(1)}
-                    >
-                        1
-                    </li>
-                    <li
-                        className={`px-3 py-1 rounded-full ${step === 2
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 cursor-pointer"
-                            }`}
-                        onClick={() => setStep(2)}
-                    >
-                        2
-                    </li>
-                    <li
-                        className={`px-3 py-1 rounded-full ${step === 3
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 cursor-pointer "
-                            }`}
-                        onClick={() => setStep(3)}
-                    >
-                        3
-                    </li>
-                    <li
-                        className={`px-3 py-1 rounded-full ${step === 4
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 cursor-pointer"
-                            }`}
-                        onClick={() => setStep(4)}
-                    >
-                        4
-                    </li>
-                    <li
-                        className={`px-3 py-1 rounded-full ${step === 5
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 cursor-pointer"
-                            }`}
-                        onClick={() => setStep(5)}
-                    >
-                        5
-                    </li>
-                </ul>
+                <div className="flex gap-2">
+                    {
+                        Array(5).fill("").map((_, idx) =>
+                            <Button
+                                key={idx + 1}
+                                variant={step === idx + 1 ? "destructive" : "outline"}
+                                size="icon"
+                                className="rounded-full cursor-pointer"
+                                onClick={() => setStep(idx + 1)}
+                            >
+                                {idx + 1}
+                            </Button>
+                        )
+                    }
+                </div>
+
             </menu>
             {/* Property form editor */}
             <form onSubmit={submitForm} className="space-y-6">
@@ -299,7 +269,7 @@ export default function PropertyFormEditor({accountType }: Props) {
                                 </Label>
                                 <Input
                                     id="title"
-                                    className={`w-full text-sm 
+                                    className={`w-full text-sm
                                         ${error.errorMsg.toLowerCase().includes("title") ? "border-red-600" : ""}
                                         `}
                                     placeholder="3-Bedroom Flat for Rent in Agbara Estate"
@@ -454,7 +424,7 @@ export default function PropertyFormEditor({accountType }: Props) {
                                                 className="cursor-pointer text-sm capitalize"
                                                 key={state.state}
                                                 value={state.state}
-                                                onClick={()=> setChooseCities(state.cities)}
+                                                onClick={() => setChooseCities(state.cities)}
                                             >
                                                 {state.state}
                                             </SelectItem>
@@ -968,7 +938,7 @@ export default function PropertyFormEditor({accountType }: Props) {
                                                     amen as Amenity
                                                 )}
                                                 onCheckedChange={() => toggleAmenity(amen)}
-                                                className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+                                                className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked] dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
                                             />
                                             <div className="grid gap-1.5 font-mudium">
                                                 <p className="text-sm leading-none font-medium">
@@ -1258,17 +1228,17 @@ export default function PropertyFormEditor({accountType }: Props) {
                             {/* Gallery Slider */}
                             <div>
                                 {form.images?.length ? (
-                                    <Carousel className="w-full border rounded-lg">
+                                    <Carousel className="w-full">
                                         <CarouselContent>
                                             {form.images.map((url, i) => (
                                                 <CarouselItem key={i}>
-                                                    <div className="relative w-full h-80">
+                                                    <div className="relative w-full h-80 rounded-lg">
                                                         <Image
                                                             key={i}
                                                             src={url}
                                                             alt={`preview-${i}`}
                                                             fill
-                                                            className="w-full h-80 object-cover rounded border shadow"
+                                                            className="w-full h-80 object-cover rounded-lg border shadow"
                                                         />
                                                     </div>
                                                 </CarouselItem>
@@ -1296,7 +1266,7 @@ export default function PropertyFormEditor({accountType }: Props) {
                                 {/* Title & Price */}
                                 <div>
                                     <div className="flex justify-between flex-wrap items-center gap-4">
-                                        <h1 className="text-2xl font-medium text-gray-800">
+                                        <h1 className="text-2xl font-medium text-gray-800 dark:text-white">
                                             {form.title || "Untitled Property"}
                                         </h1>
                                         <p className="text-xl font-medium text-green-700">
@@ -1313,13 +1283,13 @@ export default function PropertyFormEditor({accountType }: Props) {
                                             </span>
                                         </div>
                                     }
-                                    <p className="text-sm font-medium text-wrap p-2 text-slate-700">
+                                    <p className="text-sm font-medium text-wrap p-2 text-slate-700 dark:text-white">
                                         {form.description || "Provide description"}
                                     </p>
                                 </div>
 
                                 {/* Fees */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-700">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-700 dark:text-white">
                                     <p>
                                         <strong>Service Charge</strong>:{" "}
                                         {formatCurrency(form.serviceCharge)}
@@ -1417,11 +1387,11 @@ export default function PropertyFormEditor({accountType }: Props) {
 
                                 {/* Amenities */}
                                 <div>
-                                    <h2 className="font-medium text-gray-800 mb-2">
+                                    <h2 className="font-medium text-gray-800 dark:text-white mb-2">
                                         Amenities
                                     </h2>
                                     {form.amenities?.length ? (
-                                        <ul className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                                        <ul className="grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-white">
                                             {form.amenities.map((a, i) => (
                                                 <li key={i} className="flex items-center gap-2">
                                                     ✅ {a}
@@ -1437,20 +1407,20 @@ export default function PropertyFormEditor({accountType }: Props) {
 
                                 {/* Agent Info */}
                                 <div>
-                                    <h2 className="font-medium text-gray-800 mb-2">
+                                    <h2 className="font-medium text-gray-800 dark:text-white mb-2">
                                         Agent Information
                                     </h2>
-                                    <p className="text-sm font-medium text-slate-700">
+                                    <p className="text-sm font-medium text-slate-700 dark:text-white">
                                         {safeValue(form.agentName)} | {safeValue(form.agentPhone) ? "+234" + " " + safeValue(form.agentPhone) : ""}{" "}
                                         | {safeValue(form.agentEmail)}
                                     </p>
-                                    <p className="text-sm font-medium text-slate-700">
+                                    <p className="text-sm font-medium text-slate-700 dark:text-white">
                                         {safeValue(form.agentCompany)}
                                     </p>
                                 </div>
 
                                 {/* Dates */}
-                                <div className="text-sm text-gray-500 border-t pt-3">
+                                <div className="text-sm text-gray-700  dark:text-slate-400 border-t pt-3">
                                     <p>
                                         Listed on{" "}
                                         {form.createdAt
@@ -1462,7 +1432,7 @@ export default function PropertyFormEditor({accountType }: Props) {
 
                                 {/* Seo Slug */}
                                 <div className="mt-2">
-                                    <p className="text-xs text-slate-700">
+                                    <p className="text-xs text-slate-700 dark:text-slate-400">
                                         {safeValue(form.seoSlug)}
                                     </p>
                                 </div>
@@ -1501,14 +1471,10 @@ export default function PropertyFormEditor({accountType }: Props) {
                 {step === 5 &&
                     ((form.title.trim() && !form.referenceId.trim()) ||
                         (isEdited && form.referenceId.trim())) ?
-                    <div className="sticky bottom-0 left right-0">
-                        <div className="w-full h-full flex justify-center py-2 bg-white shadow">
-                            <Button
-                                type="submit"
-                                size="sm"
-                                variant="outline"
-                                disabled={loading}
-                                className="bg-green-800 text-white text-base px-24 py-5 cursor-pointer shadow border max-w-[280px] overflow-hidden"
+                    <div className="sticky bottom-4 left-0 right-0">
+                        <div className="w-full h-full flex justify-center">
+                            <CustomButton                                
+                                disabled={loading}                                
                             >
                                 {form.referenceId.trim() ?
                                     <>
@@ -1519,7 +1485,7 @@ export default function PropertyFormEditor({accountType }: Props) {
                                             accountType === "ADMIN" ? "Create Property" : "Submit Property"}
                                     </>
                                 }
-                            </Button>
+                            </CustomButton>
 
                         </div>
                     </div> :
@@ -1543,10 +1509,10 @@ export default function PropertyFormEditor({accountType }: Props) {
                     </div>
 
                     <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
-                        <AlertDialogAction onClick={handleSaveAndLeave} className="bg-blue-600 text-white">
+                        <AlertDialogAction onClick={handleSaveAndLeave} className="bg-blue-600">
                             Save Draft & Leave
                         </AlertDialogAction>
-                        <AlertDialogAction onClick={handleLeaveWithoutSaving} className="bg-red-600 text-white">
+                        <AlertDialogAction onClick={handleLeaveWithoutSaving} className="bg-red-600">
                             Leave Without Saving
                         </AlertDialogAction>
                     </AlertDialogFooter>
