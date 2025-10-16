@@ -4,8 +4,8 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
-    PlusCircle,
-    List,
+    Plus,
+    Building2,
     Users,
     FileText,
     BarChart3,
@@ -13,7 +13,9 @@ import {
     LogOut,
     X,
     Menu,    
-    Mails,
+    Mails,    
+    FileX2
+    
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useLockScroll from "@/hooks/useLockScroll";
@@ -21,11 +23,18 @@ import SidebarLink from "./SidebarLink";
 
 const links = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Add Property", href: "/admin/add-property", icon: PlusCircle },
-    { name: "Properties", href: "/admin/properties", icon: List },
+    { name: "Add Property", href: "/admin/add-property", icon: Plus },
+    {
+        name: "Properties",
+        href: "/admin/properties",
+        icon: Building2,
+        children: [
+            { name: "Drafts", href: "/admin/drafts", icon: FileText },
+            { name: "Trash", href: "/admin/trash", icon: FileX2 },
+        ]
+    },
     { name: "Agents", href: "/admin/agents", icon: Users },
     { name: "Request", href: "/admin/requests", icon: Mails },
-    { name: "Drafts", href: "/admin/drafts", icon: FileText },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
@@ -66,9 +75,9 @@ export default function Sidebar() {
                             transition={{ type: "spring", stiffness: 120, damping: 20 }}
                             className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r shadow-xl md:translate-x-0 bg-inherit dark:bg-inherit"
                         >
-                            <div className="flex items-center justify-between h-16 border-b dark:border-gray-800 px-4">
+                            <div className="flex items-center justify-between h-16 border-b dark:border-gray-800 px-7">
                                 <div>
-                                    <h1 className="text-xl font-bold">
+                                    <h1 className="text-xl font-bold text-primary">
                                         Admin
                                     </h1>
                                 </div>
@@ -83,10 +92,9 @@ export default function Sidebar() {
                             </div>
 
                             <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
-                                {links.map((v) => {
-                                    const active = pathname === v.href;
-                                    return <SidebarLink key={v.name} {...v} active={active} setOpen={setOpen} />;
-                                })}
+                                {links.map((v) =>
+                                    <SidebarLink key={v.name} {...v} pathname={pathname} setOpen={setOpen} />
+                                )}
                             </nav>
 
                             <div className="border-t p-4 dark:border-gray-800">
@@ -104,17 +112,14 @@ export default function Sidebar() {
 
             {/* Desktop sidebar (always visible) */}
             <aside className="hidden md:fixed md:left-0 md:top-0 md:z-40 md:flex md:h-screen md:w-64 md:flex-col md:border-r md:bg-white md:shadow-sm dark:bg-gray-900 dark:border-gray-800">
-                <div className="flex items-center justify-start h-16 border-b dark:border-gray-800 px-4">
-                    <h1 className="text-xl font-bold">Admin</h1>
+                <div className="flex items-center justify-start h-16 border-b dark:border-gray-800 px-7">
+                    <h1 className="text-xl font-bold text-primary">Admin</h1>
                 </div>
 
                 <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
-                    {links.map((v) => {
-                        const active = pathname === v.href;                        
-                        return (
-                            <SidebarLink key={v.name} {...v} active={active} setOpen={setOpen} />                            
-                        );
-                    })}
+                    {links.map((v) =>
+                        <SidebarLink key={v.name} {...v} pathname={pathname} setOpen={setOpen} />
+                    )}
                 </nav>
 
                 <div className="border-t p-4 dark:border-gray-800">

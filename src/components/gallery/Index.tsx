@@ -8,7 +8,7 @@ import DisplayImage from "./DisplayImage";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import EmptyGallery from "./EmptyGallery";
 import { uploadImage } from "@/lib/cloudinary/services";
-import { showError, showSuccess } from "../Toasts";
+import { showError, showSuccess } from "../ui/toasts";
 import ImageTypes from "@/types/image.types";
 import { addImageDb } from "@/lib/firebase/image_service";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
@@ -35,16 +35,15 @@ export default function ImageGallery({
     const [loading, setLoading] = useState({ isLoading: true, loading: 0 });
     const galleryEleRef = useRef<HTMLDivElement>(null);
 
-    const handleCloseModal = (v: boolean) => {
+    const handleModal = (v: boolean) => {
         if (v) {
-            // Add modal to the nav history
-            //window.history.pushState({ modal: true }, "", window.location.href + "#");
-            window.history.pushState({ modal: true }, "");
+            // Add modal to the nav history            
+            window.history.pushState({ modal: true }, "");            
             setOpen(true); // Open modal
         } else {
             setSelected([]); // Cleen seleted
-            router.back(); // Clean up history
             setOpen(false); // Close the modal
+            router.back(); // Clean up history
         }
     };
 
@@ -118,9 +117,7 @@ export default function ImageGallery({
     }, [open]);
 
     useEffect(() => {
-        const handlePopState = (event: PopStateEvent) => {
-            event.preventDefault();
-            //console.log(event.state?.modal);
+        const handlePopState = () => {            
             setSelected([]); // Cleen seleted
             setOpen(false); // Close the modal
         };
@@ -137,16 +134,14 @@ export default function ImageGallery({
     }, [router]);
 
     if (!open) {
-        return <ImageUploadBox onClick={() => handleCloseModal(true)} />;
+        return <ImageUploadBox onClick={() => handleModal(true)} />;
     }
 
-    {
-        /* Backdrop */
-    }
+   
     return (
         <div
             className="fixed inset-0 z-50 bg-black/50"
-            onClick={() => handleCloseModal(true)}
+            onClick={() => handleModal(true)}
         >
             {/* Fullscreen overlay */}
             <div
@@ -160,7 +155,7 @@ export default function ImageGallery({
                     <button
                         type="button"
                         className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer"
-                        onClick={() => handleCloseModal(false)}
+                        onClick={() => handleModal(false)}
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
@@ -227,7 +222,7 @@ export default function ImageGallery({
                             disabled={selected.length === 0}
                             onClick={() => {
                                 setGetSelected(selected);
-                                handleCloseModal(false);
+                                handleModal(false);
                             }}
                         >
                            <> Add Selected Images</>

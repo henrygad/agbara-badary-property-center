@@ -2,7 +2,6 @@
 
 import ImageTypes from "@/types/image.types";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 // Define state shape
 interface ImageState {
@@ -19,30 +18,25 @@ interface ImageState {
 }
 
 // Create the store
-export const useImageStore = create(
-    persist<ImageState>(
-        (set) => ({
-            images: [],
-            selectedImage: null,
-            loading: false,
-            loadingMore: false,
+export const useImageStore = create<ImageState>(
+    (set) => ({
+        images: [],
+        selectedImage: null,
+        loading: false,
+        loadingMore: false,
 
-            setLoading: (loading, loadingMore) => set({ loading, loadingMore }),
+        setLoading: (loading, loadingMore) => set({ loading, loadingMore }),
 
-            setImages: (images) => set({ images }),
+        setImages: (images) => set({ images }),
 
-            addImage: (property) =>
-                set((state) => ({ images: [...state.images, property] })),
+        addImage: (property) =>
+            set((state) => ({ images: [...state.images, property] })),
 
-            deleteImage: (publicId) =>
-                set((state) => ({
-                    images: state.images.filter((p) => p.publicId !== publicId),
-                })),
+        deleteImage: (publicId) =>
+            set((state) => ({
+                images: state.images.filter((p) => p.publicId !== publicId),
+            })),
 
-            setSelectedImage: (property) => set({ selectedImage: property }),
-        }),
-        {
-            name: "image-storage", // key for localStorage
-        }
-    )
+        setSelectedImage: (property) => set({ selectedImage: property }),
+    })
 );

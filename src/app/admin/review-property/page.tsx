@@ -6,7 +6,7 @@ import { PropertyTypes } from "@/types/property.types";
 import { useEffect, useState } from "react";
 import { clearTimeout } from "timers";
 
-export default function EditProperty() {
+export default function ReviewProperty() {
   const { setForm } = usePropertyStore();
   const [loadingForm, setLoadingForm] = useState(false);
 
@@ -15,24 +15,24 @@ export default function EditProperty() {
 
     // Get data to edit from localStorage
     // Check if toEdit data is present
-    const update = localStorage.getItem("updateProperty");
+    const review = localStorage.getItem("reviewProperty");
 
-    if (update) {
-      const parsed = JSON.parse(update) as PropertyTypes;
+    if (review) {
+      const parsed = JSON.parse(review) as PropertyTypes;
       const clearOut = setTimeout(() => {
         setForm(() => parsed);
-        localStorage.removeItem("updateProperty");
+        localStorage.removeItem("reviewProperty");
         clearTimeout(clearOut);
       }, 200);
     }
 
-      setLoadingForm(false);
-    }, [setForm]);
+    setLoadingForm(false);
+  }, [setForm]);
 
   return <div>
     <PropertyFormEditor
       accountType="ADMIN"
-      documentType="UPDATE"
+      documentType="REVIEW"
       loadingForm={loadingForm}
       setLoadingForm={setLoadingForm}
     />

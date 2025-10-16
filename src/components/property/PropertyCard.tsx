@@ -1,52 +1,55 @@
 "use client";
 
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { PropertyTypes } from "@/types/property.types";
-import { CardMenu } from "./CardMenu";
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import React from 'react'
 
-export default function PropertyCard(p: PropertyTypes) {
-    const { title, referenceId, description, category, type, status, price } = p;
+type Props = {
+    image: string,
+    title: string,
+    price: number
+    agentName: string,
+    referenceId: string
+    staus: string
+};
 
-    const truncateWords = (text: string, limit: number) => {
-        const words = text.split(" ");
-        return words.length > limit ? words.slice(0, limit).join(" ") + "..." : text;
-    };
+export default function PropertyCard({ image, title, price, agentName, referenceId, staus }: Props) {
+    return <div className="flex items-center gap-4">
+        <Image
+            src={image}
+            alt={title}
+            width={80}
+            height={80}
+            className="h-16 w-16 rounded-md object-cover"
+        />
+        <div className="flex flex-col">
+            <h3 className="font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">
+                {title}
+            </h3>
+            <p className="text-xs text-gray-500">Agent: {agentName}</p>
 
-    return <Card className="flex-1  flex flex-col basis-1">
-        {/* Title */}
-        <CardHeader>
-            <span className="flex justify-between items-start">
-                <h3 className="text-lg font-semibold">{title}</h3>
-                <CardMenu property={p} />
-            </span>
-            <span className="flex justify-start gap-2">
-                <Badge variant="secondary" >{category}</Badge>
-                <span className="font-medium">₦{price?.toLocaleString()}</span>
-            </span>
-        </CardHeader>
+            <div className="flex items-center gap-2 mt-1">
+                <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    {price}
+                </p>
 
-        {/* Short Description */}
-        <CardContent>
-            <p className="text-sm text-muted-foreground">
-                {truncateWords(description || "No description found for this property", 30)}
-            </p>
-        </CardContent>
-
-        {/* Footer Info */}
-        <CardFooter className="flex justify-between items-center gap-3 mt-2">
-            <span className="flex items-center gap-1">                
-                <p className="text-xs font-medium text-muted-foreground">{referenceId}</p>
-            </span>
-            <span className="flex-1 flex gap-3 justify-end text-sm">
-                <Badge variant="outline" >{type}</Badge>
-                <Badge
-                    variant={status === "For Sale" || status === "For Rent" ? "default" : "destructive"}
+                {/* 🏷️ Property Purpose Badge (rent/sell/sold/leased) */}
+                <span
+                    className={cn(
+                        "text-xs font-semibold px-2 py-[2px] rounded-md",
+                        staus === "For Rent" && "bg-blue-100 text-blue-700",
+                        staus === "For Sale" && "bg-purple-100 text-purple-700",
+                        staus === "For Lease" && "bg-teal-100 text-teal-700",
+                        staus === "Sold" && "bg-pink-100 text-pink-700",
+                        staus === "Rented" && "bg-indigo-100 text-indigo-700",
+                        staus === "Leased" && "bg-emerald-100 text-emerald-700"
+                    )}
                 >
-                    {status}
-                </Badge>
-            </span>
-        </CardFooter>
-    </Card>
+                    {staus}
+                </span>
+            </div>
 
+            <p className="text-xs text-gray-400 mt-1">Ref ID: {referenceId}</p>
+        </div>
+    </div>; 
 };

@@ -6,7 +6,6 @@ import { CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
     Popover,
     PopoverContent,
@@ -29,15 +28,12 @@ export function CustomCalendar({ date, setDate }: { date: Date | undefined; setD
     // const [month, setMonth] = React.useState<Date | undefined>(date)
 
 
-    return (
-        <div className="w-full flex flex-col gap-2">
-            <Label htmlFor="date" className="text-sm font-medium">Date Listed</Label>
-            <div className="w-full relative flex gap-2">
+    return <div className="w-full relative flex gap-2">
                 <Input
                     id="date"
                     value={value}
                     placeholder="June 01, 2025"
-                    className="pr-10"
+                    className="pr-6 md:pr-10 text-sm"
                     onChange={(e) => {
                         const date = new Date(e.target.value)
                         setValue(e.target.value)
@@ -84,8 +80,6 @@ export function CustomCalendar({ date, setDate }: { date: Date | undefined; setD
                         />
                     </PopoverContent>
                 </Popover>
-            </div>
-        </div>
-    );
+    </div>
 };
 

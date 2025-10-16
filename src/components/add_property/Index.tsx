@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Amenity,
     Condition,
@@ -38,7 +38,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { addPropertyDb } from "@/lib/firebase/property_service";
+import { addPropertyDb, updatePropertyDb } from "@/lib/firebase/property_service";
 import validatePropertyFields from "@/validators/property_from_editor.validate";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -52,54 +52,85 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "../ui/textarea";
 import { Checkbox } from "../ui/checkbox";
-import { CustomCalendar } from "../ui/CustomCalader";
+import { CustomCalendar } from "../CustomCalader";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import ImageGallery from "../gallery/Index";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
-import { Spinner } from "../ui/spinner";
-import { showError, showSuccess } from "../Toasts";
+import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
+import { showError, showSuccess } from "../ui/toasts";
 import { formatCurrency, safeValue, fiterSEOSlug, formatDate } from "@/utils";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import { useImageStore } from "@/store/useImageStore";
-import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import CustomButton from "../CustomButton";
+import { clearTimeout } from "timers";
+import { useRouter } from "next/navigation";
+import FormButton from "./FromButton";
+import PageLoading from "../PageLoading";
+import useUnsavedChanges from "@/hooks/useUnsavedChanges";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 
 type Props = {
-    accountType: "ADMIN" | "AGENT",
-    imageGallery?: string[]
+    accountType: "ADMIN" | "AGENT"
+    documentType: "NEW" | "UPDATE" | "DUPLICATE" | "REVIEW"
+    loadingForm: boolean
+    setLoadingForm: (l: boolean) => void
 }
 
-export default function PropertyFormEditor({ accountType }: Props) {
-    const { addProperty } = usePropertyStore();
-    const { images, addImage } = useImageStore();
-
-
-    const [isMounted, setIsMounted] = useState(false);
+export default function PropertyFormEditor({ accountType, loadingForm, documentType }: Props) {
+    const router = useRouter();
     const [step, setStep] = useState(1);
 
-    const [form, setForm] = useState<PropertyTypes>(DEFAULT_PROPERTY_FORM);
-    const [error, setError] = useState<{ errorMsg: string; isError: boolean }>({ errorMsg: "", isError: false });
+    const { addProperty, form, setForm } = usePropertyStore();
+    const { images, addImage } = useImageStore();
+
     const [loading, setLoading] = useState(false);
-    const [isEdited, setIsEdited] = useState(false);
+    const [error, setError] = useState<{ errorMsg: string; isError: boolean }>({ errorMsg: "", isError: false });
+
+    const [isDocEdited, setIsDocEdited] = useState(false);
 
     const [chooseCities, setChooseCities] = useState<string[]>(REGIONAL_TOWNS[0].cities);
 
     // Form is not empty
-    const isFormDirty = Object.values(form).some((val) => val !== "");
+    const isFormDirty = Object.values({
+        title: form.title,
+        description: form.description,
+        seoSlug: form.seoSlug,
+        price: !form.price ? "" : form.price,
+        state: form.state,
+        category: form.category,
+        type: form.type,
+        satus: form.status,
+        images: form.images.length ? form.images : "",
+        videoUrl: form.videoUrl
 
-    // Hook to detect when form is not empty and save data as draft to local storage
-    //const { showPrompt, setShowPrompt, handleSaveAndLeave, handleLeaveWithoutSaving, } = useUnsavedChanges({ shouldBlock: isFormDirty, onSaveDraft: saveDraft });
-    useUnsavedChanges({ shouldBlock: isFormDirty, onSaveDraft: saveDraft });
+    }).some((val) => val !== "") && isDocEdited;
 
+    // Intecept navigation if form is dirty
+    const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
+        useUnsavedChanges({
+            when: isFormDirty,
+            onSaveDraft: saveDraft,
+            guardedPaths: ["/admin/add-property",  "/admin/edit-property"],
+        });
+    
+    function saveDraft() {
+        const getPropertyDraft = JSON.parse(
+            localStorage.getItem("property-draft") || "[]"
+        );
+        localStorage.setItem(
+            "property-draft",
+            JSON.stringify([
+                ...getPropertyDraft,
+                { ...form, draftId: String(Date.now() + Math.random()) },
+            ])
+        );
+        setForm(() => DEFAULT_PROPERTY_FORM);
+        showSuccess("Draft saved!", "Draft have been saved locally");
+    }
 
-    function update<K extends keyof typeof form>(
-        key: K,
-        value: (typeof form)[K]
-    ) {
+    function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
 
         // When data passed to form is edited
-        if (!isEdited) {
-            setIsEdited(true);
+        if (!isDocEdited) {
+            setIsDocEdited(true);
         };
 
         setForm((s) => ({ ...s, [key]: value }));
@@ -126,26 +157,59 @@ export default function PropertyFormEditor({ accountType }: Props) {
             setStep(p);
         }
         window.scrollTo(0, 0)
-    };
+    };   
 
-    // Save draft to local storage
-    function saveDraft() {
-        const getPropertyDraft = JSON.parse(localStorage.getItem("property-draft") || "[]");
-        localStorage.setItem("property-draft", JSON.stringify(
-            [
-                ...getPropertyDraft,
-                { ...form, draftId: String(Date.now() + Math.random()) }
-            ]));
-        setForm(DEFAULT_PROPERTY_FORM);
-        showSuccess("Draft saved!", "Draft have been saved locally")
-    };
+    async function submitNewProperty(payload: PropertyTypes) {
+        // Simulate API call
+        const property = await addPropertyDb(payload);
+        return property;
+    }
+
+    async function submitUpdatedProperty(payload: PropertyTypes) {
+
+        if (!payload.id) {
+            throw new Error("Need property id to updated property!");
+        }
+        // Simulate API call
+        const property = await updatePropertyDb(payload.id, payload)
+
+        // Return user back
+        const clearOut = setTimeout(() => {
+            router.back();
+            clearTimeout(clearOut);
+        }, 200);
+
+        return property;
+
+    }
+
+    async function submitReviewedProperty(payload: PropertyTypes) {
+
+        if (!payload.id) {
+            throw new Error("Need property id to updated property!");
+        }
+
+        // Simulate API call
+        const property = await updatePropertyDb(payload.id, payload)
+
+        // Return user back
+        const clearOut = setTimeout(() => {
+            router.back();
+            clearTimeout(clearOut);
+        }, 200);
+
+        return property;
+    }
 
     // form submission handler (create new property listing to firestore)
     async function submitForm(e?: React.FormEvent) {
         e?.preventDefault();
+
+        if (loading) return;
+
         setLoading(true);
 
-        try {
+        try {            
             // validate essential fields
             const error = validatePropertyFields(form);
             if (error.isError) {
@@ -159,10 +223,17 @@ export default function PropertyFormEditor({ accountType }: Props) {
                 referenceId: `AGB-${Date.now()}`,
             };
 
-            const draftId = payload.draftId;
+            let property: PropertyTypes | null = null;
 
-            // Simulate API call
-            const property = await addPropertyDb(payload);
+            if (documentType === "NEW") {
+                property = await submitNewProperty(payload);
+            } else if (documentType === "UPDATE" && payload.referenceId) {
+                property = await submitUpdatedProperty(payload);
+            } else if (documentType === "REVIEW" && payload.referenceId) {
+                property = await submitReviewedProperty(payload);
+            }
+
+            const draftId = payload.draftId;            
 
             // Simulate successful response
             if (!property) return;
@@ -171,16 +242,31 @@ export default function PropertyFormEditor({ accountType }: Props) {
                 // Delete draf from store
             }
 
+            let heading = "";
+            let description = "";
+
+            if (accountType === "AGENT") {
+                heading = "Property Submitted!";
+                description = "Your listing has been succesfully submitted for review."
+            }
+
+            if (accountType === "ADMIN") {
+                heading = "Property Added!";
+                description = "Your listing is now live."
+            }
+
+            if (documentType === "UPDATE" ||
+                documentType === "REVIEW"
+            ) {
+                heading = "Property Updated!";
+                description = "Listing has been succesfully updated."
+            }
+
+
+            showSuccess(heading, description);
             addProperty(property);
-
-            showSuccess("Property submitted!",
-                `Your listing has been ${form.referenceId.trim() ? "updated" : accountType === "ADMIN" ? "created" : "submited"}.`
-            )
-
-            setForm(DEFAULT_PROPERTY_FORM);
-            setError({ errorMsg: "", isError: false });
-            changeSteps(1);
-
+            setForm(() => DEFAULT_PROPERTY_FORM);
+            setError({ errorMsg: "", isError: false });          
         } catch (err) {
             const errorMsg = err as { message: string };
             showError("Failed to submit", errorMsg.message);
@@ -193,47 +279,7 @@ export default function PropertyFormEditor({ accountType }: Props) {
         }
     }
 
-    useEffect(() => {
-
-        let clearOut: NodeJS.Timeout | undefined = undefined;
-
-        // Get data to edit from localStorage
-        // Check if toEdit data is present
-        const update = localStorage.getItem("updateProperty");
-
-        if (update) {
-            const parsed = JSON.parse(update) as PropertyTypes;
-            clearOut = setTimeout(() => {
-                setForm(parsed);
-                localStorage.removeItem("updateProperty");
-            }, 200);
-        }
-
-
-        // Get duplicated data from localStorage
-        // Check if duplicate data is present
-        const duplicate = localStorage.getItem("duplicateProperty");
-
-        if (duplicate) {
-            const parsed = JSON.parse(duplicate) as PropertyTypes;
-            // clear the  UID so it will generate a new one
-            parsed.id = "";
-            parsed.referenceId = "";
-
-            clearOut = setTimeout(() => {
-                setForm(parsed);
-                localStorage.removeItem("duplicateProperty");
-            }, 200);
-
-        }
-
-        setIsMounted(true)
-
-        return () => clearTimeout(clearOut);
-    }, []);
-
-
-    if (!isMounted) return <div>Loading...</div>
+    if (loadingForm) return <PageLoading loading={loadingForm} />
 
     return (
         <div className="w-full bg-inherit">
@@ -1023,14 +1069,23 @@ export default function PropertyFormEditor({ accountType }: Props) {
                                         className="w-full text-sm"
                                         placeholder="Agent name"
                                     />
-                                    <div className="relative flex justify-start items-center">
-                                        <span className="absolute top-0 left-0 bottom-0 flex">
-                                            <span className="flex-1 flex justify-center items-center text-sm font-normal px-4">
-                                                +234
-                                            </span>
-                                        </span>
+                                    {/* Phone number */}
+                                    <div className="flex w-full overflow-hidden rounded border">
+                                        <Select defaultValue="+234">
+                                            <SelectTrigger className="rounded-none border-0 border-r px-2 w-[100px] focus-visible:ring-0 cursor-pointer">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="cursor-pointer">
+                                                <SelectItem value="+234">🇳🇬 +234</SelectItem>
+                                                <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                                                <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+
                                         <Input
-                                            type="number"
+                                            type="tel"
+                                            placeholder="Phone number"
+                                            className="border-0 rounded-none flex-1 focus-visible:ring-0"
                                             value={
                                                 form.agentPhone === null ? "" : form.agentPhone ?? ""
                                             }
@@ -1038,8 +1093,6 @@ export default function PropertyFormEditor({ accountType }: Props) {
                                                 if (isNaN(Number(e.target.value))) return;
                                                 update("agentPhone", Number(e.target.value));
                                             }}
-                                            className="w-full text-sm pl-15"
-                                            placeholder="Phone number"
                                         />
                                     </div>
                                     <Input
@@ -1135,13 +1188,13 @@ export default function PropertyFormEditor({ accountType }: Props) {
                                                 />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {AVAILABILITY.map((s) => (
+                                                {AVAILABILITY.map((av) => (
                                                     <SelectItem
                                                         className="cursor-pointer text-sm"
-                                                        value={s}
-                                                        key={s}
+                                                        value={av.value}
+                                                        key={av.name}
                                                     >
-                                                        {s}
+                                                        {av.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -1209,7 +1262,8 @@ export default function PropertyFormEditor({ accountType }: Props) {
                                     </div>
 
                                     {/* Date Listed */}
-                                    <div className="flex justify-center col-span-2 w-full">
+                                    <div className="col-span-2 w-full">
+                                        <Label htmlFor="date" className="text-sm font-medium mb-1">Date Listed</Label>
                                         <CustomCalendar
                                             date={form.createdAt}
                                             setDate={(date) => update("createdAt", date)}
@@ -1223,7 +1277,7 @@ export default function PropertyFormEditor({ accountType }: Props) {
 
                 {/* Preview & Confirm */}
                 {step === 5 && (
-                    <FormSection title="Preview Your Listing">
+                    <FormSection title="Preview Your Listing Before Submiting">
                         <div>
                             {/* Gallery Slider */}
                             <div>
@@ -1468,32 +1522,23 @@ export default function PropertyFormEditor({ accountType }: Props) {
                 </div>
 
                 {/* Create | Update new listing button */}
-                {step === 5 &&
-                    ((form.title.trim() && !form.referenceId.trim()) ||
-                        (isEdited && form.referenceId.trim())) ?
+                {step === 5 &&                  
                     <div className="sticky bottom-4 left-0 right-0">
                         <div className="w-full h-full flex justify-center">
-                            <CustomButton                                
-                                disabled={loading}                                
-                            >
-                                {form.referenceId.trim() ?
-                                    <>
-                                        {loading ? <>< Spinner /> Updating Property... </> : "Update Property"}
-                                    </> :
-                                    <>
-                                        {loading ? <>< Spinner /> Submiting Property... </> :
-                                            accountType === "ADMIN" ? "Create Property" : "Submit Property"}
-                                    </>
-                                }
-                            </CustomButton>
-
+                            <FormButton
+                                loading={loading}
+                                isDocEdited={isDocEdited}
+                                documentType={documentType}
+                                accountType={accountType}
+                                title={form.title}
+                            />                            
                         </div>
-                    </div> :
-                    null
+                    </div>
                 }
             </form>
-            {/* Unsaved Changes Alert */}
-            {/* <AlertDialog open={showPrompt} onOpenChange={setShowPrompt}>
+            <div>
+                {/* Unsaved Changes Alert */}
+                <AlertDialog open={openPrompt} onOpenChange={setOpenPrompt}>
                 <AlertDialogContent className="sm:max-w-md rounded-2xl">
                     <div className="flex justify-between items-start">
                         <AlertDialogHeader>
@@ -1503,24 +1548,26 @@ export default function PropertyFormEditor({ accountType }: Props) {
                             </AlertDialogDescription>
                         </AlertDialogHeader>
 
-                        <button onClick={() => setShowPrompt(false)} className="p-1 rounded hover:bg-gray-100">
+                            <button onClick={() => setOpenPrompt(false)} className="p-1 rounded hover:bg-gray-100">
                             <X className="w-5 h-5 text-gray-600" />
                         </button>
                     </div>
 
                     <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
-                        <AlertDialogAction onClick={handleSaveAndLeave} className="bg-blue-600">
+                            <AlertDialogAction onClick={saveDraftAndLeave} className="bg-blue-600">
                             Save Draft & Leave
                         </AlertDialogAction>
-                        <AlertDialogAction onClick={handleLeaveWithoutSaving} className="bg-red-600">
+                            <AlertDialogAction onClick={() => {
+                                setForm(() => DEFAULT_PROPERTY_FORM);
+                                leaveWithoutSaving()
+                            }} className="bg-red-600">
                             Leave Without Saving
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog> */}
-
+                </AlertDialog>
+            </div>
         </div>
     );
 };
-
 

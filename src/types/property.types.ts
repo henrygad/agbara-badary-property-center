@@ -47,7 +47,7 @@ export type PropertyType =
     | "Short Let"
     | "Other";
 
-export type Availability = "Draft" | "Pending" | "Review" | "Published" | "unPublished" | "Reject";
+export type Availability = "Draft" | "Pending" | "Reviewing" | "Accepted" | "Removed" | "Rejected";
 
 export interface PropertyTypes {
     id?: string; // UUID

@@ -44,7 +44,7 @@ export const PROPERTY_TYPES = [
 ];
 
 export const PROPERTY_CATEGORIES = ["Residential", "Commercial", "Land", "Short Let"];
-export const STATUS = ["For Rent", "For Sale", "Short Let", "Sold", "Rented"];
+export const STATUS = ["For Rent", "For Sale", "For Lease", "Rented", "Sold", "Leased"];
 export const FURNISHING = ["Furnished", "Semifurnished", "Unfurnished"];
 export const CONDITION = ["New", "Renovated", "Fairly Used", "Needs Renovation"];
 export const PRICE_FREQUENCY = [   
@@ -86,8 +86,32 @@ export const REGIONAL_TOWNS = [
         ]
     },
 ];
-
-export const AVAILABILITY = ["Draft", "Pending", "Review", "Published", "unPublished", "Reject"];
+export const AVAILABILITY = [
+    {
+        name: "Draft",
+        value: "Draft"
+    },
+    {
+        name: "Pending",
+        value: "Pending"
+    },
+    {
+        name: "Reviewing",
+        value: "Reviewing"
+    },
+    {
+        name: "Accept",
+        value: "Accepted"
+    },
+    {
+        name: "Remove",
+        value: "Removed"
+    },
+    {
+        name: "Reject",
+        value: "Rejected"
+    },
+];
 export const SIZE_UNIT = ["sqm", "sqft", "plots", "acres"];
 export const PACKAGE_TYPE = ["Free", "Featured", "Premium"];
 

@@ -1,57 +1,63 @@
 "use client";
 
+import { DEFAULT_PROPERTY_FORM } from "@/components/add_property/defaultData";
 import { PropertyTypes } from "@/types/property.types";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 
-// Define state shape
-interface PropertyState {
-    loading: boolean,
-    loadingMore: boolean,
-    setLoading: (loading: boolean, loadingMore: boolean) => void,
-    properties: PropertyTypes[];
+// Create the store
+interface PropertyStoreActions {
+    setLoading: (loading: boolean, loadingMore: boolean) => void;
     setProperties: (properties: PropertyTypes[]) => void;
     addProperty: (property: PropertyTypes) => void;
     updateProperty: (property: PropertyTypes) => void;
     deleteProperty: (id: string) => void;
-    selectedProperty: PropertyTypes | null;
+    setForm: (cb: (p: PropertyTypes) => PropertyTypes) => void;
     setSelectedProperty: (property: PropertyTypes | null) => void;
 }
 
-// Create the store
-export const usePropertyStore = create(
-    persist<PropertyState>(
-        (set) => ({
-            properties: [],
-            selectedProperty: null,
-            loading: false,
-            loadingMore: false,
+interface PropertyStoreState {
+    form: PropertyTypes;
+    properties: PropertyTypes[];
+    selectedProperty: PropertyTypes | null;
+    loading: boolean;
+    loadingMore: boolean;
+}
 
-            setLoading: (loading, loadingMore) => set({ loading, loadingMore }),
+type PropertyStore = PropertyStoreState & PropertyStoreActions;
 
-            setProperties: (properties) => set({ properties }),
+export const usePropertyStore = create<PropertyStore>(
+    (set) => ({
+        form: DEFAULT_PROPERTY_FORM,
+        properties: [],
+        selectedProperty: null,
+        loading: false,
+        loadingMore: false,
 
-            addProperty: (property) =>
-                set((state) => ({ properties: [...state.properties, property] })),
+        setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
 
-            updateProperty: (property) =>
-                set((state) => ({
-                    properties: state.properties.map((p) =>
-                        p.id === property.id ? property : p
-                    ),
-                })),
+        setProperties: (properties: PropertyTypes[]) => set({ properties }),
 
-            deleteProperty: (id) =>
-                set((state) => ({
-                    properties: state.properties.filter((p) => p.id !== id),
-                })),
+        addProperty: (property: PropertyTypes) =>
+            set((state) => ({ properties: [...state.properties, property] })),
 
-            setSelectedProperty: (property) => set({ selectedProperty: property }),
-        }),
-        {
-            name: "property-storage", // key for localStorage
-        }
-    )
+        updateProperty: (property: PropertyTypes) =>
+            set((state) => ({
+                properties: state.properties.map((p) =>
+                    p.id === property.id ? property : p
+                ),
+            })),
+
+        deleteProperty: (id: string) =>
+            set((state) => ({
+                properties: state.properties.filter((p) => p.id !== id),
+            })),
+        setForm: (cb: (p: PropertyTypes) => PropertyTypes) => {
+            set((state) => {
+                return { form: cb(state.form) };
+            });
+        },
+        setSelectedProperty: (property: PropertyTypes | null) => set({ selectedProperty: property }),
+    })
 );
 

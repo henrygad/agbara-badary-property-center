@@ -13,6 +13,7 @@ import {
 import { PropertyTypes } from "@/types/property.types"
 import { useRouter } from "next/navigation"
 
+
 export function CardMenu({ property }: { property: PropertyTypes }) {
     const statuses = ["For Sale", "For Rent", "Sold", "Rented", "Archived"]
     const router = useRouter()
