@@ -1,11 +1,12 @@
 // Fetch Properties by search queries
-import { SearchParams } from "@/types/search.types";
+
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "./config";
 import { PropertyTypes } from "@/types/property.types";
+import { SearchTypes } from "@/types/search.types";
 
 
-export async function searchPropertiesDb(params: SearchParams) {
+export async function searchPropertiesDb(params: SearchTypes) {
     const conditions = [];
 
     // Build Firestore query conditions
