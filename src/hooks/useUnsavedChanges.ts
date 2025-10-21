@@ -74,8 +74,7 @@ export default function useUnsavedChanges({
 
 
     // ----- intercept back/forward (popstate) -----
-    useEffect(() => {
-        console.log(window.history.state?.modal, "in");
+    useEffect(() => {        
         if (!when || !isOnGuardedPath() || window.history.state?.modal) return;
 
         // push a guard entry so first Back triggers popstate and leaves us control

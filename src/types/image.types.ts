@@ -1,4 +1,5 @@
 type ImageTypes = {
+    id?: string
     url: string,
     publicId: string,
     format: string,

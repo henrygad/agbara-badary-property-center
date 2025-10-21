@@ -6,8 +6,12 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import useClickOutSide from "@/hooks/useClickOutSide";
+import DisplayImage from "./gallery/DisplayImage";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function Navbar() {
+  const { user } = useUserStore();
+
   const pathname = usePathname();
   const [dark, setDark] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -83,7 +87,7 @@ export default function Navbar() {
         </motion.button>
 
         {/* Avatar dropdown */}
-        <div          
+        <div
           className="relative"
           ref={showMenuEleRef}
         >
@@ -93,8 +97,19 @@ export default function Navbar() {
           >
             <motion.div
               whileHover={{ rotate: 5 }}
-              className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600"
-            />
+              className="h-8 w-8 rounded-full"
+            >
+              {user?.profileImage?.url &&
+                <DisplayImage
+                  src={user?.profileImage.url}
+                  alt={user?.accountType + " " + "Avatar"}
+                  useRemove={false}
+                  type="Profile"
+                  className="h-8 w-8 rounded-full"
+                />
+              }
+            </motion.div>
+
             <ChevronDown
               className={cn(
                 "h-4 w-4 transition-transform",

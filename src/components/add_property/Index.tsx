@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Amenity,
     Condition,
@@ -28,16 +28,8 @@ import {
     DEFAULT_PROPERTY_FORM,
     PACKAGE_TYPE,
 } from "./defaultData";
-import Image from "next/image";
 import DisplayImage from "../gallery/DisplayImage";
 import React from "react";
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel";
 import { addPropertyDb, updatePropertyDb } from "@/lib/firebase/property_service";
 import validatePropertyFields from "@/validators/property_from_editor.validate";
 import { Button } from "../ui/button";
@@ -57,15 +49,16 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import ImageGallery from "../gallery/Index";
 import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import { showError, showSuccess } from "../ui/toasts";
-import { formatCurrency, safeValue, fiterSEOSlug, formatDate } from "@/utils";
+import { fiterSEOSlug } from "@/utils";
 import { usePropertyStore } from "@/store/usePropertyStore";
-import { useImageStore } from "@/store/useImageStore";
 import { clearTimeout } from "timers";
 import { useRouter } from "next/navigation";
-import FormButton from "./FromButton";
-import PageLoading from "../PageLoading";
+import FormButton from "./FormButton";
+import PageLoading from "../Loadings";
 import useUnsavedChanges from "@/hooks/useUnsavedChanges";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import Property from "../property/Index";
+import { useUserStore } from "@/store/useUserStore";
 
 type Props = {
     accountType: "ADMIN" | "AGENT"
@@ -75,11 +68,12 @@ type Props = {
 }
 
 export default function PropertyFormEditor({ accountType, loadingForm, documentType }: Props) {
+    const { user, loading: loadingUser } = useUserStore();
+
     const router = useRouter();
     const [step, setStep] = useState(1);
 
     const { addProperty, form, setForm } = usePropertyStore();
-    const { images, addImage } = useImageStore();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<{ errorMsg: string; isError: boolean }>({ errorMsg: "", isError: false });
@@ -90,16 +84,16 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
     // Form is not empty
     const isFormDirty = Object.values({
-        title: form.title,
-        description: form.description,
-        seoSlug: form.seoSlug,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        seoSlug: form.seoSlug.trim(),
         price: !form.price ? "" : form.price,
-        state: form.state,
-        category: form.category,
-        type: form.type,
-        satus: form.status,
-        images: form.images.length ? form.images : "",
-        videoUrl: form.videoUrl
+        state: form.state.trim(),
+        category: form.category.trim(),
+        type: form.type.trim(),
+        satus: form.status.trim(),
+        images: form.images.length ? form.images.join(".trim(),") : "",
+        videoUrl: form.videoUrl?.trim()
 
     }).some((val) => val !== "") && isDocEdited;
 
@@ -108,9 +102,23 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
         useUnsavedChanges({
             when: isFormDirty,
             onSaveDraft: saveDraft,
-            guardedPaths: ["/admin/add-property",  "/admin/edit-property"],
+            guardedPaths: ["/admin/add-property", "/admin/edit-property"],
         });
-    
+
+    // Populate agent details if account type is agent
+    useEffect(() => {
+        if (user) {
+            setForm((s) => ({ ...s, agentName: user.firstName + " " + user.lastName, agentEmail: user?.email || "", agentPhone: Number(user?.phone || ""), agentCompany: user?.company || "" }));
+        }
+    }, [user, setForm]);
+
+
+    if (loadingForm || !user || loadingUser) return <PageLoading
+        loading={(loadingForm || !user || loadingUser)}
+    >
+        <div className="text-white">loading...</div>
+    </PageLoading>;
+
     function saveDraft() {
         const getPropertyDraft = JSON.parse(
             localStorage.getItem("property-draft") || "[]"
@@ -157,11 +165,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
             setStep(p);
         }
         window.scrollTo(0, 0)
-    };   
+    };
 
     async function submitNewProperty(payload: PropertyTypes) {
         // Simulate API call
-        const property = await addPropertyDb(payload);
+        const property = await addPropertyDb(payload);       
+
         return property;
     }
 
@@ -177,7 +186,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
         const clearOut = setTimeout(() => {
             router.back();
             clearTimeout(clearOut);
-        }, 200);
+        }, 500);
 
         return property;
 
@@ -196,7 +205,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
         const clearOut = setTimeout(() => {
             router.back();
             clearTimeout(clearOut);
-        }, 200);
+        }, 500);
 
         return property;
     }
@@ -209,7 +218,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
         setLoading(true);
 
-        try {            
+        try {
             // validate essential fields
             const error = validatePropertyFields(form);
             if (error.isError) {
@@ -233,7 +242,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                 property = await submitReviewedProperty(payload);
             }
 
-            const draftId = payload.draftId;            
+            const draftId = payload.draftId;
 
             // Simulate successful response
             if (!property) return;
@@ -265,8 +274,21 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
             showSuccess(heading, description);
             addProperty(property);
-            setForm(() => DEFAULT_PROPERTY_FORM);
-            setError({ errorMsg: "", isError: false });          
+
+            setForm(() => {
+                if (!user) {
+                    return DEFAULT_PROPERTY_FORM;
+                }
+
+                return {
+                    ...DEFAULT_PROPERTY_FORM,
+                    agentName: user.firstName + " " + user.lastName, agentEmail: user?.email || "", agentPhone: Number(user?.phone || ""), agentCompany: user?.company || ""
+                }
+            });
+
+            setError({ errorMsg: "", isError: false });
+            
+            setStep(1);
         } catch (err) {
             const errorMsg = err as { message: string };
             showError("Failed to submit", errorMsg.message);
@@ -277,9 +299,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
         } finally {
             setLoading(false);
         }
-    }
+    };
 
-    if (loadingForm) return <PageLoading loading={loadingForm} />
+
+
+
+
+
 
     return (
         <div className="w-full bg-inherit">
@@ -1009,7 +1035,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     Display Images
                                 </Label>
                                 <ScrollArea
-                                    className="w-full whitespace-nowrap max-w-[330px] sm:max-w-[480px] md:max-w-full"
+                                    className="w-full whitespace-nowrap max-w-[340px] md:max-w-full"
                                 >
                                     <div className="flex gap-2">
                                         {form.images?.length ?
@@ -1019,11 +1045,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                     className="w-[160px] h-[160px] rounded border shadow"
                                                     src={src}
                                                     alt={src}
-                                                    handleremove={true}
-                                                    remove={(src) => {
+                                                    remove={(rsrc) => {
                                                         update(
                                                             "images",
-                                                            form.images.filter((img) => img !== src)
+                                                            form.images.filter((furl) => furl !== rsrc)
                                                         );
                                                     }}
                                                 />
@@ -1031,8 +1056,6 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                             null
                                         }
                                         <ImageGallery
-                                            galleryImages={images}
-                                            setGalleryImages={(imgs) => imgs.map(img => addImage(img))}
                                             setGetSelected={(img) => update("images", [...form.images, ...img.map(img => img.url)])}
                                         />
                                     </div>
@@ -1278,220 +1301,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                 {/* Preview & Confirm */}
                 {step === 5 && (
                     <FormSection title="Preview Your Listing Before Submiting">
-                        <div>
-                            {/* Gallery Slider */}
-                            <div>
-                                {form.images?.length ? (
-                                    <Carousel className="w-full">
-                                        <CarouselContent>
-                                            {form.images.map((url, i) => (
-                                                <CarouselItem key={i}>
-                                                    <div className="relative w-full h-80 rounded-lg">
-                                                        <Image
-                                                            key={i}
-                                                            src={url}
-                                                            alt={`preview-${i}`}
-                                                            fill
-                                                            className="w-full h-80 object-cover rounded-lg border shadow"
-                                                        />
-                                                    </div>
-                                                </CarouselItem>
-                                            ))}
-                                        </CarouselContent>
-                                        <CarouselPrevious
-                                            type="button"
-                                            className="h-10 w-10 left-1 cursor-pointer  text-red-700 bg-amber-500"
-                                        />
-                                        <CarouselNext
-                                            type="button"
-                                            className="h-10 w-10 right-1 cursor-pointer text-red-700 bg-amber-500"
-                                        />
-                                    </Carousel>
-                                ) : (
-                                    <div className="w-full h-72 bg-gray-100 flex items-center justify-center text-gray-500">
-                                        No Image Uploaded
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Content */}
-                            <div className="space-y-6 mt-4">
-
-                                {/* Title & Price */}
-                                <div>
-                                    <div className="flex justify-between flex-wrap items-center gap-4">
-                                        <h1 className="text-2xl font-medium text-gray-800 dark:text-white">
-                                            {form.title || "Untitled Property"}
-                                        </h1>
-                                        <p className="text-xl font-medium text-green-700">
-                                            {formatCurrency(form.price)}{" "}
-                                            {form.price && form.priceFrequency
-                                                ? ` / ${form.priceFrequency}`
-                                                : ""}
-                                        </p>
-                                    </div>
-                                    {form.negotiable &&
-                                        <div className="flex justify-end">
-                                            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2.5 py-0.5 rounded-full font-medium">
-                                                Negotiable
-                                            </span>
-                                        </div>
-                                    }
-                                    <p className="text-sm font-medium text-wrap p-2 text-slate-700 dark:text-white">
-                                        {form.description || "Provide description"}
-                                    </p>
-                                </div>
-
-                                {/* Fees */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-700 dark:text-white">
-                                    <p>
-                                        <strong>Service Charge</strong>:{" "}
-                                        {formatCurrency(form.serviceCharge)}
-                                    </p>
-                                    <p>
-                                        <strong>Agency Fee</strong>:{" "}
-                                        {formatCurrency(form.agencyFee)}
-                                    </p>
-                                    <p>
-                                        <strong>Legal Fee</strong>:{" "}
-                                        {formatCurrency(form.legalFee)}
-                                    </p>
-                                    <p>
-                                        <strong>Status</strong>: {safeValue(form.status)}
-                                    </p>
-                                </div>
-
-                                {/* Meta Info */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div className="space-y-1">
-                                        <p>
-                                            <strong>Availability:</strong>{" "}
-                                            {form.title.trim() ? safeValue(form.availability) : "-"}
-                                        </p>
-                                        <p>
-                                            <strong>Priority Rank:</strong>{" "}
-                                            {form.title.trim() ? safeValue(form.priorityRank) : "-"}
-                                        </p>
-                                        <p>
-                                            <strong>Ref ID:</strong>{" "}
-                                            {form.availability != "Draft" &&
-                                                safeValue(form.referenceId)}
-                                        </p>
-                                        <p>
-                                            <strong>Catigory:</strong> {safeValue(form.category)}
-                                        </p>
-                                        <p>
-                                            <strong>Type:</strong> {safeValue(form.type)}
-                                        </p>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <p>
-                                            <strong>Location:</strong>{" "}
-                                            {[form.street, form.area, form.city, form.state]
-                                                .filter(Boolean)
-                                                .join(", ") || "—"}
-                                        </p>
-                                        <p>
-                                            <strong>Bedrooms:</strong> {safeValue(form.bedrooms)}
-                                        </p>
-                                        <p>
-                                            <strong>Bathrooms:</strong> {safeValue(form.bathrooms)}
-                                        </p>
-                                        <p>
-                                            <strong>Toilets:</strong> {safeValue(form.toilets)}
-                                        </p>
-                                        <p>
-                                            <strong>Parking Spaces:</strong>{" "}
-                                            {safeValue(form.parkingSpaces)}
-                                        </p>
-                                        <p>
-                                            <strong>Parking Capacity:</strong>{" "}
-                                            {safeValue(form.parkingCapacity)}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Extra Info */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <p>
-                                        <strong>Furnishing:</strong> {safeValue(form.furnishing)}
-                                    </p>
-                                    <p>
-                                        <strong>Condition:</strong> {safeValue(form.condition)}
-                                    </p>
-                                    <p>
-                                        <strong>Floor Level:</strong> {safeValue(form.floorLevel)}
-                                    </p>
-                                    <p>
-                                        <strong>Total Floors:</strong>{" "}
-                                        {safeValue(form.totalFloors)}
-                                    </p>
-                                    <p>
-                                        <strong>Floor Area:</strong> {safeValue(form.floorArea)}
-                                    </p>
-                                    <p>
-                                        <strong>Year Built:</strong> {safeValue(form.yearBuilt)}
-                                    </p>
-                                    <p>
-                                        <strong>Size:</strong> {safeValue(form.size)}{" "}
-                                        {safeValue(form.size) !== "—" && safeValue(form.sizeUnit)}
-                                    </p>
-                                </div>
-
-                                {/* Amenities */}
-                                <div>
-                                    <h2 className="font-medium text-gray-800 dark:text-white mb-2">
-                                        Amenities
-                                    </h2>
-                                    {form.amenities?.length ? (
-                                        <ul className="grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-white">
-                                            {form.amenities.map((a, i) => (
-                                                <li key={i} className="flex items-center gap-2">
-                                                    ✅ {a}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="text-gray-500 text-sm">
-                                            No amenities specified
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Agent Info */}
-                                <div>
-                                    <h2 className="font-medium text-gray-800 dark:text-white mb-2">
-                                        Agent Information
-                                    </h2>
-                                    <p className="text-sm font-medium text-slate-700 dark:text-white">
-                                        {safeValue(form.agentName)} | {safeValue(form.agentPhone) ? "+234" + " " + safeValue(form.agentPhone) : ""}{" "}
-                                        | {safeValue(form.agentEmail)}
-                                    </p>
-                                    <p className="text-sm font-medium text-slate-700 dark:text-white">
-                                        {safeValue(form.agentCompany)}
-                                    </p>
-                                </div>
-
-                                {/* Dates */}
-                                <div className="text-sm text-gray-700  dark:text-slate-400 border-t pt-3">
-                                    <p>
-                                        Listed on{" "}
-                                        {form.createdAt
-                                            ? formatDate(form.createdAt)
-                                            : "—"
-                                        }
-                                    </p>
-                                </div>
-
-                                {/* Seo Slug */}
-                                <div className="mt-2">
-                                    <p className="text-xs text-slate-700 dark:text-slate-400">
-                                        {safeValue(form.seoSlug)}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        <Property
+                            property={form}
+                            viewer={accountType}
+                            showFull={true}
+                            placeViewing="PREVIEW"
+                        />
                     </FormSection>
                 )}
 
@@ -1522,7 +1337,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                 </div>
 
                 {/* Create | Update new listing button */}
-                {step === 5 &&                  
+                {step === 5 &&
                     <div className="sticky bottom-4 left-0 right-0">
                         <div className="w-full h-full flex justify-center">
                             <FormButton
@@ -1531,7 +1346,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 documentType={documentType}
                                 accountType={accountType}
                                 title={form.title}
-                            />                            
+                            />
                         </div>
                     </div>
                 }
@@ -1539,32 +1354,32 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
             <div>
                 {/* Unsaved Changes Alert */}
                 <AlertDialog open={openPrompt} onOpenChange={setOpenPrompt}>
-                <AlertDialogContent className="sm:max-w-md rounded-2xl">
-                    <div className="flex justify-between items-start">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                You have unsaved data. Save it as a draft before leaving?
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
+                    <AlertDialogContent className="sm:max-w-md rounded-2xl">
+                        <div className="flex justify-between items-start">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    You have unsaved data. Save it as a draft before leaving?
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
 
                             <button onClick={() => setOpenPrompt(false)} className="p-1 rounded hover:bg-gray-100">
-                            <X className="w-5 h-5 text-gray-600" />
-                        </button>
-                    </div>
+                                <X className="w-5 h-5 text-gray-600" />
+                            </button>
+                        </div>
 
-                    <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
+                        <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
                             <AlertDialogAction onClick={saveDraftAndLeave} className="bg-blue-600">
-                            Save Draft & Leave
-                        </AlertDialogAction>
+                                Save Draft & Leave
+                            </AlertDialogAction>
                             <AlertDialogAction onClick={() => {
                                 setForm(() => DEFAULT_PROPERTY_FORM);
                                 leaveWithoutSaving()
                             }} className="bg-red-600">
-                            Leave Without Saving
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
+                                Leave Without Saving
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
                 </AlertDialog>
             </div>
         </div>

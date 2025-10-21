@@ -44,14 +44,14 @@ export const PROPERTY_TYPES = [
 ];
 
 export const PROPERTY_CATEGORIES = ["Residential", "Commercial", "Land", "Short Let"];
-export const STATUS = ["For Rent", "For Sale", "For Lease", "Rented", "Sold", "Leased"];
+export const STATUS = ["Rent", "Sale", "Lease", "Rented", "Sold", "Leased"];
 export const FURNISHING = ["Furnished", "Semifurnished", "Unfurnished"];
 export const CONDITION = ["New", "Renovated", "Fairly Used", "Needs Renovation"];
 export const PRICE_FREQUENCY = [   
-    "Per Year",
-    "Total Price",
-    "Per Month",
-    "Per Day",
+    "Yearly",
+    "Total",
+    "Monthly",
+    "Dayly",
 ];
 
 export const REGIONAL_TOWNS = [
@@ -115,7 +115,6 @@ export const AVAILABILITY = [
 export const SIZE_UNIT = ["sqm", "sqft", "plots", "acres"];
 export const PACKAGE_TYPE = ["Free", "Featured", "Premium"];
 
-
 export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     // Basic Info    
     title: "",
@@ -166,7 +165,7 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     agentPhone: null,
     agentEmail: "",
     agentCompany: "",
-    showContact: false,
+    showContact: true,
     // meta
     referenceId: "",
     availability: "Draft",

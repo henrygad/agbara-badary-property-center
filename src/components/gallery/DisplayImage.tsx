@@ -1,67 +1,113 @@
 "use client";
 
 import Image from "next/image";
-import { Dispatch, SetStateAction } from "react";
-import { Trash2 } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { ImageIcon, Trash2, User } from "lucide-react";
 import ImageTypes from "@/types/image.types";
+import { getOptimizedImage } from "@/utils";
+import { cn } from "@/lib/utils";
 
 type Props = {
-    src: string,
+    src: string
     alt?: string
-    className?: string,
-    metaData?: ImageTypes,
-    selected?: ImageTypes[],
+    className?: string
+    metaData?: ImageTypes
+    selected?: ImageTypes[]
     setSelected?: Dispatch<SetStateAction<ImageTypes[]>>
-    remove?: (i: string) => void
-    handleremove?: boolean
+    useRemove?: boolean
+    remove?: (img: ImageTypes | string) => void
+    type?: "Profile" | "Property"
 };
 
-const DisplayImage = ({ src, alt = "demo", metaData, selected, setSelected = () => { }, remove = () => null, handleremove, className }: Props) => {
+const DisplayImage = ({ src, alt = "Property", type = "Property", metaData, selected, setSelected = () => { }, useRemove = true, remove = () => null, className }: Props) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
 
-    // advance feature are, display full image, and able to edit image size (crop)
-    return <div
-        className={`relative overflow-hidden cursor-pointer ${selected?.includes(metaData!)
-            ? "border-blue-500"
-            : "border-transparent"
-            } ${className || ""}`}
-        onClick={() =>
-            setSelected(pre => {
-                const copy = new Set(pre);
-                if (copy.has(metaData!)) {
-                    copy.delete(metaData!);
-                } else {
-                    copy.add(metaData!);
-                }
-                return Array.from(copy);
-            })
-        }
-    >
-        <Image
-            src={src}
-            alt={alt}
-            fill
-            placeholder="blur"
-            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U1ZTVlNSIgLz4="
-            sizes="100%"
-            className="w-full h-auto object-cover"
-        />
-        {selected?.includes(metaData!) && (
-            <div className="absolute inset-0 bg-blue-500/30 flex items-center justify-center text-white font-bold">
-                ✓
+    const handleLoad = () => setIsLoading(false);
+    const handleError = () => {
+        setIsError(true);
+        setIsLoading(false);
+    };
+
+    const handleSelect = () => {
+        if (isError || !src.trim() || !metaData) return;
+        setSelected(pre => {
+            const copy = new Set(pre);
+            if (copy.has(metaData)) {
+                copy.delete(metaData);
+            } else {
+                copy.add(metaData);
+            }
+            return Array.from(copy);
+        })
+    };
+
+    return <div className={cn("relative flex items-center justify-center overflow-hidden cursor-pointer", className)} onClick={handleSelect}>
+        {/* Loading spinner */}
+        {isLoading && !isError && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700" />
+        )}
+
+        {/* Error placeholder */}
+        {isError && (
+            <div className="flex flex-col items-center justify-center text-center text-sm text-gray-500">
+                <Placeholder type={type} />
             </div>
         )}
 
-        {handleremove && <button
-            type="button"
-            className="text-base p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 absolute top-1 right-1 cursor-pointer"
-            onClick={(e) => {
-                remove(src)
-                e.stopPropagation();
-            }}
-        >
-            <Trash2 className="w-3 h-3" />
-        </button>}
-    </div>;
+        {/* Real image */}
+        {!isError && src?.trim() &&
+            <Image
+            src={getOptimizedImage(src, 1200)}
+            alt={alt}
+            fill
+            // placeholder="blur"
+                // blurDataURL={getOptimizedImage(src, 10)}
+                loading="lazy"
+                unoptimized
+                onLoad={handleLoad}
+                onError={handleError}
+                className={cn(
+                    "object-cover transition-opacity duration-500",
+                    isLoading ? "opacity-0" : "opacity-100"
+                )}
+            />       
+        }
+
+        {/* Selected overflow layer */}
+        {
+            selected?.includes(metaData!) && (
+            <div className="absolute inset-0 bg-blue-500/30 flex items-center justify-center text-white font-bold">
+                ✓
+            </div>
+            )
+        }
+
+        {/*Remove/delete button */}
+        {
+            !selected?.includes(metaData!) &&
+            useRemove &&
+            remove &&
+            <button
+                type="button"
+                className="text-base p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 absolute top-1 right-1 cursor-pointer"
+                onClick={(e) => {
+                        const sendOut = metaData || src
+                        remove(sendOut)
+                        e.stopPropagation();
+                    }}
+                >
+                    <Trash2 className="w-3 h-3" />
+            </button>
+        }
+    </div >;
+};
+
+
+const Placeholder = ({ type }: { type: "Profile" | "Property" }) => {
+
+    if (type === "Profile") return <User className="w-10 h-10 text-gray-400" />;
+    return <ImageIcon className="w-10 h-10 text-gray-400" />;
 };
 
 export default DisplayImage;

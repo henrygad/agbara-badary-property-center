@@ -17,7 +17,7 @@ export default function FormButton({ loading, title, accountType, documentType, 
             >
                 <>{
                     loading ?
-                        <>< Spinner /> Submiting Property... </> :
+                        <>< Spinner /> Submiting... </> :
                         "Submit Property"
                 }</>
             </CustomButton>
@@ -27,7 +27,7 @@ export default function FormButton({ loading, title, accountType, documentType, 
         >
             <>{
                 loading ?
-                    <>< Spinner /> Adding Property... </> :
+                    <>< Spinner /> Adding... </> :
                     "Add Property"
             }</>
         </CustomButton>

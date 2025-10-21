@@ -8,9 +8,12 @@ import { getPropertiesDb } from "@/lib/firebase/property_service";
 import { useImageStore } from "@/store/useImageStore";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import { useEffect } from "react";
+import { useUserStore } from "@/store/useUserStore";
+import { getAdminDb } from "@/lib/firebase/admin_service";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   
+  const { setUser, setLoading: setAdminLoading} = useUserStore();
   const {
     setLoading: setPropertyLoading,
     setProperties,    
@@ -20,6 +23,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   // Fetch Admin datas
   useEffect(() => {
+
+    const fetchAdmin = async () => {
+      setAdminLoading(true);
+      try {
+        const admin = await getAdminDb();
+        if (admin) setUser(admin);
+      } catch (error) {
+        console.error("Error fetching admin:", error);
+      } finally {
+        setAdminLoading(false);
+      }
+    };
+
     const fetchProperties = async () => {
       setPropertyLoading(true, false);
       try {
@@ -35,7 +51,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const fetchImages = async () => {
       setImageLoading(true, false);
       try {
-        const images = await getImagesDb();
+        const images = await getImagesDb();       
         if (images) setImages(images);
       } catch (error) {
         console.error("Error fetching images:", error);
@@ -44,15 +60,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       }
     };
 
+
+    fetchAdmin();
     fetchImages();
     fetchProperties();
-  }, [setImageLoading, setImages, setPropertyLoading, setProperties]);
-  
+  }, [setImageLoading, setImages, setPropertyLoading, setProperties, setUser, setAdminLoading]);
 
   return (
     <div className="flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">
       <Sidebar />
-      <div className="md:ml-64 flex-1 min-h-screen">
+      <div className="md:ml-64 flex-1">
         <Navbar />
         <main className="p-3 md:px-6 py-6 dark:bg-gray-800 min-h-screen">
           {children}

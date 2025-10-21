@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function DELETE(req: Request) {
     try {
         const { public_ids } = await req.json(); // array of public IDs to delete
 

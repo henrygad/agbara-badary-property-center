@@ -5,9 +5,8 @@ import TableDisplay from "@/components/property/TableDisplay";
 import { Button } from "@/components/ui/button";
 // import { usePropertyStore } from "@/store/usePropertyStore";
 import { Building2, Clock, Inbox, Users, Plus } from "lucide-react";
-import { mockPropertiesAdmin } from "./properties/data";
 import { useMemo } from "react";
-import { PropertyTypes } from "@/types/property.types";
+import { sampleProperties } from "@/data/property";
 
 const Metrics = [
     {
@@ -51,7 +50,7 @@ const Metrics = [
 export default function AdminDashboard() {
     // const { properties, loading, loadingMore } = usePropertyStore();
 
-    const onlyPeningProperties = useMemo(() => mockPropertiesAdmin.filter(p => p.availability === "Pending" || p.availability === "Reviewing"), [])
+    const onlyPeningProperties = useMemo(() => sampleProperties.filter(p => p.availability === "Pending" || p.availability === "Reviewing"), [])
 
     return <div className="h-auto w-full">
         {/* Key Metric */}
@@ -136,7 +135,7 @@ export default function AdminDashboard() {
                                 onlyPeningProperties.map((p) => (
                                     <TableDisplay
                                         key={p.id}
-                                        p={(p as unknown) as PropertyTypes}
+                                        p={p}
                                     />
                                 ))
                             ) : (

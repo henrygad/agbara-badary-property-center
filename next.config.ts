@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
       },
     ],
+    // optional: caching time (in seconds)
+    minimumCacheTTL: 60 * 60, // <-- moved here, not inside experimental
+
   },
 };
 

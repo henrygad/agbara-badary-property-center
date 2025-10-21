@@ -6,7 +6,10 @@ const sampleImages: string[] = [
     "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
     "https://picsum.photos/300/200",
     "https://picsum.photos/301/200",
-    "https://res.cloudinary.com/dpvybiudz/image/upload/v1759842899/properties/nufbsvevhmol5oewd0dk.png"
+    "https://res.cloudinary.com/dpvybiudz/image/upload/v1759842899/properties/nufbsvevhmol5oewd0dk.png",
+    "https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg?auto=compress&cs=tinysrgb&w=800",
+    "https://images.pexels.com/photos/259950/pexels-photo-259950.jpeg?auto=compress&cs=tinysrgb&w=800",
+    "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=800"
 ];
 
 

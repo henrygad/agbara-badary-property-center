@@ -1,3 +1,5 @@
+import { NextRequest } from "next/server";
+
 export const formatCurrency = (value?: number | null) => {
     if (!value || isNaN(value)) return "—";
     return `₦${value.toLocaleString()}`;
@@ -25,4 +27,24 @@ export const formatDate = (date: Date | undefined) => {
         month: "long",
         year: "numeric",
     })
+}
+
+export const getCookieFromClient = (req: NextRequest) => {
+    const DNS = process.env.NEXT_PUBLIC_APP_DSN;
+    const pattern = new RegExp(`__Host-${DNS}_client_id=([^;]+)`);
+
+    const cookie = req.headers.get("cookie") || "";
+    const match = cookie.match(pattern);
+
+    const clientId = match ? match[1] : null;
+
+    return clientId
+
+};
+ 
+export function getOptimizedImage(url: string, width = 1200) {
+    return url.replace(
+        "/upload/",
+        `/upload/f_auto,q_auto,w_${width}/`
+    );
 }

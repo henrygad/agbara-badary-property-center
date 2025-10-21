@@ -9,7 +9,7 @@ export async function getImagesDb() {
 
     return querySnapshot.docs.map(doc => {
         const data = doc.data();
-        return { ...data };
+        return { id: doc.id, ...data }
     }) as ImageTypes[]
 }
 
@@ -33,7 +33,7 @@ export async function addImageDb(image: ImageTypes) {
 
         if (docSnap.exists()) {
             const data = docSnap.data();
-            return { ...data } as ImageTypes
+            return {id: docSnap.id, ...data } as ImageTypes
         } else {
             throw new Error("No such document!");
         }
@@ -43,7 +43,6 @@ export async function addImageDb(image: ImageTypes) {
         throw err;
     }
 };
-
 
 // Delete property by ID
 export async function deleteImageDb(id: string) {

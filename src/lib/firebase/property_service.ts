@@ -9,6 +9,7 @@ const formatteFireStoreDate = (data: DocumentData) => {
     return data;
 }
 
+
 // Fetch all properties
 export async function getPropertiesDb() {
     const querySnapshot = await getDocs(collection(db, "properties"))

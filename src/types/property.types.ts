@@ -23,13 +23,13 @@ export type Amenity =
     | "Internet Access"
     | "Electricity"
 
-export type Status = "" | "For Sale" | "For Rent" | "Short Let" | "Sold" | "Rented";
+export type Status = "" | "Sale" | "Rent" | "Lease" | "Sold" | "Rented" | "Leased";
 export type PackageType = "Free" | "Featured" | "Premium";
 export type Furnishing = "" | "Furnished" | "Semi-Furnished" | "Unfurnished";
 export type Condition = "" | "New" | "Renovated" | "Fairly Used" | "Needs Renovation";
 export type PropertyCategory = "" | "Residential" | "Commercial" | "Land" | "Short Let";
 export type SizeUnit = "sqm" | "sqft" | "plots" | "acres";
-export type PriceFrequency = "" | "Per Month" | "Per Year" | "Per Day" | "Total";
+export type PriceFrequency = "" | "Monthly" | "Yearly" | "Dayly" | "Total";
 export type PropertyType =
     ""
     | "Flat"
@@ -47,10 +47,10 @@ export type PropertyType =
     | "Short Let"
     | "Other";
 
-export type Availability = "Draft" | "Pending" | "Reviewing" | "Accepted" | "Removed" | "Rejected";
+export type Availability = "Draft" | "Pending" | "Reviewing" | "Accepted" | "Trash" | "Rejected";
 
 export interface PropertyTypes {
-    id?: string; // UUID
+    id?: string; // Fire strore iD
     // Basic Info
     title: string;
     description: string;
@@ -95,7 +95,7 @@ export interface PropertyTypes {
     // Amenities
     amenities: string[];
 
-    // Mediaffffff
+    // Media
     images: string[];
     videoUrl?: string;
     virtualTourUrl?: string;
@@ -124,4 +124,5 @@ export interface PropertyTypes {
 
     // others
     draftId?: string
+    views?: string[]
 }

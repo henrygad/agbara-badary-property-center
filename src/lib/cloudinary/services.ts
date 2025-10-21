@@ -1,5 +1,6 @@
 
-export async function uploadImage(file: File) {
+
+export async function uploadImageToCloud(file: File) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
@@ -28,3 +29,36 @@ export async function uploadImage(file: File) {
         format: data.format,
     }; 
 }
+
+export async function deleteImagesFromCloud(publicIds: string[]) {
+    if (!Array.isArray(publicIds) || publicIds.length === 0) {
+        throw new Error("No Array of public IDs provided.");
+    }
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!;
+    const apiSecret = process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET!;
+
+    try {
+        const res = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization:
+                        "Basic " + Buffer.from(`${apiKey}:${apiSecret}`).toString("base64"),
+                },
+                body: JSON.stringify({ publicIds }),
+            }
+        );
+
+        const data = await res.json();
+
+        return { data, publicIds };
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+

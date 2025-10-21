@@ -1,4 +1,4 @@
-export type SearchParams = {
+export type SearchTypes = {
     state?: string;
     city?: string,
     minPrice?: number;

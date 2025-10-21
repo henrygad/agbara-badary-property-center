@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
+
     try {
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
         const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!;
         const apiSecret = process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET!;
-
-        // Folder name that matches your upload_preset target
-        const folder = "properties";
+        const folder = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER;    
 
         const res = await fetch(
             `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?prefix=${folder}/&max_results=100`,

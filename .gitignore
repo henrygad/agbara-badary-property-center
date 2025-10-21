@@ -45,3 +45,9 @@ Thumbs.db
 # === Misc ===
 coverage/
 dist/
+
+
+# Local dev 
+certs/
+server.js
+

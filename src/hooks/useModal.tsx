@@ -1,48 +1,60 @@
 "use client";
 
-
 import { useEffect, useState } from "react";
-import useNavigate from "./useNavigate";
+import useLockScroll from "./useLockScroll";
+import { useRouter } from "next/navigation";
 
+export const useModal = () => {
+    const [open, setOpen] = useState(false);
+    const router = useRouter();
 
-const useModal = () => {
-    const navigate = useNavigate();
-    const [modalIsOpen, setModalIsOpen] = useState(false);
+    // Disable page from scrolling
+    useLockScroll({ open });
 
-    const handleModal = (modalIsOpen: boolean) => {
-        if (modalIsOpen) {
-            navigate("#");
+    const handleModal = (v: boolean) => {
+        if (v) {
+            // Add modal to the nav history            
+            window.history.pushState({ modal: true }, "");
+            setOpen(true); // Open modal
         } else {
-            navigate(-1);
+            setOpen(false); // Close the modal
+            router.back(); // Clean up history
         }
-        setModalIsOpen(modalIsOpen);
     };
 
-
+    // ESC key closes
     useEffect(() => {
-
-        const handlePopState = () => {
-            if (modalIsOpen) {
-                setModalIsOpen(false);
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && open) {
+                setOpen(false);
             }
         };
 
-        if (modalIsOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
+        window.addEventListener("keydown", onKey);
+        return () => {
+            window.removeEventListener("keydown", onKey);
+        };
+    }, [open]);
+
+    // Change on popstate
+    useEffect(() => {
+        const handlePopState = () => {
+            setOpen(false); // Close the modal
+        };
 
         window.addEventListener("popstate", handlePopState);
 
         return () => {
-            document.body.style.overflow = "";
             window.removeEventListener("popstate", handlePopState);
+            // remove extra state when modal closes
+            if (window.history.state?.modal) {
+                router.back();
+            }
         };
-    }, [modalIsOpen]);
-
-
-    return { modalIsOpen, handleModal };
-};
-
-export default useModal;
+    }, [router]);
+    return {
+        open,
+        setOpen,
+        handleModal
+    }
+}

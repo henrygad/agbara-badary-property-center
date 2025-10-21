@@ -4,17 +4,17 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { mockPropertiesAdmin, mockPropertiesAgents } from "./data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AVAILABILITY, PROPERTY_CATEGORIES, PROPERTY_TYPES, STATUS } from "@/components/add_property/defaultData";
 import TableDisplay from "@/components/property/TableDisplay";
 import { CustomCalendar } from "@/components/CustomCalader";
-import { PropertyTypes } from "@/types/property.types";
+import { sampleProperties } from "@/data/property";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 export default function ListPropertiesPage() {
   const [tabs, setTabs] = useState(0);
 
-  const [properties, setProperties] = useState(mockPropertiesAdmin);
+  const [properties, setProperties] = useState(sampleProperties);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -33,7 +33,7 @@ export default function ListPropertiesPage() {
   const filteredProperties = useMemo(() => {
     return properties.filter((p) => {
       const matchesSearch =
-        p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.id||"").toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.title.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesCat = categoryFilter === "all" || p.category === categoryFilter;
@@ -49,7 +49,7 @@ export default function ListPropertiesPage() {
         availabilityFilter === "all" || p.availability === availabilityFilter;
 
       // ✅ Date filtering
-      const date = new Date(p.updatedAt);
+      const date = new Date((p.updatedAt || ""));
       const afterStart = !startDate || date >= new Date(startDate);
       const beforeEnd = !endDate || date <= new Date(endDate);
 
@@ -84,7 +84,7 @@ export default function ListPropertiesPage() {
 
   const toggleSelectAll = () => {
     if (allChecked) setSelected([]);
-    else setSelected(paginated.map((p) => p.id));
+    else setSelected(paginated.map((p) => p.id || ""));
   };
 
   const toggleSelect = (id: string) => {
@@ -107,7 +107,7 @@ export default function ListPropertiesPage() {
               setTabs(idx);
 
               const clearOut = setTimeout(() => {
-                setProperties(tab === "Admin" ? mockPropertiesAdmin : mockPropertiesAgents);
+                setProperties(tab === "Admin" ? sampleProperties : []);
                 clearTimeout(clearOut);
               }, 100);
 
@@ -122,7 +122,7 @@ export default function ListPropertiesPage() {
       <div
         className="mb-6 bg-white dark:bg-transparent p-4"
       >
-        <h2 className="text-lg font-medium mb-3">Filter Property</h2>
+        <h2 className="text-lg font-medium mb-3">Filter Properties</h2>
         <div className="flex gap-6 flex-wrap flex-row md:items-end md:justify-between">
           {/* Selection Filters */}
           <div className="flex flex-wrap gap-2">
@@ -325,7 +325,7 @@ export default function ListPropertiesPage() {
               paginated.map((p) => (
                 <TableDisplay
                   key={p.id}
-                  p={(p as unknown) as PropertyTypes}
+                  p={p}
                   selected={selected}
                   setSelected={toggleSelect}                 
                 />
@@ -339,27 +339,29 @@ export default function ListPropertiesPage() {
             )}
           </tbody>
         </table>
-      </div>
-
+      </div>     
+      
       {/* 🧭 Pagination */}
       {totalPages > 1 && (
         <div className="mt-6 flex justify-end gap-3 items-center">
           <Button
+            type="button"
             variant="outline"
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
           >
-            Previous
+            <ArrowLeftIcon className="h-5 w-5" /> Previous
           </Button>
           <span className="text-sm text-gray-600 dark:text-gray-400">
             Page {page} of {totalPages}
           </span>
           <Button
+            type="button"
             variant="outline"
             disabled={page === totalPages}
             onClick={() => setPage((p) => p + 1)}
           >
-            Next
+            Next <ArrowRightIcon className="h-5 w-5" />
           </Button>
         </div>
       )}

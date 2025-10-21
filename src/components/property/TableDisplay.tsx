@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import PropertyCard from './PropertyCard'
+import AdminCard from './AdminCard'
 import { PropertyTypes } from '@/types/property.types'
 import { Checkbox } from '../ui/checkbox'
 import { cn } from '@/lib/utils'
@@ -73,7 +73,7 @@ export default function TableDisplay({ p, selected, setSelected = () => { } }: P
             </td>}
             {/* property card */}
             <td className="pl-2 pr-4 py-4 min-w-[320px]">
-                <PropertyCard
+                <AdminCard
                     image={p.images[0]}
                     referenceId={p.referenceId}
                     staus={p.status}
