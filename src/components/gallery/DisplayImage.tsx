@@ -16,10 +16,11 @@ type Props = {
     setSelected?: Dispatch<SetStateAction<ImageTypes[]>>
     useRemove?: boolean
     remove?: (img: ImageTypes | string) => void
-    type?: "Profile" | "Property"
+    type?: "Profile" | "Property",
+    imageObjectCover?: string
 };
 
-const DisplayImage = ({ src, alt = "Property", type = "Property", metaData, selected, setSelected = () => { }, useRemove = true, remove = () => null, className }: Props) => {
+const DisplayImage = ({ src, alt = "Property", type = "Property", imageObjectCover = "object-cover", metaData, selected, setSelected = () => { }, useRemove = true, remove = () => null, className }: Props) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
 
@@ -42,21 +43,25 @@ const DisplayImage = ({ src, alt = "Property", type = "Property", metaData, sele
         })
     };
 
-    return <div className={cn("relative flex items-center justify-center overflow-hidden cursor-pointer", className)} onClick={handleSelect}>
+    
+    return <div
+        className={cn("relative flex items-center justify-center overflow-hidden cursor-pointer", className)}
+        onClick={handleSelect}
+    >
         {/* Loading spinner */}
-        {isLoading && !isError && (
+        {isLoading && (
             <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700" />
         )}
 
         {/* Error placeholder */}
-        {isError && (
+        {(isError || !src) && ( 
             <div className="flex flex-col items-center justify-center text-center text-sm text-gray-500">
                 <Placeholder type={type} />
             </div>
         )}
 
         {/* Real image */}
-        {!isError && src?.trim() &&
+        {!isError &&
             <Image
             src={getOptimizedImage(src, 1200)}
             alt={alt}
@@ -68,18 +73,18 @@ const DisplayImage = ({ src, alt = "Property", type = "Property", metaData, sele
                 onLoad={handleLoad}
                 onError={handleError}
                 className={cn(
-                    "object-cover transition-opacity duration-500",
-                    isLoading ? "opacity-0" : "opacity-100"
+                    "transition-opacity duration-500", imageObjectCover,
+                    isLoading ? "opacity-0" : "opacity-100", "hover:opacity-80 transition"
                 )}
-            />       
+        />
         }
 
         {/* Selected overflow layer */}
         {
             selected?.includes(metaData!) && (
-            <div className="absolute inset-0 bg-blue-500/30 flex items-center justify-center text-white font-bold">
-                ✓
-            </div>
+                <div className="absolute inset-0 bg-blue-500/30 flex items-center justify-center text-white font-bold">
+                    ✓
+                </div>
             )
         }
 

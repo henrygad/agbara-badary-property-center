@@ -8,9 +8,9 @@ import { formatDate } from '@/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { Button } from '../ui/button'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog'
-import { Badge } from '../ui/badge'
 import { showSuccess, showWarning } from '../ui/toasts'
 import { useRouter } from 'next/navigation'
+import Availability from './Availability'
 
 
 type Props = {
@@ -73,27 +73,11 @@ export default function TableDisplay({ p, selected, setSelected = () => { } }: P
             </td>}
             {/* property card */}
             <td className="pl-2 pr-4 py-4 min-w-[320px]">
-                <AdminCard
-                    image={p.images[0]}
-                    referenceId={p.referenceId}
-                    staus={p.status}
-                    title={p.title}
-                    price={p.price || 0}
-                    agentName={p.agentName}
-                />
+                <AdminCard property={p} />
             </td>
-            {/* statu */}
+            {/* availability */}
             <td className="px-4 py-4">
-                <Badge
-                    className={cn(
-                        p.availability.toLowerCase() === "accepted" && "bg-green-500 text-white",
-                        p.availability.toLowerCase() === "pending" && "bg-yellow-500 text-white",
-                        p.availability.toLowerCase() === "rejected" && "bg-red-500 text-white",
-                        p.availability.toLowerCase() === "reviewing" && "bg-blue-500 text-white"
-                    )}
-                >
-                    {p.availability.charAt(0).toUpperCase() + p.availability.slice(1)}
-                </Badge>
+                <Availability availability={p.availability} />
             </td>
             <td className="px-4 py-4 min-w-[180px]">
                 <p className='line-clamp-1 text-sm'>{p.area}{" "}{p.city}{", "}{p.state}</p>

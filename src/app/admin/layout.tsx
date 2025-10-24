@@ -10,13 +10,17 @@ import { usePropertyStore } from "@/store/usePropertyStore";
 import { useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { getAdminDb } from "@/lib/firebase/admin_service";
+import { usePathname } from "next/navigation";
+import { DEFAULT_PROPERTY_FORM } from "@/components/add_property/defaultData";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   
   const { setUser, setLoading: setAdminLoading} = useUserStore();
   const {
     setLoading: setPropertyLoading,
     setProperties,    
+    setForm,
   } = usePropertyStore();
   const { setLoading: setImageLoading, setImages } = useImageStore();
 
@@ -65,6 +69,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     fetchImages();
     fetchProperties();
   }, [setImageLoading, setImages, setPropertyLoading, setProperties, setUser, setAdminLoading]);
+
+
+  useEffect(() => {
+    // If we not in add-property or edit-property or review-property page
+    // Clean setForm in property store
+    if (!pathname.includes("add-property") && !pathname.includes("edit-property") && !pathname.includes("review-property")) {
+      setForm(() => DEFAULT_PROPERTY_FORM);
+    }
+  }, [pathname, setForm])
 
   return (
     <div className="flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">

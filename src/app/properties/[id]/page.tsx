@@ -19,8 +19,7 @@ export default function PropertyDetailsPage() {
   if (!property) return <p className="p-6">Loading property...</p>;
 
   return <Property
-    property={property}
-    showFull={true}
+    property={property}    
     viewer="ADMIN"
     placeViewing="CLIENT"
   />

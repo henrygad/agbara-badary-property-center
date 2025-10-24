@@ -29,7 +29,6 @@ export default function PhotoEditor({
     const [rotation, setRotation] = useState(0);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
-
     useLockScroll({ open });
 
     const onCropCompleteInternal = useCallback((_: Area, croppedPixels: Area) => {
@@ -123,7 +122,7 @@ export default function PhotoEditor({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+                    className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
                 >
                     <motion.div
                         initial={{ scale: 0.9, y: 20 }}
@@ -131,8 +130,7 @@ export default function PhotoEditor({
                         exit={{ scale: 0.9, y: 20 }}
                         transition={{ type: "spring", stiffness: 200, damping: 18 }}
                         className="text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 rounded-2xl w-full max-w-lg p-4 shadow-2xl"
-                    >
-                        <h2 className="text-lg font-semibold mb-2">Crop Profile Picture</h2>
+                    >                        
                         <div className="relative w-full h-72 sm:h-96 rounded-xl overflow-hidden">
                             <Cropper
                                 image={imageSrc}

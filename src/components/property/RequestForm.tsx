@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { PropertyTypes } from "@/types/property.types";
 import { cn } from "@/lib/utils";
 import { Spinner } from "../ui/spinner";
+import CustomButton from "../CustomButton";
 
 // Zod validation schema
 const RequestSchema = z.object({
@@ -35,7 +36,7 @@ const RequestSchema = z.object({
 
 type RequestFormData = z.infer<typeof RequestSchema>;
 
-export default function SendRequest({ property }: { property: PropertyTypes }) {
+export default function RequestForm({ property }: { property: PropertyTypes }) {
 
     const [open, setOpen] = useState(false);
     const [warning, setWarning] = useState<string | null>(null);
@@ -86,13 +87,13 @@ export default function SendRequest({ property }: { property: PropertyTypes }) {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <div className="sticky bottom-4 left-0 right-0">
-                    <Button
-                        onClick={() => setOpen(true)}
-                        className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold cursor-pointer"
+                <div className="sticky bottom-2 left-0 right-0">
+                    <CustomButton
+                        type="button"
+                        onClick={() => setOpen(true)}                        
                     >
                         Send Request
-                    </Button>
+                    </CustomButton>
                 </div>
             </AlertDialogTrigger>
 
@@ -211,7 +212,6 @@ export default function SendRequest({ property }: { property: PropertyTypes }) {
                     </form>
                 )}
             </AlertDialogContent>
-
         </AlertDialog>
     );
 

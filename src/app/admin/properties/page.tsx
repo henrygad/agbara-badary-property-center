@@ -341,7 +341,7 @@ export default function ListPropertiesPage() {
         </table>
       </div>     
       
-      {/* 🧭 Pagination */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-6 flex justify-end gap-3 items-center">
           <Button

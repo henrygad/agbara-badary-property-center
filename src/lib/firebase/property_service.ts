@@ -1,14 +1,8 @@
 
 import { db } from "./config"
 import { PropertyTypes } from "@/types/property.types"
-import { collection, addDoc, serverTimestamp, getDocs, getDoc, doc, updateDoc, deleteDoc, DocumentData } from "firebase/firestore"
-
-const formatteFireStoreDate = (data: DocumentData) => {
-    data.createdAt = new Date(data.createdAt?.seconds * 1000);
-    data.updatedAt = new Date(data.updatedAt?.seconds * 1000);
-    return data;
-}
-
+import { formatteFireStoreDate } from "@/utils"
+import { collection, addDoc, serverTimestamp, getDocs, getDoc, doc, updateDoc, deleteDoc} from "firebase/firestore"
 
 // Fetch all properties
 export async function getPropertiesDb() {

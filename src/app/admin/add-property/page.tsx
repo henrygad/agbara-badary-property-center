@@ -4,7 +4,6 @@ import PropertyFormEditor from "@/components/add_property/Index";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import { PropertyTypes } from "@/types/property.types";
 import { useEffect, useState } from "react";
-import { clearTimeout } from "timers";
 
 export default function AddProperty() {
     const { setForm } = usePropertyStore();
@@ -27,9 +26,10 @@ export default function AddProperty() {
             const clearOut = setTimeout(() => {
                 setForm(() => parsed);
                 localStorage.removeItem("duplicateProperty");                
-                setLoadingForm(false);
-                clearTimeout(clearOut);
+                setLoadingForm(false);               
             }, 200);
+
+            // return () => clearTimeout(clearOut);
         } 
     }, [setForm]);
 

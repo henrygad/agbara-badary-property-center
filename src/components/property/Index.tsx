@@ -1,269 +1,412 @@
 "use client";
 
-import { PropertyTypes } from "@/types/property.types";
-import { Carousel, CarouselContent, CarouselItem } from "../ui/carousel";
+import { useRef } from "react";
+import Autoplay from "embla-carousel-autoplay";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel";
 import { formatCurrency, formatDate } from "@/utils";
-import ShortView from "./ClientCard";
-import { Card, CardContent } from "../ui/card";
-import { Bath, Bed, Building2, CalendarDays, Car, Mail, MapPin, Phone, Ruler, User } from "lucide-react";
-import { Badge } from "../ui/badge";
-import SendRequest from "./SendRequest";
-import DisplayImage from "../gallery/DisplayImage";
+import { Bath, Toilet, Bed, CalendarDays, Car, Mail, MapPin, Phone, Ruler, User, Sofa, Hammer, Layers, Building2, Briefcase, CarFront } from "lucide-react";
+import DisplayImage from "@/components/gallery/DisplayImage";
+import { PropertyTypes } from "@/types/property.types";
+import { Badge } from "@/components/ui/badge";
+import Status from "@/components/property/Status";
+import Availability from "@/components/property/Availability";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import ImageGallery from "@/components/gallery/ImageGallery";
+import RequestForm from "./RequestForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import CustomCard from "../CustomCrad";
+
 
 
 type Props = {
     property: PropertyTypes
-    showFull: boolean
     viewer: "ADMIN" | "AGENT" | "CLIENT"
     placeViewing: "PREVIEW" | "CLIENT"
 };
 
-export default function Property({ property, showFull, placeViewing }: Props) {
 
-    if (!showFull) {
-        return <ShortView />
-    }
+export default function Listings({ property, viewer, placeViewing }: Props) {
+    const plugin = useRef(
+        Autoplay({
+            delay: 8000,
+            stopOnInteraction: false,
+            stopOnMouseEnter: true,
+        })
+    );
 
-    return <div className="space-y-8">
-        {/* HEADER */}
-        <div>
-            <h1 className="text-2xl font-semibold flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-muted-foreground" />
-                {property.title}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-                Reference ID: <span className="font-medium">{property.referenceId}</span>
-            </p>
 
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-                <Badge variant="secondary">{property.category}</Badge>
-                <Badge>{property.type}</Badge>
+    return <div className="w-full">
+        <Carousel
+            opts={{
+                align: "start",
+                loop: true,
+            }}
+            plugins={[plugin.current]}
+            className="relative min-w-full"
+        >
+            <div className="absolute top-4 left-4 flex space-x-2 z-20">
+                <Availability placeViewing={placeViewing} availability={property.availability} />
+                {property.status && <Status status={property.status} />}
+                {property.category && <Badge variant="secondary">{property.category}</Badge>}
+                {property.type && <Badge>{property.type}</Badge>}
+            </div>
 
-                <Badge
-                    className={
-                        property.status === "Rent"
-                            ? "bg-blue-100 text-blue-800"
-                            : property.status === "Sale"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                    }
-                >
-                    {property.status}
-                </Badge>
+            {
+                property.images.length ?
+                    <CarouselContent className="min-w-full">
+                        {property.images.map((image, index) => (
+                            <CarouselItem key={index} className="w-full h-[400px] sm:h-[600px] rounded-lg">
+                                <DisplayImage
+                                    src={image}
+                                    alt="propery photo"
+                                    className="w-full h-full rounded-lg"
+                                    useRemove={false}
+                                />
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent> :
+                    <div className="w-full h-[400px] sm:h-[600px] rounded-lg border"></div>
+            }
 
-                <Badge
-                    className={
-                        property.availability === "Pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : property.availability === "Accepted"
-                                ? "bg-green-100 text-green-800"
-                                : property.availability === "Rejected"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-gray-100 text-gray-800"
-                    }
-                >
-                    {property.availability}
-                </Badge>
+            <CarouselPrevious type="button" className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/50 p-2 rounded-full hover:bg-white" />
+            <CarouselNext type="button" className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/50 p-2 rounded-full hover:bg-white" />
+        </Carousel>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-3 md:mt-8 px-1">
+            <div className="md:col-span-2">
+                {/* Title and price */}
+                <h1 className="text-3xl font-bold">{property.title}</h1>
+                <div className="mt-2 space-y-2">
+                    <span className="flex gap-2 text-2xl font-bold">
+                        <p className="text-primary">{formatCurrency(property.price)}</p> / {property.priceFrequency}
+                    </span>
+                    {property.negotiable && <Badge variant="outline" className="text-sm text-primary ">Price is Negotiable</Badge>}
+                </div>
+
+                {/* Location */}
+                <div className="mt-8">
+                    <h2 className="text-xl mb-1 font-semibold">Location</h2>
+                    <CustomCard>
+                        <div className="p-4 grid sm:grid-cols-2 gap-3">
+                            <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-muted-foreground" />
+                                <span>{placeViewing === "PREVIEW" && property.street + ","} {property.area}, {property.city}, {property.state}</span>
+                            </div>
+                            {property.landmark && (
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                                    <span>Landmark: {property.landmark}</span>
+                                </div>
+                            )}
+                        </div>
+                    </CustomCard>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2 mt-8">
+                    <Tabs defaultValue="description">
+                        <TabsList className="flex gap-4 text-sm dark:bg-gray-900">
+                            <TabsTrigger
+                                type="button"
+                                value="description"
+                                className="data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white dark:data-[state=active]:text-white cursor-pointer"
+                            >
+                                Description
+                            </TabsTrigger>
+                            <TabsTrigger
+                                type="button"
+                                value="gallery"
+                                className="data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white dark:data-[state=active]:text-white cursor-pointer"
+                            >
+                                Gallery
+                            </TabsTrigger>
+                            <TabsTrigger
+                                type="button"
+                                value="virtual-tour"
+                                className="data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white dark:data-[state=active]:text-white cursor-pointer"
+                            >
+                                Virtual Tour
+                            </TabsTrigger>
+                        </TabsList>
+                        <ScrollArea className="min-h-[100px] max-h-[400px] w-full">
+                            <TabsContent value="description">
+                                <p className="text-base font-normal">{property.description}</p>
+                            </TabsContent>
+                            <TabsContent value="gallery">
+                                <ImageGallery images={property.images} title="" />
+                            </TabsContent>
+                            <TabsContent value="virtual-tour">
+                                {property.videoUrl && (
+                                    <iframe
+                                        src={property.videoUrl}
+                                        className="w-full h-[400px] rounded-md"
+                                        allowFullScreen
+                                    ></iframe>
+
+                                )}
+                            </TabsContent>
+                        </ScrollArea>
+                    </Tabs>                 
+                </div>
+
+                {/* Details */}
+                <div className="mt-8">
+                    <h2 className="text-xl mb-1 font-semibold">Details</h2>
+                    <CustomCard>
+                        <div className="p-4 grid md:grid-cols-2 gap-6">
+                            {property.bedrooms && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <Bed className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.bedrooms} Bedrooms</span>
+                                </div>
+                            )}
+                            {property.bathrooms && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <Bath className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.bathrooms} Bathrooms</span>
+                                </div>
+                            )}
+                            {property.toilets && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <Toilet className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.toilets} Bathrooms</span>
+                                </div>
+                            )}
+                            {property.parkingSpaces && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <Car className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.parkingSpaces} Parking spaces</span>
+                                </div>
+                            )}
+                            {property.size && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <Ruler className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.size} {property.sizeUnit}</span>
+                                </div>
+                            )}
+                            {property.furnishing && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <Sofa className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.furnishing}</span>
+                                </div>
+                            )}
+                            {property.condition && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <Hammer className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.condition}</span>
+                                </div>
+                            )}
+
+                            {/* Commercial Specific */}
+                            <>
+                                {property.floorLevel && (
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <Layers className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.floorLevel} Floor level</span>
+                                    </div>
+                                )}
+                                {property.totalFloors && (
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <Building2 className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.totalFloors} Total floors</span>
+                                    </div>
+                                )}
+                                {property.propertyUse && (
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <Briefcase className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.propertyUse} Use</span>
+                                    </div>
+                                )}
+
+                                {property.parkingCapacity && (
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <CarFront className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.parkingCapacity} Parking capacity</span>
+                                    </div>
+                                )}
+                                {property.floorArea && (
+                                    <div className="flex items-center gap-2">
+                                        <Ruler className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.floorArea} Floor area</span>
+                                    </div>
+                                )}
+                            </>
+
+                            {property.yearBuilt && (
+                                <div className="flex items-center gap-2">
+                                    <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                                    <span>Built in {property.yearBuilt}</span>
+                                </div>
+                            )}
+                        </div>
+                    </CustomCard>
+                </div>
+                {/*amenities  */}
+                {property.amenities?.length ?
+                    <div>
+                        <h2 className="text-xl mb-1 font-semibold mt-8">Amenities</h2>
+                        <CustomCard>
+                            <div className="p-4">
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {property.amenities.map((a: string, i: number) => (
+                                        <Badge key={i} variant="secondary">{a}</Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        </CustomCard>
+                    </div> :
+                    null
+                }
+            </div>
+
+            <div>
+                {/* Fees */}
+                <div className="mt-8">
+                    <h2 className="text-xl mb-1 font-semibold">Fees</h2>
+                    <CustomCard>
+                        <div className="p-4 grid lg:grid-cols-3 gap-3">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Service Charge</p>
+                                <p>{formatCurrency(property.serviceCharge) || "0"} /{property.serviceChargeFrequency}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Agency Fee</p>
+                                <p>{formatCurrency(property.agencyFee) || "0"}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Legal Fee</p>
+                                <p>{formatCurrency(property.legalFee) || "0"}</p>
+                            </div>
+                        </div>
+                    </CustomCard>
+                </div>
+
+                {/* Meta Admin view */}
+                {viewer === "ADMIN" && <div className="mt-8">
+                    <h2 className="text-xl mb-1 font-semibold">Metadata</h2>
+                    <CustomCard>
+                        <div className="p-4 grid lg:grid-cols-2 gap-3">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Package</p>
+                                <p className="text-base">{property.packageType}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Priority Rank</p>
+                                <p className="text-base">{property.priorityRank ?? ""}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Views</p>
+                                <p className="text-base">{property.views?.length ?? 0}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Reference ID</p>
+                                <p className="text-base">{property.referenceId}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Listed On</p>
+                                <p className="text-base">{formatDate(property.createdAt).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Last Updated</p>
+                                <p className="text-base">{formatDate(property.updatedAt).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </CustomCard>
+                </div>
+                }
+                {/* Meta Agent view */}
+                {viewer === "AGENT" && <div className="mt-8">
+                    <h2 className="text-xl mb-1 font-semibold">Metadata</h2>
+                    <CustomCard>
+                        <div className="p-4 grid sm:grid-cols-2 gap-3">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Views</p>
+                                <p className="text-base">{property.views?.length ?? 0}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Reference ID</p>
+                                <p className="text-base">{property.referenceId}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Listed On</p>
+                                <p className="text-base">{formatDate(property.createdAt).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Last Updated</p>
+                                <p className="text-base">{formatDate(property.updatedAt).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </CustomCard>
+                </div>
+                }
+                {/* Meta Client view */}
+                {viewer === "CLIENT" && <div className="mt-8">
+                    <CustomCard>
+                        <div className="p-4 grid sm:grid-cols-2 gap-3">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Reference ID</p>
+                                <p className="text-base">{property.referenceId}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Last Updated</p>
+                                <p className="text-base">{formatDate(property.updatedAt).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </CustomCard>
+                </div>
+                }
+
+                {/* Agent details */}
+                {(placeViewing === "PREVIEW" || viewer === "ADMIN") && <div className="mt-8">
+                    <h2 className="text-xl mb-1 font-semibold">Agent</h2>
+                    <CustomCard>
+                        <div className="p-4 space-y-8">
+                            <div className="flex justify-center">
+                                <DisplayImage
+                                    src={property.agentPhoto || " "}
+                                    useRemove={false}
+                                    alt={property.agentName}
+                                    className="w-24 h-24 rounded-full border-2 border-primary object-cover"
+                                    type="Profile"
+                                />
+                            </div>
+                            <div className="flex flex-wrap justify-evenly items-center gap-3 break-all">
+                                <div className="flex items-center gap-2">
+                                    <User className="w-4 h-4 text-muted-foreground" />
+                                    <span>{property.agentName}</span>
+                                </div>
+                                {property.agentPhone &&
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.agentPhone}</span>
+                                    </div>}
+                                {property.agentEmail &&
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.agentEmail}</span>
+                                    </div>}
+                                {property.agentCompany &&
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Company</p>
+                                        <p>{property.agentCompany}</p>
+                                    </div>}
+                            </div>
+                        </div>
+                    </CustomCard>
+                </div>}
             </div>
         </div>
 
-        {/* IMAGE CAROUSEL */}
-        <Card>
-            <CardContent className="p-4">
-                <Carousel className="w-full">
-                    <CarouselContent>
-                        {property.images?.map((img: string, idx: number) => (
-                            <CarouselItem key={idx}>
-                                <DisplayImage
-                                    className="w-full h-[400px] object-cover rounded-md"
-                                    src={img}
-                                    alt={property.title}
-                                    useRemove={false}
-                                />                               
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-
-                {/* Optional Video / Virtual Tour */}
-                {property.videoUrl && (
-                    <div className="mt-4">
-                        <h3 className="font-medium mb-2">Video Tour</h3>
-                        <iframe
-                            src={property.videoUrl}
-                            className="w-full h-[400px] rounded-md"
-                            allowFullScreen
-                        ></iframe>
-                    </div>
-                )}
-
-                {property.virtualTourUrl && (
-                    <div className="mt-4">
-                        <h3 className="font-medium mb-2">Virtual Tour</h3>
-                        <iframe
-                            src={property.virtualTourUrl}
-                            className="w-full h-[400px] rounded-md"
-                            allowFullScreen
-                        ></iframe>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-
-        {/* LOCATION */}
-        <Card>
-            <CardContent className="p-4 grid sm:grid-cols-2 gap-3">
-                <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <span>{property.street}, {property.area}, {property.city}, {property.state}</span>
-                </div>
-                {property.landmark && (
-                    <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <span>Landmark: {property.landmark}</span>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-
-        {/* PRICING */}
-        <Card>
-            <CardContent className="p-4 grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-                <div>
-                    <p className="text-sm text-muted-foreground">Price</p>
-                    <p className="text-lg font-semibold">
-                        ₦{formatCurrency(property.price)} / {property.priceFrequency}
-                    </p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Service Charge</p>
-                    <p>₦{formatCurrency(property.serviceCharge) || "—"}</p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Agency Fee</p>
-                    <p>₦{formatCurrency(property.agencyFee) || "—"}</p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Legal Fee</p>
-                    <p>₦{formatCurrency(property.legalFee) || "—"}</p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Negotiable</p>
-                    <p>{property.negotiable ? "Yes" : "No"}</p>
-                </div>
-            </CardContent>
-        </Card>
-
-        {/* DETAILS */}
-        <Card>
-            <CardContent className="p-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {property.bedrooms && (
-                    <div className="flex items-center gap-2">
-                        <Bed className="w-4 h-4 text-muted-foreground" />
-                        <span>{property.bedrooms} Bedrooms</span>
-                    </div>
-                )}
-                {property.bathrooms && (
-                    <div className="flex items-center gap-2">
-                        <Bath className="w-4 h-4 text-muted-foreground" />
-                        <span>{property.bathrooms} Bathrooms</span>
-                    </div>
-                )}
-                {property.parkingSpaces && (
-                    <div className="flex items-center gap-2">
-                        <Car className="w-4 h-4 text-muted-foreground" />
-                        <span>{property.parkingSpaces} Parking spaces</span>
-                    </div>
-                )}
-                {property.size && (
-                    <div className="flex items-center gap-2">
-                        <Ruler className="w-4 h-4 text-muted-foreground" />
-                        <span>{property.size} {property.sizeUnit}</span>
-                    </div>
-                )}
-                {property.yearBuilt && (
-                    <div className="flex items-center gap-2">
-                        <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                        <span>Built in {property.yearBuilt}</span>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-
-        {/* AMENITIES */}
-        <Card>
-            <CardContent className="p-4">
-                <h3 className="font-medium mb-2">Amenities</h3>
-                {property.amenities?.length ? (
-                    <div className="flex flex-wrap gap-2">
-                        {property.amenities.map((a: string, i: number) => (
-                            <Badge key={i} variant="secondary">{a}</Badge>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-muted-foreground text-sm">No amenities listed</p>
-                )}
-            </CardContent>
-        </Card>
-
-        {/* AGENT INFO */}
-        <Card>
-            <CardContent className="p-4 space-y-2">
-                <h3 className="font-medium mb-2">Agent Information</h3>
-                <div className="grid sm:grid-cols-2 gap-2">
-                    <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        <span>{property.agentName}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-muted-foreground" />
-                        <span>{property.agentPhone || "—"}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        <span>{property.agentEmail}</span>
-                    </div>
-                    {property.agentCompany && (
-                        <div>
-                            <p className="text-sm text-muted-foreground">Company</p>
-                            <p>{property.agentCompany}</p>
-                        </div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-
-        {/* META */}
-        <Card>
-            <CardContent className="p-4 grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-                <div>
-                    <p className="text-sm text-muted-foreground">Package</p>
-                    <p>{property.packageType}</p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Priority Rank</p>
-                    <p>{property.priorityRank ?? "—"}</p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Views</p>
-                    <p>{property.views?.length ?? 0}</p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Created At</p>
-                    <p>{formatDate(property.createdAt).toLocaleString()}</p>
-                </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Last Updated</p>
-                    <p>{formatDate(property.updatedAt).toLocaleString()}</p>
-                </div>
-            </CardContent>
-        </Card>
-        {/* Request form */}
+        {/* Spacer */}
+        <div className="h-10" />
         {
-            placeViewing === "CLIENT" &&
-            <SendRequest
-                property={property}
-            />
+            placeViewing === "CLIENT" && <RequestForm property={property} />
         }
     </div>
 };

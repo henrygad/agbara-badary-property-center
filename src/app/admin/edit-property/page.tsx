@@ -11,22 +11,25 @@ export default function EditProperty() {
   const [loadingForm, setLoadingForm] = useState(false);
 
   useEffect(() => {
-    setLoadingForm(true);
-
+    
     // Get data to edit from localStorage
     // Check if toEdit data is present
     const update = localStorage.getItem("updateProperty");
-
+    
     if (update) {
+      setLoadingForm(true);
+
       const parsed = JSON.parse(update) as PropertyTypes;
+      
       const clearOut = setTimeout(() => {
         setForm(() => parsed);
-        localStorage.removeItem("updateProperty");
-        clearTimeout(clearOut);
+        localStorage.removeItem("updateProperty");        
+        setLoadingForm(false);
       }, 200);
+
+      // return () => clearTimeout(clearOut);
     }
 
-      setLoadingForm(false);
     }, [setForm]);
 
   return <div>

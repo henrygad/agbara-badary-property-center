@@ -128,12 +128,19 @@ export default function Navbar() {
               >
                 <button
                   className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
-                  onClick={() => router.push("/admin/profile")}
+                  onClick={() => {
+                    router.push("/admin/profile");
+                    setShowMenu(false)
+                  }}
                 >
                   Profile
                 </button>
                 <button
-                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                  onClick={() => {                
+                    setShowMenu(false);
+                  }}
+                >
                   Logout
                 </button>
               </motion.div>

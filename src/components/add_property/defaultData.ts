@@ -44,14 +44,14 @@ export const PROPERTY_TYPES = [
 ];
 
 export const PROPERTY_CATEGORIES = ["Residential", "Commercial", "Land", "Short Let"];
-export const STATUS = ["Rent", "Sale", "Lease", "Rented", "Sold", "Leased"];
+export const STATUS = ["Rent", "Sale", "Lease", "Rented", "Sold", "Leased", "Short Let"];
 export const FURNISHING = ["Furnished", "Semifurnished", "Unfurnished"];
 export const CONDITION = ["New", "Renovated", "Fairly Used", "Needs Renovation"];
 export const PRICE_FREQUENCY = [   
     "Yearly",
     "Total",
     "Monthly",
-    "Dayly",
+    " Daily",
 ];
 
 export const REGIONAL_TOWNS = [
@@ -124,9 +124,10 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     status: "",
     // Pricing
     price: null,
-    priceFrequency: "",
+    priceFrequency: "Monthly",
     negotiable: false,
     serviceCharge: null,
+    serviceChargeFrequency: "Monthly",
     agencyFee: null,
     legalFee: null,
     currency: "NGN",
@@ -150,8 +151,8 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     totalFloors: null,
     propertyUse: "",
     parkingCapacity: null,
-    powerSupplyNotes: "",
     floorArea: null,
+    powerSupplyNotes: "",
     // location
     state: "",
     city: "",

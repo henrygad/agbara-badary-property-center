@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Montserrat, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
+import GlobalLayout from "@/components/GlobalLayout";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -27,17 +29,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
   }) {
-  
 
-  
   return (
     <html lang="en">    
       <body
         className={`${montserrat.variable} ${poppins.variable} antialiased`}
       >
-        {children}
+        <GlobalLayout>{children}</GlobalLayout>
         <Toaster richColors closeButton position="top-right" duration={5000} />
-      </body>
+      <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
+        strategy="beforeInteractive"
+        />
+     </body>   
     </html>
   );
 }

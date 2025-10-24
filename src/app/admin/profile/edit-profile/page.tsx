@@ -42,6 +42,7 @@ export default function AdminProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openEditor, setOpenEditor] = useState(false);
   const [initialFile, setInitialFile] = useState<File | null>(null);
+
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -60,7 +61,7 @@ export default function AdminProfilePage() {
     form.setValue("lastName", user?.lastName ?? "");
     form.setValue("gender", user?.gender);
     form.setValue("phone", user?.phone ?? "");
-    form.setValue("email", user?.email ?? "");
+    form.setValue("email", user?.authEmail ?? "");
     form.setValue("company", user?.company ?? "");
     form.setValue("bio", user?.bio ?? "");
   }, [user, form]);
@@ -143,7 +144,7 @@ export default function AdminProfilePage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="space-y-8">
       {/* Profile Header */}
       <div className="flex items-center gap-3 sm:gap-6">
         <div className="relative w-24 h-24 rounded-full overflow-hidden">
@@ -210,13 +211,13 @@ export default function AdminProfilePage() {
           </div>
 
           {/* Gender */}
-          <div>
+          <div className="w-full">
             <Label className="text-sm font-medium mb-2">Gender</Label>
             <Select
               defaultValue={form.getValues("gender")}
               onValueChange={(v) => form.setValue("gender", v as "Male" | "Female" | "Other" | undefined)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -277,11 +278,11 @@ export default function AdminProfilePage() {
         </div>
 
         {/* Submit */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sticky bottom-0">
           <Button
             type="submit"
             disabled={isUploading || isSubmitting}
-            className="bg-red-700 hover:bg-red-800 text-white cursor-pointer"
+            className="flex-1 bg-red-700 hover:bg-red-800 text-white cursor-pointer"
           >
             {isSubmitting ? <> <Spinner /> Saving...</> : "Save Changes"}
           </Button>

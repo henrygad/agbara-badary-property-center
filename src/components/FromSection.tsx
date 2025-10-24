@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Card } from "./card";
+import { Card } from "./ui/card";
 
 const FromSection = ({ title, children }: { title: string, children: ReactElement }) => {
     return <section className="w-full h-auto">
@@ -9,7 +9,7 @@ const FromSection = ({ title, children }: { title: string, children: ReactElemen
                 {children}
             </>
 
-        </Card>        
+        </Card>
     </section>;
 };
 

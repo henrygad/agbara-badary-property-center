@@ -1,7 +1,8 @@
+import { DocumentData } from "firebase/firestore";
 import { NextRequest } from "next/server";
 
 export const formatCurrency = (value?: number | null) => {
-    if (!value || isNaN(value)) return "—";
+    if (!value || isNaN(value)) return "0";
     return `₦${value.toLocaleString()}`;
 };
 
@@ -47,4 +48,10 @@ export function getOptimizedImage(url: string, width = 1200) {
         "/upload/",
         `/upload/f_auto,q_auto,w_${width}/`
     );
+}
+
+export const formatteFireStoreDate = (data: DocumentData) => {
+    data.createdAt = new Date(data.createdAt?.seconds * 1000);
+    data.updatedAt = new Date(data.updatedAt?.seconds * 1000);
+    return data;
 }

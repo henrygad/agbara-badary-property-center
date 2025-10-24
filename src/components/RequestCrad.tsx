@@ -94,14 +94,20 @@ export default function RequestCrad({ req }: Props) {
             open={open}
             setOpen={handleModal}
         >
-            <div className="w-full max-w-full overflow-hidden px-6">
-                <div className="flex items-start justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-red-600">
-                        Request Details
-                    </h2>
-                    <Button variant="ghost" size="icon" onClick={() => handleModal(false)}>
-                        <X className="w-4 h-4" />
-                    </Button>
+            <div className="w-full min-h-full max-w-full overflow-y-auto px-3 sm:px-6 py-4">
+                <div className="relative flex items-start justify-between mb-4">
+                    <div className='flex-1 flex flex-col items-center justify-center'>
+                        <h2 className="text-lg font-semibold text-red-600">
+                            Request Details
+                        </h2>
+                        <p className="text-sm text-slate-500">View and manage request details</p>
+                    </div>
+
+                    <div className='absolute right-4 top-0'>
+                        <Button variant="ghost" size="icon" onClick={() => handleModal(false)}>
+                            <X className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="space-y-6 text-sm">

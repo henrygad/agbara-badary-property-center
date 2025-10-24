@@ -22,7 +22,7 @@ function isValidDate(date: Date | undefined) {
     return !isNaN(date.getTime())
 }
 
-export function CustomCalendar({ date, setDate }: { date: Date | undefined; setDate: (date: Date | undefined) => void }) {
+export function CustomCalendar({ date, setDate, id = "date" }: {id?: string, date: Date | undefined; setDate: (date: Date | undefined) => void }) {
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState(formatDate(date))
     // const [month, setMonth] = React.useState<Date | undefined>(date)
@@ -30,7 +30,7 @@ export function CustomCalendar({ date, setDate }: { date: Date | undefined; setD
 
     return <div className="w-full relative flex gap-2">
                 <Input
-                    id="date"
+                    id={id}
                     value={value}
                     placeholder="June 01, 2025"
                     className="pr-6 md:pr-10 text-sm"

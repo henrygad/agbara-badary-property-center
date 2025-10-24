@@ -10,23 +10,26 @@ export default function ReviewProperty() {
   const { setForm } = usePropertyStore();
   const [loadingForm, setLoadingForm] = useState(false);
 
-  useEffect(() => {
-    setLoadingForm(true);
+  useEffect(() => {    
 
     // Get data to edit from localStorage
     // Check if toEdit data is present
     const review = localStorage.getItem("reviewProperty");
 
     if (review) {
+      setLoadingForm(true);
+
       const parsed = JSON.parse(review) as PropertyTypes;
+
       const clearOut = setTimeout(() => {
         setForm(() => parsed);
-        localStorage.removeItem("reviewProperty");
-        clearTimeout(clearOut);
+        localStorage.removeItem("reviewProperty");        
+        setLoadingForm(false);        
       }, 200);
+
+    //  return () => clearTimeout(clearOut);
     }
 
-    setLoadingForm(false);
   }, [setForm]);
 
   return <div>

@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./config";
 import UserTypes from "@/types/user.types";
+import { formatteFireStoreDate } from "@/utils";
 
 // Fetch admin data
 export const getAdminDb = async () => {
@@ -10,7 +11,7 @@ export const getAdminDb = async () => {
     if (!snapshot.exists()) {
         throw new Error("Admin profile not found");
     }
-    return snapshot.data() as UserTypes;
+    return formatteFireStoreDate(snapshot.data()) as UserTypes;
 };
 
 export const createAdminDb = async (adminData: UserTypes) => {

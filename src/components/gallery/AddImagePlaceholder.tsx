@@ -1,12 +1,12 @@
 import { ImagePlus } from "lucide-react";
 
-export default function ImageUploadBox({ onClick }: { onClick: () => void }) {
+export default function AddImagePlaceholder({ onClick }: { onClick: () => void }) {
     return (
         <div
             className="
-        w-[160px] h-[160px] 
+        w-36 h-28 flex-shrink-0 rounded-xl 
         flex flex-col items-center justify-center
-        border-2 border-dashed rounded-lg
+        border-2 border-dashed
         text-gray-400 hover:text-gray-600
         hover:border-gray-400
         cursor-pointer transition

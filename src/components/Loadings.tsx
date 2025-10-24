@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
-import { ReactElement } from 'react';
+import { ReactNode } from 'react';
 
 
 
@@ -13,7 +13,7 @@ export const UploadingImageLoading = ({ className }: { className?: string }) => 
 }
 
 
-export default function PageLoading({ loading, children }: { loading: boolean, children?: ReactElement }) {
+export default function PageLoading({ loading, children }: { loading: boolean, children?: ReactNode }) {
     return loading ?
         <div className='w-full h-[90vh] flex-1 flex justify-center items-center'>
             {children || "Loading...."}

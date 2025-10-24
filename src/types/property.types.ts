@@ -23,13 +23,13 @@ export type Amenity =
     | "Internet Access"
     | "Electricity"
 
-export type Status = "" | "Sale" | "Rent" | "Lease" | "Sold" | "Rented" | "Leased";
+export type Status = "" | "Sale" | "Rent" | "Lease" | "Sold" | "Rented" | "Leased" | "Short Let";
 export type PackageType = "Free" | "Featured" | "Premium";
 export type Furnishing = "" | "Furnished" | "Semi-Furnished" | "Unfurnished";
 export type Condition = "" | "New" | "Renovated" | "Fairly Used" | "Needs Renovation";
 export type PropertyCategory = "" | "Residential" | "Commercial" | "Land" | "Short Let";
 export type SizeUnit = "sqm" | "sqft" | "plots" | "acres";
-export type PriceFrequency = "" | "Monthly" | "Yearly" | "Dayly" | "Total";
+export type PriceFrequency = "Monthly" | "Yearly" | "Daily" | "Total";
 export type PropertyType =
     ""
     | "Flat"
@@ -71,6 +71,7 @@ export interface PropertyTypes {
     price: number | null;
     priceFrequency: PriceFrequency;
     serviceCharge?: number | null;
+    serviceChargeFrequency?: PriceFrequency;
     agencyFee?: number | null;
     legalFee?: number | null;
     negotiable: boolean;
@@ -111,6 +112,7 @@ export interface PropertyTypes {
     agentPhone: number | null;
     agentEmail: string;
     agentCompany?: string;
+    agentPhoto?: string,
     showContact: boolean
 
     // Meta / Listing Management

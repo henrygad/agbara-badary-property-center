@@ -13,7 +13,7 @@ import {
     SizeUnit,
     Availability,
 } from "../../types/property.types";
-import FormSection from "@/components/ui/FromSection";
+import FormSection from "@/components/FromSection";
 import {
     AMENITIES,
     REGIONAL_TOWNS,
@@ -46,7 +46,7 @@ import { Textarea } from "../ui/textarea";
 import { Checkbox } from "../ui/checkbox";
 import { CustomCalendar } from "../CustomCalader";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import ImageGallery from "../gallery/Index";
+import GalleryModal from "../gallery/Index";
 import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import { showError, showSuccess } from "../ui/toasts";
 import { fiterSEOSlug } from "@/utils";
@@ -108,16 +108,19 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
     // Populate agent details if account type is agent
     useEffect(() => {
         if (user) {
-            setForm((s) => ({ ...s, agentName: user.firstName + " " + user.lastName, agentEmail: user?.email || "", agentPhone: Number(user?.phone || ""), agentCompany: user?.company || "" }));
+            setForm((s) => ({
+                ...s,
+                agentName: user.firstName + " " + user.lastName,
+                agentEmail: user?.authEmail || "",
+                agentPhoto: user?.profileImage?.url || "",
+                agentPhone: Number(user?.phone || ""),
+                agentCompany: user?.company || ""
+            }));
         }
     }, [user, setForm]);
 
 
-    if (loadingForm || !user || loadingUser) return <PageLoading
-        loading={(loadingForm || !user || loadingUser)}
-    >
-        <div className="text-white">loading...</div>
-    </PageLoading>;
+    if (loadingForm || !user || loadingUser) return <PageLoading loading={(loadingForm || !user || loadingUser)}>loading...</PageLoading>;
 
     function saveDraft() {
         const getPropertyDraft = JSON.parse(
@@ -169,7 +172,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
     async function submitNewProperty(payload: PropertyTypes) {
         // Simulate API call
-        const property = await addPropertyDb(payload);       
+        const property = await addPropertyDb(payload);
 
         return property;
     }
@@ -287,7 +290,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
             });
 
             setError({ errorMsg: "", isError: false });
-            
+
             setStep(1);
         } catch (err) {
             const errorMsg = err as { message: string };
@@ -300,11 +303,6 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
             setLoading(false);
         }
     };
-
-
-
-
-
 
 
     return (
@@ -355,10 +353,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Category */}
                             <div>
-                                <Label className="block text-sm font-medium mb-1">
+                                <Label htmlFor="category" className="block text-sm font-medium mb-1">
                                     Category
                                 </Label>
-                                <Select
+                                <Select                                    
                                     value={form.category}
                                     defaultValue={form.category}
                                     onValueChange={(value) =>
@@ -366,6 +364,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     }
                                 >
                                     <SelectTrigger
+                                        id="category"
                                         className={`w-full cursor-pointer
                                         ${error.errorMsg.toLowerCase().includes("category") ? "border-red-600" : ""}
                                         `}
@@ -391,7 +390,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Type */}
                             <div>
-                                <Label className="block text-sm font-medium mb-1">Type</Label>
+                                <Label htmlFor="type" className="block text-sm font-medium mb-1">Type</Label>
                                 <Select
                                     value={form.type}
                                     onValueChange={(value) =>
@@ -399,6 +398,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     }
                                 >
                                     <SelectTrigger
+                                        id="type"
                                         className={`w-full cursor-pointer
                                         ${error.errorMsg.toLowerCase().includes("type") ? "border-red-600" : ""}
                                         `}
@@ -424,12 +424,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Status */}
                             <div>
-                                <Label className="block text-sm font-medium mb-1">Status</Label>
+                                <Label htmlFor="status" className="block text-sm font-medium mb-1">Status</Label>
                                 <Select
                                     value={form.status}
                                     onValueChange={(value) => update("status", value as Status)}
                                 >
                                     <SelectTrigger
+                                        id="status"
                                         className={`w-full cursor-pointer
                                         ${error.errorMsg.toLowerCase().includes("status") ? "border-red-600" : ""}
                                         `}
@@ -455,10 +456,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Description */}
                             <div className="md:col-span-2">
-                                <Label className="block text-sm font-medium mb-1">
+                                <Label htmlFor="description" className="block text-sm font-medium mb-1">
                                     Description
                                 </Label>
                                 <Textarea
+                                    id="description"
                                     placeholder="Provide full description, nearby landmarks, special conditions, etc."
                                     value={form.description}
                                     onChange={(e) => update("description", e.target.value)}
@@ -475,12 +477,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {/* State */}
                             <div>
-                                <Label className="block text-sm font-medium mb-1">State</Label>
+                                <Label htmlFor="state" className="block text-sm font-medium mb-1">State</Label>
                                 <Select
                                     value={form.state}
                                     onValueChange={(value) => update("state", value)}
                                 >
                                     <SelectTrigger
+                                        id="state"
                                         className={`w-full cursor-pointer
                                         ${error.errorMsg.toLowerCase().includes("state") ? "border-red-600" : ""}
                                         `}
@@ -507,12 +510,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* City */}
                             <div>
-                                <Label className="block text-sm font-medium mb-1">City</Label>
+                                <Label htmlFor="city" className="block text-sm font-medium mb-1">City</Label>
                                 <Select
                                     value={form.city}
                                     onValueChange={(value) => update("city", value)}
                                 >
                                     <SelectTrigger
+                                        id="city"
                                         className={`w-full cursor-pointer
                                         ${error.errorMsg.toLowerCase().includes("city") ? "border-red-600" : ""}
                                         `}
@@ -538,11 +542,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Area */}
                             <div>
-                                <Label htmlFor="Area" className="text-sm font-medium mb-1">
+                                <Label htmlFor="area" className="text-sm font-medium mb-1">
                                     Area
                                 </Label>
                                 <Input
-                                    id="Area"
+                                    id="area"
                                     className={`w-full text-sm 
                                         ${error.errorMsg.toLowerCase().includes("area") ? "border-red-600" : ""}
                                         `}
@@ -555,13 +559,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                             {/* Street */}
                             <div>
                                 <Label
-                                    htmlFor="Street"
+                                    htmlFor="street"
                                     className="text-sm font-medium mb-1"
                                 >
                                     Street Address
                                 </Label>
                                 <Input
-                                    id="Street"
+                                    id="street"
                                     value={form.street ?? ""}
                                     onChange={(e) => update("street", e.target.value)}
                                     className="w-full text-sm"
@@ -572,13 +576,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                             {/* Landmark */}
                             <div>
                                 <Label
-                                    htmlFor="Landmark"
+                                    htmlFor="landmark"
                                     className="text-sm font-medium mb-1"
                                 >
                                     Landmark
                                 </Label>
                                 <Input
-                                    id="Landmark"
+                                    id="landmark"
                                     value={form.landmark ?? ""}
                                     onChange={(e) => update("landmark", e.target.value)}
                                     className="w-full text-sm"
@@ -588,11 +592,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Map Coordinates */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="map-coordinates" className="text-sm font-medium mb-1">
                                     Map Coordinates (lat , long)
                                 </Label>
                                 <div className="flex gap-2">
                                     <Input
+                                        id="map-coordinates"
                                         value={form.latitude === null ? "" : form.latitude ?? ""}
                                         onChange={(e) =>
                                             update("latitude", Number(e.target.value))
@@ -618,9 +623,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                             <div className="md:col-span-3 space-y-4">
                                 {/* Price & Frequency */}
                                 <div>
-                                    <Label className="text-sm font-medium mb-1">Price</Label>
+                                    <Label htmlFor="price" className="text-sm font-medium mb-1">Price</Label>
                                     <div className="flex flex-col-reverse sm:flex-row gap-2">
                                         <Input
+                                            id="price"
                                             type="number"
                                             placeholder="600,000"
                                             className={` text-sm
@@ -665,6 +671,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 {/* Negotiable */}
                                 <div className="flex items-center gap-2 my-5">
                                     <Checkbox
+                                        id="negotiable"
                                         checked={form.negotiable}
                                         onCheckedChange={() =>
                                             update("negotiable", !form.negotiable)
@@ -685,10 +692,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 {/* Service Charge & agent fee $ legal fee */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                     <div className="flex flex-col">
-                                        <Label className="text-sm font-medium mb-1">
+                                        <Label htmlFor="service-charge" className="text-sm font-medium mb-1">
                                             Service Charge
                                         </Label>
+                                        <div className="flex flex-col-reverse sm:flex-row gap-2">
                                         <Input
+                                                id="service-charge"
                                             value={
                                                 form.serviceCharge === null
                                                     ? ""
@@ -700,13 +709,43 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                             className=" text-sm"
                                             placeholder="20,000"
                                             type="number"
-                                        />
+                                            />
+                                            <Select
+                                                value={form.serviceChargeFrequency}
+                                                onValueChange={(value) =>
+                                                    update("serviceChargeFrequency", value as PriceFrequency)
+                                                }
+                                            >
+                                                <SelectTrigger
+                                                    className={`w-full sm:w-auto cursor-pointer
+                                                         ${error.errorMsg.toLowerCase().includes("price frequency") ? "border-red-600" : ""}
+                                                    `}
+                                                >
+                                                    <SelectValue
+                                                        placeholder="Frequency"
+                                                        className="text-sm"
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {PRICE_FREQUENCY.map((p) => (
+                                                        <SelectItem
+                                                            className="cursor-pointer text-sm"
+                                                            key={p}
+                                                            value={p}
+                                                        >
+                                                            {p}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     </div>
                                     <div className="flex flex-col">
-                                        <Label className="text-sm font-medium mb-1">
+                                        <Label htmlFor="agency-fee" className="text-sm font-medium mb-1">
                                             Agency Fee
                                         </Label>
                                         <Input
+                                            id="agency-fee"
                                             value={
                                                 form.agencyFee === null ? "" : form.agencyFee ?? ""
                                             }
@@ -719,10 +758,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         />
                                     </div>
                                     <div className="flex flex-col">
-                                        <Label className="text-sm font-medium mb-1">
+                                        <Label htmlFor="legal-fee" className="text-sm font-medium mb-1">
                                             Legal Fee
                                         </Label>
                                         <Input
+                                            id="agency-fee"
                                             value={
                                                 form.legalFee === null ? "" : form.legalFee ?? ""
                                             }
@@ -746,8 +786,9 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {/* Bedrooms */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">Bedrooms</Label>
+                                <Label htmlFor="bedrooms" className="text-sm font-medium mb-1">Bedrooms</Label>
                                 <Input
+                                    id="bedrooms"
                                     type="number"
                                     value={form.bedrooms === null ? "" : form.bedrooms ?? ""}
                                     onChange={(e) => update("bedrooms", Number(e.target.value))}
@@ -759,10 +800,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Bathrooms */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="bathrooms" className="text-sm font-medium mb-1">
                                     Bathrooms
                                 </Label>
                                 <Input
+                                    id="bathrooms"
                                     type="number"
                                     value={form.bathrooms === null ? "" : form.bathrooms ?? ""}
                                     onChange={(e) =>
@@ -776,8 +818,9 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Toilets */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">Toilets</Label>
+                                <Label htmlFor="toilets" className="text-sm font-medium mb-1">Toilets</Label>
                                 <Input
+                                    id="toilets"
                                     type="number"
                                     value={form.toilets === null ? "" : form.toilets ?? ""}
                                     onChange={(e) => update("toilets", Number(e.target.value))}
@@ -789,10 +832,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Parking Space */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="parking-spaces" className="text-sm font-medium mb-1">
                                     Parking Spaces
                                 </Label>
                                 <Input
+                                    id="parking-spaces"
                                     type="number"
                                     value={
                                         form.parkingSpaces === null
@@ -810,10 +854,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Parking Capacity */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="parking-capacity" className="text-sm font-medium mb-1">
                                     Parking Capacity
                                 </Label>
                                 <Input
+                                    id="parking-capacity"
                                     type="number"
                                     value={
                                         form.parkingCapacity === null
@@ -831,7 +876,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Furnishing */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="furnishing" className="text-sm font-medium mb-1">
                                     Furnishing
                                 </Label>
                                 <Select
@@ -840,7 +885,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         update("furnishing", value as Furnishing)
                                     }
                                 >
-                                    <SelectTrigger className="w-full cursor-pointer">
+                                    <SelectTrigger id="furnishing" className="w-full cursor-pointer">
                                         <SelectValue
                                             placeholder="Select furnishing"
                                             className="text-sm"
@@ -862,7 +907,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Condition */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="condition" className="text-sm font-medium mb-1">
                                     Condition
                                 </Label>
                                 <Select
@@ -871,7 +916,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         update("condition", value as Condition)
                                     }
                                 >
-                                    <SelectTrigger className="w-full cursor-pointer">
+                                    <SelectTrigger id="condition" className="w-full cursor-pointer">
                                         <SelectValue
                                             placeholder="Select condition"
                                             className="text-sm"
@@ -893,11 +938,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Property Size */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
-                                    Property Size
+                                <Label htmlFor="size" className="text-sm font-medium mb-1">
+                                    Size
                                 </Label>
                                 <div className="flex flex-col-reverse sm:flex-row gap-2">
                                     <Input
+                                        id="size"
                                         type="number"
                                         value={form.size === null ? "" : form.size ?? ""}
                                         onChange={(e) => update("size", Number(e.target.value))}
@@ -930,10 +976,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Year built */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="year-built" className="text-sm font-medium mb-1">
                                     Year Built
                                 </Label>
                                 <Input
+                                    id="year-built"
                                     type="number"
                                     value={form.yearBuilt === null ? "" : form.yearBuilt ?? ""}
                                     onChange={(e) =>
@@ -946,10 +993,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Floor Level */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="floor-level" className="text-sm font-medium mb-1">
                                     Floor Level
                                 </Label>
                                 <Input
+                                    id="floor-level"
                                     value={
                                         form.floorLevel === null ? "" : form.floorLevel ?? ""
                                     }
@@ -961,10 +1009,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Total Floors */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="total-floor" className="text-sm font-medium mb-1">
                                     Total Floors
                                 </Label>
                                 <Input
+                                    id="total-floor"
                                     type="number"
                                     value={
                                         form.totalFloors === null ? "" : form.totalFloors ?? ""
@@ -979,10 +1028,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Floor Area */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="floor-area" className="text-sm font-medium mb-1">
                                     Floor Area
                                 </Label>
                                 <Input
+                                    id="floor-area"
                                     type="number"
                                     value={form.floorArea === null ? "" : form.floorArea ?? ""}
                                     onChange={(e) =>
@@ -993,14 +1043,14 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 />
                             </div>
 
-                            {/* Amenities    */}
+                            {/* Amenities  */}
                             <div className="md:col-span-3">
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="amenities" className="text-sm font-medium mb-1">
                                     Amenities
                                 </Label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div id="amenities" className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     {AMENITIES.map((amen) => (
-                                        <Label
+                                        <Label                                            
                                             key={amen}
                                             className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950 cursor-pointer"
                                         >
@@ -1031,18 +1081,16 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                         <div className="w-full space-y-6">
                             {/* Images */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="display-imagge" className="text-sm font-medium mb-1">
                                     Display Images
                                 </Label>
-                                <ScrollArea
-                                    className="w-full whitespace-nowrap max-w-[340px] md:max-w-full"
-                                >
-                                    <div className="flex gap-2">
+                                <ScrollArea>
+                                    <div id="display-imagge" className="flex gap-2">
                                         {form.images?.length ?
                                             form.images.map((src, idx) => (
                                                 <DisplayImage
                                                     key={idx}
-                                                    className="w-[160px] h-[160px] rounded border shadow"
+                                                    className="w-36 h-28 flex-shrink-0 rounded-xl"
                                                     src={src}
                                                     alt={src}
                                                     remove={(rsrc) => {
@@ -1055,7 +1103,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                             )) :
                                             null
                                         }
-                                        <ImageGallery
+                                        <GalleryModal
                                             setGetSelected={(img) => update("images", [...form.images, ...img.map(img => img.url)])}
                                         />
                                     </div>
@@ -1065,10 +1113,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Video / Virtual Tour Link */}
                             <div>
-                                <Label className="text-sm font-medium mb-1">
+                                <Label htmlFor="vidoe-url" className="text-sm font-medium mb-1">
                                     Video / Virtual Tour Link (optional)
                                 </Label>
                                 <Input
+                                    id="vidoe-url"
                                     value={form.videoUrl ?? ""}
                                     onChange={(e) => update("videoUrl", e.target.value)}
                                     placeholder="YouTube link or 360 tour URL"
@@ -1082,20 +1131,22 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Agent / Owner details */}
                             <div>
-                                <Label className="text-sm font-medium mb-1 mt-4">
+                                <Label htmlFor="agent" className="text-sm font-medium mb-1 mt-4">
                                     Agent / Owner
                                 </Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Input
+                                        id="agent"
                                         value={form.agentName}
                                         onChange={(e) => update("agentName", e.target.value)}
                                         className="w-full text-sm"
                                         placeholder="Agent name"
                                     />
+
                                     {/* Phone number */}
                                     <div className="flex w-full overflow-hidden rounded border">
                                         <Select defaultValue="+234">
-                                            <SelectTrigger className="rounded-none border-0 border-r px-2 w-[100px] focus-visible:ring-0 cursor-pointer">
+                                            <SelectTrigger className="rounded-none border-0 bg-gray-50 px-2 w-[100px] focus-visible:ring-0 cursor-pointer">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="cursor-pointer">
@@ -1150,21 +1201,21 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Meta / Listing Management */}
                             <div className="flex-1  mt-4">
-                                <Label className="text-base font-medium mt-1">
+                                <Label htmlFor="meta" className="text-base font-medium mt-1">
                                     Meta / Listing Management
                                 </Label>
 
-                                <div className="space-y-4 md:grid md:grid-col-2 md:gap-4 mt-4">
+                                <div id="meta" className="space-y-4 md:grid md:grid-col-2 md:gap-4 mt-4">
                                     {/* SEO Slug */}
                                     <div className="flex-1 flex flex-col col-span-2">
                                         <Label
-                                            htmlFor="seoSlug"
+                                            htmlFor="seo-slug"
                                             className="text-sm font-medium mb-1"
                                         >
                                             SEO Slug
                                         </Label>
                                         <Input
-                                            id="seoSlug"
+                                            id="seo-slug"
                                             placeholder="3-bedroom-flat-agbara"
                                             value={form.seoSlug}
                                             className=" text-sm"
@@ -1178,13 +1229,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     {/* Reference ID */}
                                     <div className="flex flex-col">
                                         <Label
-                                            htmlFor="referenceId"
+                                            htmlFor="reference-id"
                                             className="text-sm font-medium mb-1"
                                         >
                                             Reference ID
                                         </Label>
                                         <Input
-                                            id="referenceId"
+                                            id="reference-id"
                                             placeholder="AGB-20250922-001"
                                             value={form.referenceId}
                                             onChange={(e) => update("referenceId", e.target.value)}
@@ -1193,9 +1244,9 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         />
                                     </div>
 
-                                    {/* Listing Status */}
+                                    {/* Listing Availibility */}
                                     <div className="flex flex-col">
-                                        <Label className="text-sm font-medium mb-1">
+                                        <Label htmlFor="availibility" className="text-sm font-medium mb-1">
                                             Availability
                                         </Label>
                                         <Select
@@ -1204,7 +1255,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                 update("availability", value as Availability)
                                             }
                                         >
-                                            <SelectTrigger className="w-full cursor-pointer">
+                                            <SelectTrigger id="availibility" className="w-full cursor-pointer">
                                                 <SelectValue
                                                     placeholder="Select status"
                                                     className="text-sm"
@@ -1226,7 +1277,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                                     {/* Package Type */}
                                     <div className="flex flex-col">
-                                        <Label className="text-sm font-medium mb-1">
+                                        <Label htmlFor="package-type" className="text-sm font-medium mb-1">
                                             Package Type
                                         </Label>
                                         <Select
@@ -1235,7 +1286,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                 update("packageType", value as PackageType)
                                             }
                                         >
-                                            <SelectTrigger className="w-full cursor-pointer">
+                                            <SelectTrigger id="package-type" className="w-full cursor-pointer">
                                                 <SelectValue
                                                     placeholder="Select package type"
                                                     className="text-sm"
@@ -1258,13 +1309,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     {/* Priority Rank */}
                                     <div className="flex flex-col">
                                         <Label
-                                            htmlFor="priorityRank"
+                                            htmlFor="priority-rank"
                                             className="text-sm font-medium mb-1"
                                         >
                                             Priority Rank
                                         </Label>
                                         <Input
-                                            id="priorityRank"
+                                            id="priority-rank"
                                             type="number"
                                             min={1}
                                             max={10}
@@ -1287,7 +1338,8 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     {/* Date Listed */}
                                     <div className="col-span-2 w-full">
                                         <Label htmlFor="date" className="text-sm font-medium mb-1">Date Listed</Label>
-                                        <CustomCalendar
+                                        <CustomCalendar                                        
+                                            id="date"
                                             date={form.createdAt}
                                             setDate={(date) => update("createdAt", date)}
                                         />
@@ -1300,14 +1352,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                 {/* Preview & Confirm */}
                 {step === 5 && (
-                    <FormSection title="Preview Your Listing Before Submiting">
-                        <Property
-                            property={form}
-                            viewer={accountType}
-                            showFull={true}
-                            placeViewing="PREVIEW"
-                        />
-                    </FormSection>
+                    <Property
+                        property={form}
+                        viewer={accountType}                       
+                        placeViewing="PREVIEW"
+                    />
                 )}
 
                 {/* Navigation buttons */}
@@ -1339,7 +1388,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                 {/* Create | Update new listing button */}
                 {step === 5 &&
                     <div className="sticky bottom-4 left-0 right-0">
-                        <div className="w-full h-full flex justify-center">
+                        <div className="w-full h-full flex justify-center px-4">
                             <FormButton
                                 loading={loading}
                                 isDocEdited={isDocEdited}

@@ -10,7 +10,7 @@ type Props = {
 const UploadImage = ({ multiple, accept, inputRef, onDrop, handleUpload }: Props) => {
   return (
     <div
-      className="flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 text-center text-gray-500 hover:border-gray-400"
+      className="flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 text-center text-gray-500 hover:border-gray-400"
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
     >

@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
     // optional: caching time (in seconds)
     minimumCacheTTL: 60 * 60, // <-- moved here, not inside experimental
