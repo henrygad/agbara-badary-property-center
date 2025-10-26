@@ -1,1 +1,124 @@
-export default function Contact() { return <h1>Contact Us</h1> }
+"use client";
+
+import ContactForm from "@/components/ContactForm";
+import FAQ from "@/components/FAQ";
+import SocialMedia from "@/components/SocialMedia";
+import { Clock3, Headset, Mail, MapPinHouse, PhoneCall } from "lucide-react";
+import dynamic from "next/dynamic";
+
+export default function Contact() {
+
+
+    // Import the Map dynamically (no SSR)
+    const ContactMap = dynamic(() => import("@/components/ContactMap"), {
+        ssr: false,
+    });
+
+
+
+    return <div>
+
+        {/* Hero */}
+        <section className="py-10 md:py-20 bg-red-600 text-white rounded-sm">
+            <div className="mx-auto px-6 text-center">
+                <div className="flex justify-center mb-6">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 flex items-center space-x-2 text-sm">
+                        <Headset size={20} />
+                        <span className="text-sm">24/7 Customer Support</span>
+                    </div>
+                </div>
+                <h2 className="text-2xl md:text-6xl font-bold mb-4 leading-tight">Get in Touch With Our Expert Team</h2>
+                <p className="max-w-3xl mx-auto text-base mb-8">Our experienced professionals are here to guide you through every step of your real estate journey in Agbara Badagary.</p>
+            </div>
+        </section>
+
+        {/* Contact location */}
+        <section className="py-10 md:py-20">
+            <div className="mx-auto px-6">
+                <div className="grid lg:grid-cols-2 gap-12">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+                        <h2 className="text-2xl font-bold mb-8 text-primary">Contact Information</h2>
+                        <div className="space-y-8">
+                            <div className="flex items-start space-x-4">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                    <MapPinHouse size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Office Address</h3>
+                                    <p className="text-gray-600 text-sm">Plot 45, Agbara Industrial Estate <br />Badagary, Lagos State, Nigeria</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start space-x-4">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                    <PhoneCall size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Phone Numbers</h3>
+                                    <p className="text-gray-600 text-sm">+234 812 345 6789</p>
+                                    <p className="text-gray-600 text-sm">+234 908 765 4321</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start space-x-4">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                    <Mail size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Email Address</h3>
+                                    <p className="text-gray-600 text-sm">info@agbarabadagary.com</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start space-x-4">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                    <Clock3 size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Office Hours</h3>
+                                    <p className="text-gray-600 text-sm">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                                    <p className="text-gray-600 text-sm">Saturday: 10:00 AM - 4:00 PM</p>
+                                    <p className="text-gray-600 text-sm">Sunday: Closed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="border-t border-gray-200 dark:border-gray-700 mt-8 pt-6">
+                            <h3 className="font-semibold text-base text-gray-900 dark:text-white mb-4">Follow Us</h3>
+                            <div className="flex items-center space-x-4">
+                                <SocialMedia />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-200 dark:bg-gray-700 rounded-xl shadow-md flex min-h-[420px]">
+                       <ContactMap />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* FAQs */}
+        <section className="py-10 md:py-20">
+            <div className="container mx-auto px-6 max-w-4xl">
+                <div className="text-center mb-12">
+                    <h2 className="text-2xl md:text-4xl font-bold text-primary">Frequently Asked Questions</h2>
+                    <p className="text-gray-600 text-sm mt-2">Quick answers to common questions about our services.</p>
+                </div>                
+                <div>
+                    <FAQ full={false} />                    
+                </div>
+            </div>
+        </section>
+
+        {/* Contact form */}
+        <section className="py-10 md:py-20">
+            <div className="mx-auto px-2 md:px-6 max-w-4xl">
+                <div className="bg-white px-4 py-10 md:p-12 rounded-xl shadow-md">
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl md:text-4xl font-bold text-primary">Send Us a Message</h2>
+                        <p className="text-gray-600 text-sm mt-2">{"Fill out the form below and we'll get back to you within 24 hours."}</p>
+                    </div>
+                    <ContactForm />                   
+                </div>
+            </div>
+        </section>
+        
+    </div>
+
+}

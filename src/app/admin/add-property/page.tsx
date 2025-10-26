@@ -23,7 +23,7 @@ export default function AddProperty() {
             parsed.id = "";
             parsed.referenceId = "";
 
-            const clearOut = setTimeout(() => {
+            setTimeout(() => {
                 setForm(() => parsed);
                 localStorage.removeItem("duplicateProperty");                
                 setLoadingForm(false);               

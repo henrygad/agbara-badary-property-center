@@ -83,9 +83,9 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 {/* Title and price */}
                 <h1 className="text-3xl font-bold">{property.title}</h1>
                 <div className="mt-2 space-y-2">
-                    <span className="flex gap-2 text-2xl font-bold">
-                        <p className="text-primary">{formatCurrency(property.price)}</p> / {property.priceFrequency}
-                    </span>
+                    <div className="flex gap-2 text-base mt-2">
+                        <p className="text-primary text-2xl font-semibold">{formatCurrency(property.price)}</p> / <span className='text-muted-foreground'>{property.priceFrequency}</span>
+                    </div> 
                     {property.negotiable && <Badge variant="outline" className="text-sm text-primary ">Price is Negotiable</Badge>}
                 </div>
 
@@ -96,12 +96,12 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                         <div className="p-4 grid sm:grid-cols-2 gap-3">
                             <div className="flex items-center gap-2">
                                 <MapPin className="w-4 h-4 text-muted-foreground" />
-                                <span>{placeViewing === "PREVIEW" && property.street + ","} {property.area}, {property.city}, {property.state}</span>
+                                <span className='text-base'>{placeViewing === "PREVIEW" && property.street + ","} {property.area}, {property.city}, {property.state}</span>
                             </div>
                             {property.landmark && (
                                 <div className="flex items-center gap-2">
                                     <MapPin className="w-4 h-4 text-muted-foreground" />
-                                    <span>Landmark: {property.landmark}</span>
+                                    <span className='text-base1'>Landmark: {property.landmark}</span>
                                 </div>
                             )}
                         </div>
@@ -134,7 +134,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                                 Virtual Tour
                             </TabsTrigger>
                         </TabsList>
-                        <ScrollArea className="min-h-[100px] max-h-[400px] w-full">
+                        <ScrollArea className="min-h-[200px] max-h-[400px] w-full">
                             <TabsContent value="description">
                                 <p className="text-base font-normal">{property.description}</p>
                             </TabsContent>
@@ -159,7 +159,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 <div className="mt-8">
                     <h2 className="text-xl mb-1 font-semibold">Details</h2>
                     <CustomCard>
-                        <div className="p-4 grid md:grid-cols-2 gap-6">
+                        <div className="p-4 grid sm:grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
                             {property.bedrooms && (
                                 <div className="flex shrink-0 items-center gap-2">
                                     <Bed className="w-4 h-4 text-muted-foreground" />
@@ -252,12 +252,10 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                     <div>
                         <h2 className="text-xl mb-1 font-semibold mt-8">Amenities</h2>
                         <CustomCard>
-                            <div className="p-4">
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="p-4 grid sm:grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">                                
                                     {property.amenities.map((a: string, i: number) => (
                                         <Badge key={i} variant="secondary">{a}</Badge>
-                                    ))}
-                                </div>
+                                    ))}                              
                             </div>
                         </CustomCard>
                     </div> :

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Montserrat, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
 import GlobalLayout from "@/components/GlobalLayout";
+import { Suspense } from "react";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -35,12 +35,11 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${poppins.variable} antialiased`}
       >
+        <Suspense fallback={<div>Loading from suspense...</div>}>
         <GlobalLayout>{children}</GlobalLayout>
-        <Toaster richColors closeButton position="top-right" duration={5000} />
-      <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
-        strategy="beforeInteractive"
-        />
+          <Toaster richColors closeButton position="top-right" duration={5000} />      
+        </Suspense>
+
      </body>   
     </html>
   );

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
     Amenity,
     Condition,
@@ -13,7 +13,6 @@ import {
     SizeUnit,
     Availability,
 } from "../../types/property.types";
-import FormSection from "@/components/FromSection";
 import {
     AMENITIES,
     REGIONAL_TOWNS,
@@ -59,6 +58,7 @@ import useUnsavedChanges from "@/hooks/useUnsavedChanges";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import Property from "../property/Index";
 import { useUserStore } from "@/store/useUserStore";
+import { Card } from "../ui/card";
 
 type Props = {
     accountType: "ADMIN" | "AGENT"
@@ -1435,3 +1435,15 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
     );
 };
 
+
+function FormSection({ title, children }: { title: string, children: ReactNode }){
+    return <section className="w-full h-auto">
+        <Card className="shadow-sm py-6 px-4 md:px-6 rounded-sm text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-900">
+            <h2 className="text-lg text-wrap font-semibold uppercase">{title}</h2>
+            <>
+                {children}
+            </>
+
+        </Card>
+    </section>;
+};

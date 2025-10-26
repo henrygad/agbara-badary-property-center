@@ -4,7 +4,6 @@ import PropertyFormEditor from "@/components/add_property/Index";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import { PropertyTypes } from "@/types/property.types";
 import { useEffect, useState } from "react";
-import { clearTimeout } from "timers";
 
 export default function EditProperty() {
   const { setForm } = usePropertyStore();
@@ -21,7 +20,7 @@ export default function EditProperty() {
 
       const parsed = JSON.parse(update) as PropertyTypes;
       
-      const clearOut = setTimeout(() => {
+       setTimeout(() => {
         setForm(() => parsed);
         localStorage.removeItem("updateProperty");        
         setLoadingForm(false);

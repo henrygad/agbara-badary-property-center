@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import DisplayImage from "./DisplayImage";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
-import useLockScroll from "@/hooks/useLockScroll";
+import { useModal } from "@/hooks/useModal";
 
 interface PropertyImageGalleryProps {
     images: string[];
@@ -14,8 +14,7 @@ interface PropertyImageGalleryProps {
 
 export default function ImageGallery({ images, title }: PropertyImageGalleryProps) {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-
-    useLockScroll({ open: selectedIndex !== null });
+    const { open, handleModal } = useModal();
 
     return (
         <div className="w-full">
@@ -25,14 +24,16 @@ export default function ImageGallery({ images, title }: PropertyImageGalleryProp
                 {images.map((src, i) => (
                     <div
                         key={i}
-                        onClick={() => setSelectedIndex(i)}
+                        onClick={() => {
+                            setSelectedIndex(i);
+                            handleModal(true);
+                        }}
                         className="h-auto w-auto"
                     >
-                        <DisplayImage
-                            key={i}
+                        <DisplayImage                           
                             src={src}
                             alt={`${title ?? "Property"} image ${i + 1}`}
-                            useRemove={false}
+                            useRemove={false}                                                        
                             className="w-36 h-28 flex-shrink-0 rounded-xl cursor-pointer"
                         />
                     </div>
@@ -41,7 +42,8 @@ export default function ImageGallery({ images, title }: PropertyImageGalleryProp
 
             {/* Framer Motion Modal */}
             <AnimatePresence>
-                {selectedIndex !== null && (
+                {open &&
+                    selectedIndex !== null && (
                     <motion.div
                         key="overlay"
                         initial={{ opacity: 0 }}
@@ -49,12 +51,18 @@ export default function ImageGallery({ images, title }: PropertyImageGalleryProp
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.25 }}
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
-                        onClick={() => setSelectedIndex(null)}
+                        onClick={() => {
+                            setSelectedIndex(null);
+                            handleModal(false);
+                        }}
                     >
                         {/* Close button */}
                         <button
                             type="button"
-                            onClick={() => setSelectedIndex(null)}
+                            onClick={() => {
+                                setSelectedIndex(null);
+                                handleModal(false);
+                            }}
                             className="absolute top-4 left-4 text-white hover:text-gray-300 transitionbg-black/90 backdrop-blur-sm rounded-2xl cursor-pointer z-50"
                         >
                             <X size={20} />

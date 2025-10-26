@@ -15,19 +15,17 @@ import { DEFAULT_PROPERTY_FORM } from "@/components/add_property/defaultData";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  
-  const { setUser, setLoading: setAdminLoading} = useUserStore();
+
+  const { setUser, setLoading: setAdminLoading } = useUserStore();
   const {
     setLoading: setPropertyLoading,
-    setProperties,    
+    setProperties,
     setForm,
   } = usePropertyStore();
   const { setLoading: setImageLoading, setImages } = useImageStore();
 
-
   // Fetch Admin datas
   useEffect(() => {
-
     const fetchAdmin = async () => {
       setAdminLoading(true);
       try {
@@ -55,7 +53,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const fetchImages = async () => {
       setImageLoading(true, false);
       try {
-        const images = await getImagesDb();       
+        const images = await getImagesDb();
         if (images) setImages(images);
       } catch (error) {
         console.error("Error fetching images:", error);
@@ -64,23 +62,32 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       }
     };
 
-
     fetchAdmin();
     fetchImages();
     fetchProperties();
-  }, [setImageLoading, setImages, setPropertyLoading, setProperties, setUser, setAdminLoading]);
-
+  }, [
+    setImageLoading,
+    setImages,
+    setPropertyLoading,
+    setProperties,
+    setUser,
+    setAdminLoading,
+  ]);
 
   useEffect(() => {
     // If we not in add-property or edit-property or review-property page
     // Clean setForm in property store
-    if (!pathname.includes("add-property") && !pathname.includes("edit-property") && !pathname.includes("review-property")) {
+    if (
+      !pathname.includes("add-property") &&
+      !pathname.includes("edit-property") &&
+      !pathname.includes("review-property")
+    ) {
       setForm(() => DEFAULT_PROPERTY_FORM);
     }
-  }, [pathname, setForm])
+  }, [pathname, setForm]);
 
   return (
-    <div className="flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">
+    <div className="break-words text-wrap flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">
       <Sidebar />
       <div className="md:ml-64 flex-1">
         <Navbar />
@@ -92,7 +99,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             {/* <p className="text-sm">
               &copy; copy right Agbara Badagry Property Center
             </p> */}
-          </div>         
+          </div>
         </footer>
       </div>
     </div>

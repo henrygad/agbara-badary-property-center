@@ -127,4 +127,6 @@ export interface PropertyTypes {
     // others
     draftId?: string
     views?: string[]
+    // isFake: boolean,
+    //accountType: "Admin" | "Agent"
 }

@@ -77,7 +77,7 @@ export default function TableDisplay({ p, selected, setSelected = () => { } }: P
             </td>
             {/* availability */}
             <td className="px-4 py-4">
-                <Availability availability={p.availability} />
+                <Availability placeViewing="PREVIEW" availability={p.availability} />
             </td>
             <td className="px-4 py-4 min-w-[180px]">
                 <p className='line-clamp-1 text-sm'>{p.area}{" "}{p.city}{", "}{p.state}</p>
