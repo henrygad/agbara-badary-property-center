@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
 import GlobalLayout from "@/components/GlobalLayout";
 import { Suspense } from "react";
+import CookieNotice from "@/components/CookieNotice";
+import SuspenseLoader from "@/components/loaders/SuspenseLoader";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -30,17 +32,19 @@ export default function RootLayout({
   children: React.ReactNode;
   }) {
 
+
   return (
-    <html lang="en">    
+    <html lang="en">
       <body
         className={`${montserrat.variable} ${poppins.variable} antialiased`}
       >
-        <Suspense fallback={<div>Loading from suspense...</div>}>
-        <GlobalLayout>{children}</GlobalLayout>
-          <Toaster richColors closeButton position="top-right" duration={5000} />      
+        <Suspense fallback={<SuspenseLoader loading={true}></SuspenseLoader>}>
+          <GlobalLayout>{children}</GlobalLayout>
+          <CookieNotice />          
+          <Toaster richColors closeButton position="top-right" duration={5000} />
         </Suspense>
 
-     </body>   
+      </body>
     </html>
   );
 }

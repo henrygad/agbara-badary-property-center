@@ -3,29 +3,28 @@
 import {
     Drawer,  
     DrawerContent,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerDescription,
 } from "@/components/ui/drawer";
-import { ReactElement } from "react";
+import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
 type Props = {
     open: boolean
     setOpen: (open: boolean) => void
-    children: ReactElement,   
+    children: ReactNode,
+    className?: string
 }
 
 
-export default function Modal({ open, setOpen, children }: Props) {
+export default function Modal({ open, setOpen, children, className = "" }: Props) {
     
     return (
         <Drawer open={open} onOpenChange={setOpen} >         
-            <DrawerContent className="text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">                                         
-                <DrawerHeader className="hidden">
-                    <DrawerTitle></DrawerTitle>   
-                    <DrawerDescription></DrawerDescription>
-                </DrawerHeader>
-                   {children}                                
+            <DrawerContent
+                className={cn("text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 p-0", className)}
+            >
+                {children}    
+                
+
             </DrawerContent>
         </Drawer>
     );   

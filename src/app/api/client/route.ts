@@ -3,17 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET(req: NextRequest) {  
-    const DNS = process.env.NEXT_PUBLIC_APP_DSN;
+    const DNS = process.env.NEXT_PUBLIC_APP_DSN || "agbarabadagrypropertycenter.com";
     const existing =  getCookieFromClient(req);
 
-    const res = NextResponse.json({ ok: true });
+    const res = NextResponse.json({ success: true, message: "Welcome client!" });
 
     if (existing) {
         // cookie exists — nothing to do
         return res;
     }
 
-    const clientId = uuidv4();
+    const clientId = uuidv4();    
 
     // cookie options:
     // __Host- prefix recommended if setting from root and using Secure + Path="/"

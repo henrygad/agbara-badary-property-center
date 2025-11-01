@@ -5,21 +5,19 @@ import FAQ from "@/components/FAQ";
 import SocialMedia from "@/components/SocialMedia";
 import { Clock3, Headset, Mail, MapPinHouse, PhoneCall } from "lucide-react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 export default function Contact() {
-
 
     // Import the Map dynamically (no SSR)
     const ContactMap = dynamic(() => import("@/components/ContactMap"), {
         ssr: false,
     });
 
-
-
     return <div>
 
         {/* Hero */}
-        <section className="py-10 md:py-20 bg-red-600 text-white rounded-sm">
+        <section className="py-10 md:py-20 bg-primary text-white md:rounded-sm">
             <div className="mx-auto px-6 text-center">
                 <div className="flex justify-center mb-6">
                     <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 flex items-center space-x-2 text-sm">
@@ -27,8 +25,8 @@ export default function Contact() {
                         <span className="text-sm">24/7 Customer Support</span>
                     </div>
                 </div>
-                <h2 className="text-2xl md:text-6xl font-bold mb-4 leading-tight">Get in Touch With Our Expert Team</h2>
-                <p className="max-w-3xl mx-auto text-base mb-8">Our experienced professionals are here to guide you through every step of your real estate journey in Agbara Badagary.</p>
+                <h2 className="text-2xl font-semibold mb-4">Get in Touch With Our Expert Team</h2>
+                <p className="max-w-3xl mx-auto text-base">Our experienced professionals are here to guide you through every step of your real estate journey in Agbara Badagary.</p>
             </div>
         </section>
 
@@ -102,6 +100,9 @@ export default function Contact() {
                 </div>                
                 <div>
                     <FAQ full={false} />                    
+                    <div className="flex justify-end items-center mt-4">
+                        <Link href="/faq" className="text-base text-primary font-medium">See All FAQ</Link>
+                    </div>
                 </div>
             </div>
         </section>

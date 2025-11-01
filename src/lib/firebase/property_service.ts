@@ -35,10 +35,9 @@ export async function getPropertyByIdDb(id: string) {
 export async function addPropertyDb(property: PropertyTypes) {
     try {
         // Normalize payload before saving
-        const normalized = {
-            ...property,                                            
+        const normalized = {                                                
             ...Object.fromEntries(
-                Object.entries(property).map(([k, v]) => [k, v === undefined ? null : v])),                                  
+                Object.entries(property).map(([k, v]) => [k, v === undefined ? null : v])) as PropertyTypes,                                  
             updatedAt: serverTimestamp(),
         };
 

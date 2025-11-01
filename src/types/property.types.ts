@@ -109,7 +109,7 @@ export interface PropertyTypes {
 
     // Agent Info
     agentName: string;
-    agentPhone: number | null;
+    agentPhone: string | null;
     agentEmail: string;
     agentCompany?: string;
     agentPhoto?: string,
@@ -127,6 +127,6 @@ export interface PropertyTypes {
     // others
     draftId?: string
     views?: string[]
-    // isFake: boolean,
-    //accountType: "Admin" | "Agent"
+    isFake?: boolean,
+    accountType: "Admin" | "Agent"| ""
 }

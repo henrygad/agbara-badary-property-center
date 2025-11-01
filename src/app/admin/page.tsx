@@ -3,10 +3,9 @@
 import MetricCard from "@/components/MetricCard";
 import TableDisplay from "@/components/property/TableDisplay";
 import { Button } from "@/components/ui/button";
-// import { usePropertyStore } from "@/store/usePropertyStore";
 import { Building2, Clock, Inbox, Users, Plus } from "lucide-react";
 import { useMemo } from "react";
-import { sampleProperties } from "@/data/property";
+import { usePropertyStore } from "@/store/usePropertyStore";
 
 const Metrics = [
     {
@@ -48,9 +47,12 @@ const Metrics = [
 ];
 
 export default function AdminDashboard() {
-    // const { properties, loading, loadingMore } = usePropertyStore();
+    const { properties, loading } = usePropertyStore();
 
-    const onlyPeningProperties = useMemo(() => sampleProperties.filter(p => p.availability === "Pending" || p.availability === "Reviewing"), [])
+    const onlyPeningProperties = useMemo(() =>
+        properties.filter(p => p.availability === "Pending" || p.availability === "Reviewing"),
+        [properties]
+    );
 
     return <div className="h-auto w-full">
         {/* Key Metric */}
@@ -114,7 +116,7 @@ export default function AdminDashboard() {
             <h2 className="text-xl font-semibold mb-2 text-text-light dark:text-text-dark">
                 Performance Metrics
             </h2>
-            <div className="mb-8 mt-6">
+            {!loading ? <div className="mb-8 mt-6">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                     Listings requiring your attention
                 </p>
@@ -149,7 +151,9 @@ export default function AdminDashboard() {
                     </table>
                 </div>
 
-            </div>
+            </div> :
+                <div>loading...</div>
+            }
             <div className="mb-8">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                     Agent accounts requiring your attention

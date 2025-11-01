@@ -18,24 +18,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RotateCcw } from "lucide-react";
 import { CONDITION, FURNISHING, PROPERTY_CATEGORIES, PROPERTY_TYPES } from "./add_property/defaultData";
-import { PropertyTypes } from "@/types/property.types";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
+import { SearchTypes } from "@/types/search.types";
 
-
-type SearchForm = {
-    status: PropertyTypes["status"];
-    location: string;
-    type: string;
-    bedrooms: string;
-    toilets: string;
-    minPrice: string;
-    maxPrice: string;
-    furnishing: string;
-    condition: string;
-    category: string;
-};
-
+const dafaultData: SearchTypes = {
+    status: "Sale",
+    location: "",
+    type: "",
+    bedrooms: "",
+    toilets: "",
+    minPrice: "",
+    maxPrice: "",
+    furnishing: "",
+    condition: "",
+    category: "",
+}
 
 type Props = {
     open?: boolean,
@@ -43,18 +41,7 @@ type Props = {
 }
 
 export default function SearchForm({ setOpen = () => null }: Props) {
-    const [search, setSearch] = useState<SearchForm>({
-        status: "Sale",
-        location: "",
-        type: "",
-        bedrooms: "",
-        toilets: "",
-        minPrice: "",
-        maxPrice: "",
-        furnishing: "",
-        condition: "",
-        category: "",
-    });
+    const [search, setSearch] = useState<SearchTypes>(dafaultData);
     const router = useRouter();
 
     const [showMore, setShowMore] = useState(false);
@@ -82,7 +69,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
     // Handle field change
 
 
-    const handleChange = (field: keyof SearchForm, value: string) => {
+    const handleChange = (field: keyof SearchTypes, value: string) => {
         setSearch((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -104,9 +91,29 @@ export default function SearchForm({ setOpen = () => null }: Props) {
 
     // Handle submit
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();        
-        if (!search.status || !search.status.trim()) return;
-        const params = new URLSearchParams({ ...search }).toString();
+        e.preventDefault();
+        if (!search || !search.status) return;
+
+        // Build URLSearchParams from 'search', skipping empty values and handling arrays
+        const paramsObj = new URLSearchParams();
+
+        Object.entries(search).forEach(([key, val]) => {
+            if (val === undefined || val === null) return;
+            if (Array.isArray(val)) {
+                val.forEach((item) => {
+                    if (item !== undefined && item !== null && item !== "") {
+                        paramsObj.append(key, String(item));
+                    }
+                });
+            } else {
+                if (val !== "") {
+                    paramsObj.append(key, String(val));
+                }
+            }
+        });
+
+        const params = paramsObj.toString();
+
         setOpen(false);
         setTimeout(() => {
             router.push(`/search?${params}`);
@@ -148,7 +155,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                         value={search.location}
                         onChange={(e) => handleChange("location", e.target.value)}
                         placeholder="Enter state, city, or area"
-                        className="text-sm w-full p-3"
+                        className="text-sm w-full py-3 px-4 rounded-full"
                     />
                 </div>
 

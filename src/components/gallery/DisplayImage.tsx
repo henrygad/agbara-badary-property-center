@@ -111,8 +111,8 @@ const DisplayImage = ({ src, alt = "Property", type = "Property", imageObjectCov
 
 const Placeholder = ({ type }: { type: "Profile" | "Property" }) => {
 
-    if (type === "Profile") return <User className="w-10 h-10 text-gray-400" />;
-    return <ImageIcon className="w-10 h-10 text-gray-400" />;
+    if (type === "Profile") return <User className="w-full h-full text-gray-400" />;
+    return <ImageIcon className="w-full h-full text-gray-400" />;
 };
 
 export default DisplayImage;

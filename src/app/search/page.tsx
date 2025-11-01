@@ -1,11 +1,10 @@
 "use client";
 
 import ClientCard from '@/components/property/ClientCard'
-import { sampleProperties } from '@/data/property'
-import { ChevronLeft, SearchIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { SearchIcon } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import {
-  AlertDialog,  
+  AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -14,21 +13,71 @@ import {
 } from "@/components/ui/alert-dialog"
 import SearchForm from '@/components/SearchForm';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { searchPropertiesDb } from '@/lib/firebase/search_service';
+import { PropertyTypes } from '@/types/property.types';
+import ReturnBack from '@/components/ReturnBack';
+import PageLoading from '@/components/loaders/PageLoader';
 
 export default function Search() {
-  const router = useRouter();
+  const query = useSearchParams();
   const [openSearchForm, setOpenSearchForm] = useState(false);
+
+  const [results, setResult] = useState<PropertyTypes[]>([]);
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+
+    const status = query.get("status");
+    const location = query.get("location");
+    const type = query.get("type");
+    const bedrooms = query.get("bedrooms");
+    const toilets = query.get("toilets");
+    const minPrice = query.get("minPrice");
+    const maxPrice = query.get("maxPrice");
+    const furnishing = query.get("furnishing");
+    const condition = query.get("condition");
+    const category = query.get("category");
+
+    async function fetchSearch() {
+      try {
+
+        const ps = await searchPropertiesDb({
+          status: status || undefined,
+          type: type || undefined,
+          bedrooms: bedrooms || undefined,
+          toilets: toilets || undefined,
+          minPrice: minPrice || undefined,
+          maxPrice: maxPrice || undefined,
+          furnishing: furnishing || undefined,
+          condition: condition || undefined,
+          category: category || undefined,
+          location: location || undefined,
+        });
+
+        if (ps.length) {
+          setResult(ps.filter(p => p.availability === "Accepted"));
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+
+    }
+
+    if (status) {
+      fetchSearch();
+    }
+  }, [query]);
+
+  if (loading) return <PageLoading loading={loading} />
 
   return (
     <div className='w-full p-2'>
       <menu className="w-full mb-4">
-        <button
-          className="text-primary font-medium text-nowrap whitespace-pre flex items-center"
-          onClick={() => router.back()}
-        >
-          <ChevronLeft size={30} /> Return back
-        </button>
+        <ReturnBack />
       </menu>
       <div className='w-full mb-4'>
         <AlertDialog open={openSearchForm} onOpenChange={setOpenSearchForm}>
@@ -48,7 +97,7 @@ export default function Search() {
             </ScrollArea>
 
             <AlertDialogFooter>
-              <AlertDialogCancel type='button'>Close</AlertDialogCancel>              
+              <AlertDialogCancel type='button'>Close</AlertDialogCancel>
             </AlertDialogFooter>
 
           </AlertDialogContent>
@@ -62,15 +111,17 @@ export default function Search() {
             <h2 className="text-2xl font-bold">
               Search Result
             </h2>
-            <p className='text-xs text-muted-foreground'>Found 248 properties</p>
+            <p className='text-xs text-muted-foreground'>Found {results.length} properties</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {
-              sampleProperties?.length ?
-                sampleProperties.map((p) =>
+              results?.length ?
+                results.map((p) =>
                   <ClientCard key={p.id} property={p} />
                 ) :
-                <div>loading</div>
+                <div>
+                  <p>No result found</p>
+                </div>
             }
           </div>
         </div>

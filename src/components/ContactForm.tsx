@@ -30,11 +30,13 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "./ui/spinner";
+import { showError } from "./ui/toasts";
+import ReCAPTCHA from "react-google-recaptcha";
 
 
 const contactSchema = z.object({
     name: z.string().min(2, "Full name is required"),
-    email: z.string().email("Invalid email address"),
+    email: z.email("Invalid email address"),
     phone: z
         .string()
         .optional()
@@ -49,6 +51,8 @@ const contactSchema = z.object({
 type ContactFormValues = z.infer<typeof contactSchema>;
 
 export default function ContactForm() {
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const [captchaError, setCaptchaError] = useState("");
     const [openDialog, setOpenDialog] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -63,17 +67,63 @@ export default function ContactForm() {
         },
     });
 
-    const onSubmit = (data: ContactFormValues) => {
+    const verifyCaptchaToken = async () => {
+        setCaptchaError("");
+
+        if (!captchaToken) {
+            setCaptchaError("Please verify that you're not a robot.");
+            throw new Error("Please verify that you're not a robot.")
+        }
+        // Send captchaToken to backend for verification
+        const res = await fetch("/api/auth/reCAPTCHA", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: captchaToken }),
+        });
+
+        const captchaData = await res.json();
+        if (!captchaData?.success) {
+            setCaptchaError("reCAPTCHA verification failed. Try again.");
+            throw new Error("reCAPTCHA verification failed. Try again.")
+        }
+
+        return true;
+    };    
+
+    const onSubmit = async (data: ContactFormValues) => {
         setLoading(true);
-        console.log("Form Submitted:", data);
-        form.reset();
-        setOpenDialog(true);
+        try {
+
+            await verifyCaptchaToken();
+            
+            const payload = data;
+            const res = await fetch("/api/client/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                setOpenDialog(true);
+                form.reset();                            
+            } else {
+                showError("Failed to send message. Please try again later.")
+            }
+        } catch (error) {
+            console.error(error);
+            console.log(error);
+            showError("Something went wrong. Please try again")
+        } finally {
+            setLoading(false);
+
+        }
     };
 
     return (
         <>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 text-sm">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                     {/* Fullname */}
                     <FormField
                         control={form.control}
@@ -138,9 +188,9 @@ export default function ContactForm() {
                                     <SelectContent>
                                         <SelectItem value="General Inquiry">General Inquiry</SelectItem>
                                         <SelectItem value="Property Listing">Property Listing</SelectItem>
-                                        <SelectItem value="Booking a Viewing">Booking a Viewing</SelectItem>
-                                        <SelectItem value="Legal Support">Legal Support</SelectItem>
+                                        <SelectItem value="Booking a Viewing">Booking a Viewing</SelectItem>                                        
                                         <SelectItem value="Technical Issue">Technical Issue</SelectItem>
+                                        <SelectItem value="Legal Support">Legal Support</SelectItem>
                                         <SelectItem value="Partnership or Advertising">
                                             Partnership / Advertising
                                         </SelectItem>
@@ -174,10 +224,23 @@ export default function ContactForm() {
                         )}
                     />
 
+                    {/* <ReCAPTCHA */}
+                    <div className="my-6 flex justify-center">
+                        <ReCAPTCHA
+                            sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
+                            onChange={(token: string | null) => setCaptchaToken(token)}
+                        />
+                    </div>
+
+                    {captchaError && (
+                        <p className="text-red-600 text-sm mb-3">{captchaError}</p>
+                    )}
+
+                    {/* Submit button */}
                     <Button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-red-700 hover:bg-red-800"
+                        className="w-full bg-primary hover:bg-red-600"
                     >
                         {loading ? <><Spinner /> Submit...</> : "Submit"}
                     </Button>
@@ -207,3 +270,4 @@ export default function ContactForm() {
         </>
     );
 }
+

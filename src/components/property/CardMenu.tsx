@@ -42,10 +42,7 @@ export function CardMenu({ property }: { property: PropertyTypes }) {
             <DropdownMenuContent align="end">
                 {/* Basic Actions */}
                 <DropdownMenuItem>View</DropdownMenuItem>
-                <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => handleEdit(property)}
-                >Edit</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => handleEdit(property)}>Edit</DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => handleDuplicate(property)}>Duplicate</DropdownMenuItem>

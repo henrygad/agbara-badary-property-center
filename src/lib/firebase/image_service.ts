@@ -1,27 +1,38 @@
 
 import ImageTypes from "@/types/image.types"
 import { db } from "./config"
-import { collection, addDoc, serverTimestamp, getDocs, getDoc, doc, deleteDoc} from "firebase/firestore"
+import { collection, addDoc, getDocs, getDoc, doc, deleteDoc, query, where } from "firebase/firestore"
+import { formatteFireStoreDate } from "@/utils";
 
 // Fetch all properties
-export async function getImagesDb() {
-    const querySnapshot = await getDocs(collection(db, "images"))
+export async function getImagesDb(uploader: string) {
 
-    return querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return { id: doc.id, ...data }
-    }) as ImageTypes[]
+    try {
+        const q = query(
+            collection(db, "images"),
+            where("uploader", "==", uploader),
+        );
+
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            return snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...formatteFireStoreDate(doc.data())
+            })) as ImageTypes[]
+        }       
+    } catch (error) {
+        console.error("Error fetching image by uploader:", error);
+        throw error;
+    }
 }
 
 // Create a new property
 export async function addImageDb(image: ImageTypes) {
     try {
         // Normalize payload before saving
-        const normalized = {
-            ...image,                                            
+        const normalized = {                                                
             ...Object.fromEntries(
-                Object.entries(image).map(([k, v]) => [k, v === undefined ? null : v])),                                  
-            updatedAt: serverTimestamp(),
+                Object.entries(image).map(([k, v]) => [k, v === undefined ? null : v])),                                            
         };
 
 
@@ -54,4 +65,5 @@ export async function deleteImageDb(id: string) {
         console.error("Error deleting image:", error);
         throw error;
     }
-}
+};
+

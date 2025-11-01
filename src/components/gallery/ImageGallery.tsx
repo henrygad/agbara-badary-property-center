@@ -14,7 +14,7 @@ interface PropertyImageGalleryProps {
 
 export default function ImageGallery({ images, title }: PropertyImageGalleryProps) {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-    const { open, handleModal } = useModal();
+    const { open, handleModal, setOpen } = useModal();
 
     return (
         <div className="w-full">
@@ -25,8 +25,8 @@ export default function ImageGallery({ images, title }: PropertyImageGalleryProp
                     <div
                         key={i}
                         onClick={() => {
-                            setSelectedIndex(i);
                             handleModal(true);
+                            setSelectedIndex(i);
                         }}
                         className="h-auto w-auto"
                     >
@@ -52,16 +52,15 @@ export default function ImageGallery({ images, title }: PropertyImageGalleryProp
                         transition={{ duration: 0.25 }}
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
                         onClick={() => {
-                            setSelectedIndex(null);
-                            handleModal(false);
+                            setSelectedIndex(null);                            
                         }}
                     >
                         {/* Close button */}
                         <button
                             type="button"
                             onClick={() => {
+                                setOpen(false);
                                 setSelectedIndex(null);
-                                handleModal(false);
                             }}
                             className="absolute top-4 left-4 text-white hover:text-gray-300 transitionbg-black/90 backdrop-blur-sm rounded-2xl cursor-pointer z-50"
                         >

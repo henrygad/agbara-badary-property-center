@@ -46,7 +46,7 @@ export default function ClientCard({ property }: { property: PropertyTypes }) {
 
       {/* Location */}
       <div className='flex items-center gap-1 mt-1'>
-        <MapPin className="w-4 h-4 text-muted-foreground" />
+        <MapPin className="w-4 h-4 text-muted-foreground font-medium" />
         <span className='text-sm'>{property.area}, {property.city}, {property.state}</span>
       </div>
       
@@ -55,25 +55,25 @@ export default function ClientCard({ property }: { property: PropertyTypes }) {
       <div className="flex flex-wrap justify-end items-center gap-3 mt-4">
         {property.bedrooms && (
           <div className="flex shrink-0 items-center gap-1 text-sm">
-            <Bed className="w-3 h-3 text-muted-foreground" />
+            <Bed size={16} className="text-muted-foreground font-medium" />
             <span>{property.bedrooms}</span>
           </div>
         )}
         {property.bathrooms && (
           <div className="flex shrink-0 items-center gap-1 text-sm">
-            <Bath className="w-3 h-3 text-muted-foreground" />
+            <Bath size={16} className="text-muted-foreground font-medium" />
             <span>{property.bathrooms}</span>
           </div>
         )}
         {property.parkingSpaces && (
           <div className="flex shrink-0 items-center gap-1 text-sm">
-            <Car className="w-3 h-3 text-muted-foreground" />
+            <Car size={16} className="text-muted-foreground font-medium" />
             <span>{property.parkingSpaces}</span>
           </div>
         )}
         {property.size && (
           <div className="flex shrink-0 items-center gap-1 text-sm">
-            <Ruler className="w-3 h-3 text-muted-foreground" />
+            <Ruler size={16} className="text-muted-foreground font-medium" />
             <span>{property.size} {property.sizeUnit}</span>
           </div>
         )}

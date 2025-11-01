@@ -1,10 +1,18 @@
+
 export type SearchTypes = {
     state?: string;
-    city?: string,
-    minPrice?: number;
-    maxPrice?: number;
+    city?: string,    
+    amenities?: string[]; 
+    keyword?: string; 
     status?: string;
+    location?: string;
     type?: string;
-    amenities?: string[]; // e.g. ["Balcony", "Generator"]
-    keyword?: string;     // e.g. "duplex with balcony"
+    bedrooms?: string;
+    toilets?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    furnishing?: string;
+    condition?: string;
+    category?: string;
 }
+

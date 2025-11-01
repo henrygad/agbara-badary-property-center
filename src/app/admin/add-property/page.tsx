@@ -9,7 +9,6 @@ export default function AddProperty() {
     const { setForm } = usePropertyStore();
     const [loadingForm, setLoadingForm] = useState(false);   
 
-
     useEffect(() => {        
         // Get duplicated data from localStorage
         // Check if duplicate data is present

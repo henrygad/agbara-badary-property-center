@@ -1,9 +1,6 @@
 import { PropertyTypes } from "@/types/property.types";
+import { validateEmail } from "@/utils";
 
-
-const validateEmail = (email: string) => {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
 
 const validatePropertyFields = (value: PropertyTypes) => {
         const error = {

@@ -1,6 +1,6 @@
 import Image from 'next/image'
-import headerlogo from "../../public/images/agbara-badagry-property-center-removebg-preview.svg"
-import footerlogo from "../../public/images/agbara-badagry-property-center-removebg-preview-2.svg"
+import headerlogo from "../../public/images/logo_svg.svg"
+import footerlogo from "../../public/images/logo_white.svg"
 import Link from 'next/link'
 
 export default function CompanyLogo({ location = "Header" }: { location: "Header" | "Footer" }) {

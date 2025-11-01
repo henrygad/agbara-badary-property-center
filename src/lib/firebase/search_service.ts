@@ -1,5 +1,3 @@
-// Fetch Properties by search queries
-
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "./config";
 import { PropertyTypes } from "@/types/property.types";
@@ -7,40 +5,59 @@ import { SearchTypes } from "@/types/search.types";
 
 
 export async function searchPropertiesDb(params: SearchTypes) {
-    const conditions = [];
+    const queries = [];
 
-    // Build Firestore query conditions
     if (params.state) {
-        conditions.push(where("state", "==", params.state));
+        queries.push(where("state", "==", params.state));
+    }
+    if (params.bedrooms) {
+        queries.push(where("bedrooms", "==", params.bedrooms));
+    }
+    if (params.furnishing) {
+        queries.push(where("furnishing", "==", params.furnishing));
+    }
+    if (params.category) {
+        queries.push(where("category", "==", params.category));
+    }
+    if (params.condition) {
+        queries.push(where("condition", "==", params.condition));
+    }
+    if (params.toilets) {
+        queries.push(where("toilets", "==", params.toilets));
     }
     if (params.city) {
-        conditions.push(where("city", "==", params.city));
+        queries.push(where("city", "==", params.city));
     }
     if (params.minPrice !== undefined) {
-        conditions.push(where("price", ">=", params.minPrice));
+        queries.push(where("price", ">=", params.minPrice));
     }
     if (params.maxPrice !== undefined) {
-        conditions.push(where("price", "<=", params.maxPrice));
+        queries.push(where("price", "<=", params.maxPrice));
     }
     if (params.status) {
-        conditions.push(where("status", "==", params.status));
+        queries.push(where("status", "==", params.status));
     }
     if (params.type) {
-        conditions.push(where("type", "==", params.type));
-    }
-
-    // At least one of the amenities must match
+        queries.push(where("type", "==", params.type));
+    }    
     if (params.amenities && params.amenities.length > 0) {
-        conditions.push(where("amenities", "array-contains-any", params.amenities));
+        queries.push(where("amenities", "array-contains-any", params.amenities));
     }
 
     // Run Firestore query
-    const q = query(collection(db, "properties"), ...conditions);
+    const q = query(collection(db, "properties"), ...queries);
     const snapshot = await getDocs(q);
 
     let results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PropertyTypes[];
 
-    // Local filter for all amenities (AND logic)
+    // Local filter 
+    // For genaral location
+    if (params.location) {
+        results = results.filter(property =>
+            (property.street + property.city + property.state).trim().includes((params.location || "").trim()));
+    }
+
+    // For all amenities (AND logic)
     if (params.amenities && params.amenities.length > 0) {
         results = results.filter(property =>
             params.amenities!.every(a => property.amenities?.includes(a))

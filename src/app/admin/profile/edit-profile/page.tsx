@@ -16,8 +16,9 @@ import { Spinner } from "@/components/ui/spinner";
 import PhotoEditor from "@/components/gallery/PhotoEditor";
 import { useUserStore } from "@/store/useUserStore";
 import { uploadImageToCloud } from "@/lib/cloudinary/services";
-import { updateAdminDb } from "@/lib/firebase/admin_service";
-import { UploadingImageLoading } from "@/components/Loadings";
+import { updateAgentDb } from "@/lib/firebase/agent_service";
+import ReturnBack from "@/components/ReturnBack";
+import ImageLoader from "@/components/loaders/ImageLoader";
 
 
 // Zod schema for validation
@@ -61,7 +62,7 @@ export default function AdminProfilePage() {
     form.setValue("lastName", user?.lastName ?? "");
     form.setValue("gender", user?.gender);
     form.setValue("phone", user?.phone ?? "");
-    form.setValue("email", user?.authEmail ?? "");
+    form.setValue("email", user?.email ?? "");
     form.setValue("company", user?.company ?? "");
     form.setValue("bio", user?.bio ?? "");
   }, [user, form]);
@@ -106,14 +107,17 @@ export default function AdminProfilePage() {
 
       // Add the new image to Cloudinary
       const addedImage = await uploadImageToCloud(file);
+      if (!user?.id) return
 
       // Update user data in Db
-      const updatedAdminResult = await updateAdminDb({ profileImage: { url: addedImage.url, publicId: addedImage.publicId } });
+      const updatedAdminResult = await updateAgentDb(user.id, { profileImage: { url: addedImage.url, publicId: addedImage.publicId } });
 
-      // Update user profile image locally
-      updateUser(updatedAdminResult);
+      if (updatedAdminResult) {
+        // Update user profile image locally
+        updateUser(updatedAdminResult);
+        showSuccess("Profile image updated!");        
+      }
 
-      showSuccess("Profile image updated!");
     } catch (err) {
       const errorMsg = err as { message: string };
       console.error(err);
@@ -128,13 +132,18 @@ export default function AdminProfilePage() {
     setIsSubmitting(true);
     try {
 
+      if (!user?.id) return;
+
       // Update profile data in db
-      const updatedAdminResult = await updateAdminDb({ ...values });
+      const updatedAdminResult = await updateAgentDb(user.id, { ...values });
+      if (updatedAdminResult) {
+        // Update user profile image locally
+        updateUser(updatedAdminResult);
 
-      // Update user profile image locally
-      updateUser(updatedAdminResult);
+        showSuccess("Profile updated successfully!");
 
-      showSuccess("Profile updated successfully!");
+      }
+
     } catch (err) {
       console.error(err);
       showError("Failed to save profile");
@@ -145,16 +154,20 @@ export default function AdminProfilePage() {
 
   return (
     <div className="space-y-8">
+      {/* return back */}
+      <menu className="my-3">
+        <ReturnBack />
+      </menu>
       {/* Profile Header */}
       <div className="flex items-center gap-3 sm:gap-6">
-        <div className="relative w-24 h-24 rounded-full overflow-hidden">
+        <div className="relative w-20 h-20 rounded-full overflow-hidden">
           {!isUploading ? <>
             <DisplayImage
-              src={user.profileImage?.url || ""}
+              src={user.profileImage?.url || "avata.png"}
               alt="Admin profile"
               type="Profile"
               useRemove={false}
-              className="w-24 h-24 rounded-full"
+              className="w-20 h-20 rounded-full border-2 border-primary"
             />
             <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 cursor-pointer transition">
               <Camera className="text-white w-6 h-6" />
@@ -166,8 +179,8 @@ export default function AdminProfilePage() {
               />
             </label>
           </> :
-            <UploadingImageLoading
-              className="w-24 h-24 rounded-full"
+            <ImageLoader
+              className="w-20 h-20 rounded-full"
             />
           }
 

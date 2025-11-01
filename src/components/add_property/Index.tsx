@@ -29,7 +29,10 @@ import {
 } from "./defaultData";
 import DisplayImage from "../gallery/DisplayImage";
 import React from "react";
-import { addPropertyDb, updatePropertyDb } from "@/lib/firebase/property_service";
+import {
+    addPropertyDb,
+    updatePropertyDb,
+} from "@/lib/firebase/property_service";
 import validatePropertyFields from "@/validators/property_from_editor.validate";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -44,58 +47,74 @@ import {
 import { Textarea } from "../ui/textarea";
 import { Checkbox } from "../ui/checkbox";
 import { CustomCalendar } from "../CustomCalader";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import GalleryModal from "../gallery/Index";
 import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import { showError, showSuccess } from "../ui/toasts";
 import { fiterSEOSlug } from "@/utils";
 import { usePropertyStore } from "@/store/usePropertyStore";
-import { clearTimeout } from "timers";
 import { useRouter } from "next/navigation";
 import FormButton from "./FormButton";
-import PageLoading from "../Loadings";
+import PageLoading from "../loaders/PageLoader";
 import useUnsavedChanges from "@/hooks/useUnsavedChanges";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "../ui/alert-dialog";
 import Property from "../property/Index";
 import { useUserStore } from "@/store/useUserStore";
 import { Card } from "../ui/card";
+import ReturnBack from "../ReturnBack";
 
 type Props = {
-    accountType: "ADMIN" | "AGENT"
-    documentType: "NEW" | "UPDATE" | "DUPLICATE" | "REVIEW"
-    loadingForm: boolean
-    setLoadingForm: (l: boolean) => void
-}
+    accountType: "ADMIN" | "AGENT";
+    documentType: "NEW" | "UPDATE" | "DUPLICATE" | "REVIEW";
+    loadingForm: boolean;
+    setLoadingForm: (l: boolean) => void;
+};
 
-export default function PropertyFormEditor({ accountType, loadingForm, documentType }: Props) {
+export default function PropertyFormEditor({
+    accountType,
+    loadingForm,
+    documentType,
+}: Props) {
     const { user, loading: loadingUser } = useUserStore();
+    const { addProperty, form, setForm, updateProperty } = usePropertyStore();
 
     const router = useRouter();
     const [step, setStep] = useState(1);
 
-    const { addProperty, form, setForm } = usePropertyStore();
-
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<{ errorMsg: string; isError: boolean }>({ errorMsg: "", isError: false });
+    const [error, setError] = useState<{ errorMsg: string; isError: boolean }>({
+        errorMsg: "",
+        isError: false,
+    });
 
     const [isDocEdited, setIsDocEdited] = useState(false);
 
-    const [chooseCities, setChooseCities] = useState<string[]>(REGIONAL_TOWNS[0].cities);
+    const [chooseCities, setChooseCities] = useState<string[]>(
+        REGIONAL_TOWNS[0].cities
+    );
 
     // Form is not empty
-    const isFormDirty = Object.values({
-        title: form.title.trim(),
-        description: form.description.trim(),
-        seoSlug: form.seoSlug.trim(),
-        price: !form.price ? "" : form.price,
-        state: form.state.trim(),
-        category: form.category.trim(),
-        type: form.type.trim(),
-        satus: form.status.trim(),
-        images: form.images.length ? form.images.join(".trim(),") : "",
-        videoUrl: form.videoUrl?.trim()
-
-    }).some((val) => val !== "") && isDocEdited;
+    const isFormDirty =
+        Object.values({
+            title: form.title.trim(),
+            description: form.description.trim(),
+            seoSlug: form.seoSlug.trim(),
+            price: !form.price ? "" : form.price,
+            state: form.state.trim(),
+            category: form.category.trim(),
+            type: form.type.trim(),
+            satus: form.status.trim(),
+            images: form.images.length ? form.images.join(".trim(),") : "",
+            videoUrl: form.videoUrl?.trim(),
+        }).some((val) => val !== "") && isDocEdited;
 
     // Intecept navigation if form is dirty
     const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
@@ -111,16 +130,21 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
             setForm((s) => ({
                 ...s,
                 agentName: user.firstName + " " + user.lastName,
-                agentEmail: user?.authEmail || "",
+                agentEmail: user?.email || "",
                 agentPhoto: user?.profileImage?.url || "",
-                agentPhone: Number(user?.phone || ""),
-                agentCompany: user?.company || ""
+                agentPhone: user?.phoneCode + user?.phone || "",
+                agentCompany: user?.company || "",
+                accountType: user?.accountType || "",
+                isFake: false,
             }));
         }
     }, [user, setForm]);
+    
 
-
-    if (loadingForm || !user || loadingUser) return <PageLoading loading={(loadingForm || !user || loadingUser)}>loading...</PageLoading>;
+    if (loadingForm || !user || loadingUser)
+        return (
+            <PageLoading loading={loadingForm || !user || loadingUser}/>               
+        );
 
     function saveDraft() {
         const getPropertyDraft = JSON.parse(
@@ -137,12 +161,14 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
         showSuccess("Draft saved!", "Draft have been saved locally");
     }
 
-    function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
-
+    function update<K extends keyof typeof form>(
+        key: K,
+        value: (typeof form)[K]
+    ) {
         // When data passed to form is edited
         if (!isDocEdited) {
             setIsDocEdited(true);
-        };
+        }
 
         setForm((s) => ({ ...s, [key]: value }));
     }
@@ -161,56 +187,68 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
     function changeSteps(p: "Back" | "Next" | number) {
         if (p === "Back") {
-            setStep((s) => s - 1)
+            setStep((s) => s - 1);
         } else if (p === "Next") {
-            setStep((s) => s + 1)
+            setStep((s) => s + 1);
         } else {
             setStep(p);
         }
-        window.scrollTo(0, 0)
-    };
+        window.scrollTo(0, 0);
+    }
 
     async function submitNewProperty(payload: PropertyTypes) {
         // Simulate API call
         const property = await addPropertyDb(payload);
+        if (property) {
+            addProperty(property);
+            return property;
+        }
+        return null
 
-        return property;
     }
 
     async function submitUpdatedProperty(payload: PropertyTypes) {
-
         if (!payload.id) {
             throw new Error("Need property id to updated property!");
         }
         // Simulate API call
-        const property = await updatePropertyDb(payload.id, payload)
+        const property = await updatePropertyDb(payload.id, payload);
+        if (property) {
+            updateProperty(property);
 
-        // Return user back
-        const clearOut = setTimeout(() => {
-            router.back();
-            clearTimeout(clearOut);
-        }, 500);
+            // Return user back
+            //const clearOut =
+            setTimeout(() => {
+                router.back();
+                //clearTimeout(clearOut);
+            }, 500);
 
-        return property;
-
+            return property;
+        }
+        return null;
     }
 
     async function submitReviewedProperty(payload: PropertyTypes) {
-
         if (!payload.id) {
             throw new Error("Need property id to updated property!");
         }
 
         // Simulate API call
-        const property = await updatePropertyDb(payload.id, payload)
+        const property = await updatePropertyDb(payload.id, payload);
+        if (property) {
+            updateProperty(property);
 
-        // Return user back
-        const clearOut = setTimeout(() => {
-            router.back();
-            clearTimeout(clearOut);
-        }, 500);
+            // Return user back
+            //const clearOut =
+            setTimeout(() => {
+                router.back();
+                // clearTimeout(clearOut);
+            }, 500);
 
-        return property;
+            return property;
+        }
+
+        return null;
     }
 
     // form submission handler (create new property listing to firestore)
@@ -259,24 +297,20 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
             if (accountType === "AGENT") {
                 heading = "Property Submitted!";
-                description = "Your listing has been succesfully submitted for review."
+                description = "Your listing has been succesfully submitted for review.";
             }
 
             if (accountType === "ADMIN") {
                 heading = "Property Added!";
-                description = "Your listing is now live."
+                description = "Your listing is now live.";
             }
 
-            if (documentType === "UPDATE" ||
-                documentType === "REVIEW"
-            ) {
+            if (documentType === "UPDATE" || documentType === "REVIEW") {
                 heading = "Property Updated!";
-                description = "Listing has been succesfully updated."
+                description = "Listing has been succesfully updated.";
             }
-
 
             showSuccess(heading, description);
-            addProperty(property);
 
             setForm(() => {
                 if (!user) {
@@ -285,8 +319,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                 return {
                     ...DEFAULT_PROPERTY_FORM,
-                    agentName: user.firstName + " " + user.lastName, agentEmail: user?.email || "", agentPhone: Number(user?.phone || ""), agentCompany: user?.company || ""
-                }
+                    agentName: user.firstName + " " + user.lastName,
+                    agentEmail: user?.email || "",
+                    agentPhone: user?.phoneCode + user?.phone || "",
+                    agentCompany: user?.company || "",
+                };
             });
 
             setError({ errorMsg: "", isError: false });
@@ -302,16 +339,19 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
         } finally {
             setLoading(false);
         }
-    };
-
+    }
 
     return (
         <div className="w-full bg-inherit">
             {/* Steps */}
             <menu className="mb-6">
+                <div className="mb-4">
+                    <ReturnBack />
+                </div>
                 <div className="flex gap-2">
-                    {
-                        Array(5).fill("").map((_, idx) =>
+                    {Array(5)
+                        .fill("")
+                        .map((_, idx) => (
                             <Button
                                 key={idx + 1}
                                 variant={step === idx + 1 ? "destructive" : "outline"}
@@ -321,10 +361,8 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                             >
                                 {idx + 1}
                             </Button>
-                        )
-                    }
+                        ))}
                 </div>
-
             </menu>
             {/* Property form editor */}
             <form onSubmit={submitForm} className="space-y-6">
@@ -353,10 +391,13 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Category */}
                             <div>
-                                <Label htmlFor="category" className="block text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="category"
+                                    className="block text-sm font-medium mb-1"
+                                >
                                     Category
                                 </Label>
-                                <Select                                    
+                                <Select
                                     value={form.category}
                                     defaultValue={form.category}
                                     onValueChange={(value) =>
@@ -369,10 +410,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         ${error.errorMsg.toLowerCase().includes("category") ? "border-red-600" : ""}
                                         `}
                                     >
-                                        <SelectValue
-                                            placeholder="Select a category"
-                                            className="text-sm"
-                                        />
+                                        <SelectValue placeholder="Select a category" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {PROPERTY_CATEGORIES.map((cat) => (
@@ -390,7 +428,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Type */}
                             <div>
-                                <Label htmlFor="type" className="block text-sm font-medium mb-1">Type</Label>
+                                <Label
+                                    htmlFor="type"
+                                    className="block text-sm font-medium mb-1"
+                                >
+                                    Type
+                                </Label>
                                 <Select
                                     value={form.type}
                                     onValueChange={(value) =>
@@ -403,10 +446,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         ${error.errorMsg.toLowerCase().includes("type") ? "border-red-600" : ""}
                                         `}
                                     >
-                                        <SelectValue
-                                            placeholder="Select a type"
-                                            className="text-sm"
-                                        />
+                                        <SelectValue placeholder="Select a type" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {PROPERTY_TYPES.map((type) => (
@@ -424,7 +464,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Status */}
                             <div>
-                                <Label htmlFor="status" className="block text-sm font-medium mb-1">Status</Label>
+                                <Label
+                                    htmlFor="status"
+                                    className="block text-sm font-medium mb-1"
+                                >
+                                    Status
+                                </Label>
                                 <Select
                                     value={form.status}
                                     onValueChange={(value) => update("status", value as Status)}
@@ -435,10 +480,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         ${error.errorMsg.toLowerCase().includes("status") ? "border-red-600" : ""}
                                         `}
                                     >
-                                        <SelectValue
-                                            placeholder="Select a status"
-                                            className="text-sm"
-                                        />
+                                        <SelectValue placeholder="Select a status" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {STATUS.map((status) => (
@@ -456,7 +498,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Description */}
                             <div className="md:col-span-2">
-                                <Label htmlFor="description" className="block text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="description"
+                                    className="block text-sm font-medium mb-1"
+                                >
                                     Description
                                 </Label>
                                 <Textarea
@@ -477,7 +522,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {/* State */}
                             <div>
-                                <Label htmlFor="state" className="block text-sm font-medium mb-1">State</Label>
+                                <Label
+                                    htmlFor="state"
+                                    className="block text-sm font-medium mb-1"
+                                >
+                                    State
+                                </Label>
                                 <Select
                                     value={form.state}
                                     onValueChange={(value) => update("state", value)}
@@ -510,7 +560,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* City */}
                             <div>
-                                <Label htmlFor="city" className="block text-sm font-medium mb-1">City</Label>
+                                <Label
+                                    htmlFor="city"
+                                    className="block text-sm font-medium mb-1"
+                                >
+                                    City
+                                </Label>
                                 <Select
                                     value={form.city}
                                     onValueChange={(value) => update("city", value)}
@@ -558,57 +613,52 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Street */}
                             <div>
-                                <Label
-                                    htmlFor="street"
-                                    className="text-sm font-medium mb-1"
-                                >
+                                <Label htmlFor="street" className="text-sm font-medium mb-1">
                                     Street Address
                                 </Label>
                                 <Input
                                     id="street"
                                     value={form.street ?? ""}
                                     onChange={(e) => update("street", e.target.value)}
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="House 12, Block A"
                                 />
                             </div>
 
                             {/* Landmark */}
                             <div>
-                                <Label
-                                    htmlFor="landmark"
-                                    className="text-sm font-medium mb-1"
-                                >
+                                <Label htmlFor="landmark" className="text-sm font-medium mb-1">
                                     Landmark
                                 </Label>
                                 <Input
                                     id="landmark"
                                     value={form.landmark ?? ""}
                                     onChange={(e) => update("landmark", e.target.value)}
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="Near Vesper School"
                                 />
                             </div>
 
                             {/* Map Coordinates */}
                             <div>
-                                <Label htmlFor="map-coordinates" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="map-coordinates"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Map Coordinates (lat , long)
                                 </Label>
                                 <div className="flex gap-2">
                                     <Input
                                         id="map-coordinates"
-                                        value={form.latitude === null ? "" : form.latitude ?? ""}
-                                        onChange={(e) =>
-                                            update("latitude", Number(e.target.value))
-                                        }
+                                        value={form.latitude === null ? "" : (form.latitude ?? "")}
+                                        onChange={(e) => update("latitude", Number(e.target.value))}
                                         className="w-1/2 text-sm"
                                         placeholder="6.45"
                                         type="number"
                                     />
                                     <Input
                                         value={
-                                            form.longitude === null ? "" : form.longitude ?? ""
+                                            form.longitude === null ? "" : (form.longitude ?? "")
                                         }
                                         onChange={(e) =>
                                             update("longitude", Number(e.target.value))
@@ -623,7 +673,9 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                             <div className="md:col-span-3 space-y-4">
                                 {/* Price & Frequency */}
                                 <div>
-                                    <Label htmlFor="price" className="text-sm font-medium mb-1">Price</Label>
+                                    <Label htmlFor="price" className="text-sm font-medium mb-1">
+                                        Price
+                                    </Label>
                                     <div className="flex flex-col-reverse sm:flex-row gap-2">
                                         <Input
                                             id="price"
@@ -632,10 +684,8 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                             className={` text-sm
                                                      ${error.errorMsg.toLowerCase().includes("price") ? "border-red-600" : ""}
                                                 `}
-                                            value={form.price === null ? "" : form.price ?? ""}
-                                            onChange={(e) =>
-                                                update("price", Number(e.target.value))
-                                            }
+                                            value={form.price === null ? "" : (form.price ?? "")}
+                                            onChange={(e) => update("price", Number(e.target.value))}
                                         />
                                         <Select
                                             value={form.priceFrequency}
@@ -648,10 +698,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                          ${error.errorMsg.toLowerCase().includes("price frequency") ? "border-red-600" : ""}
                                                     `}
                                             >
-                                                <SelectValue
-                                                    placeholder="Choose Frequency"
-                                                    className="text-sm"
-                                                />
+                                                <SelectValue placeholder="Choose Frequency" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {PRICE_FREQUENCY.map((p) => (
@@ -692,28 +739,34 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 {/* Service Charge & agent fee $ legal fee */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                     <div className="flex flex-col">
-                                        <Label htmlFor="service-charge" className="text-sm font-medium mb-1">
+                                        <Label
+                                            htmlFor="service-charge"
+                                            className="text-sm font-medium mb-1"
+                                        >
                                             Service Charge
                                         </Label>
                                         <div className="flex flex-col-reverse sm:flex-row gap-2">
-                                        <Input
+                                            <Input
                                                 id="service-charge"
-                                            value={
-                                                form.serviceCharge === null
-                                                    ? ""
-                                                    : form.serviceCharge ?? ""
-                                            }
-                                            onChange={(e) =>
-                                                update("serviceCharge", Number(e.target.value))
-                                            }
-                                            className=" text-sm"
-                                            placeholder="20,000"
-                                            type="number"
+                                                value={
+                                                    form.serviceCharge === null
+                                                        ? ""
+                                                        : (form.serviceCharge ?? "")
+                                                }
+                                                onChange={(e) =>
+                                                    update("serviceCharge", Number(e.target.value))
+                                                }
+                                                className=" text-sm"
+                                                placeholder="20,000"
+                                                type="number"
                                             />
                                             <Select
                                                 value={form.serviceChargeFrequency}
                                                 onValueChange={(value) =>
-                                                    update("serviceChargeFrequency", value as PriceFrequency)
+                                                    update(
+                                                        "serviceChargeFrequency",
+                                                        value as PriceFrequency
+                                                    )
                                                 }
                                             >
                                                 <SelectTrigger
@@ -721,10 +774,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                          ${error.errorMsg.toLowerCase().includes("price frequency") ? "border-red-600" : ""}
                                                     `}
                                                 >
-                                                    <SelectValue
-                                                        placeholder="Frequency"
-                                                        className="text-sm"
-                                                    />
+                                                    <SelectValue placeholder="Frequency" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {PRICE_FREQUENCY.map((p) => (
@@ -741,13 +791,16 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         </div>
                                     </div>
                                     <div className="flex flex-col">
-                                        <Label htmlFor="agency-fee" className="text-sm font-medium mb-1">
+                                        <Label
+                                            htmlFor="agency-fee"
+                                            className="text-sm font-medium mb-1"
+                                        >
                                             Agency Fee
                                         </Label>
                                         <Input
                                             id="agency-fee"
                                             value={
-                                                form.agencyFee === null ? "" : form.agencyFee ?? ""
+                                                form.agencyFee === null ? "" : (form.agencyFee ?? "")
                                             }
                                             onChange={(e) =>
                                                 update("agencyFee", Number(e.target.value))
@@ -758,13 +811,16 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         />
                                     </div>
                                     <div className="flex flex-col">
-                                        <Label htmlFor="legal-fee" className="text-sm font-medium mb-1">
+                                        <Label
+                                            htmlFor="legal-fee"
+                                            className="text-sm font-medium mb-1"
+                                        >
                                             Legal Fee
                                         </Label>
                                         <Input
                                             id="agency-fee"
                                             value={
-                                                form.legalFee === null ? "" : form.legalFee ?? ""
+                                                form.legalFee === null ? "" : (form.legalFee ?? "")
                                             }
                                             onChange={(e) =>
                                                 update("legalFee", Number(e.target.value))
@@ -786,13 +842,15 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {/* Bedrooms */}
                             <div>
-                                <Label htmlFor="bedrooms" className="text-sm font-medium mb-1">Bedrooms</Label>
+                                <Label htmlFor="bedrooms" className="text-sm font-medium mb-1">
+                                    Bedrooms
+                                </Label>
                                 <Input
                                     id="bedrooms"
                                     type="number"
-                                    value={form.bedrooms === null ? "" : form.bedrooms ?? ""}
+                                    value={form.bedrooms === null ? "" : (form.bedrooms ?? "")}
                                     onChange={(e) => update("bedrooms", Number(e.target.value))}
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="3"
                                     min={0}
                                 />
@@ -806,11 +864,9 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 <Input
                                     id="bathrooms"
                                     type="number"
-                                    value={form.bathrooms === null ? "" : form.bathrooms ?? ""}
-                                    onChange={(e) =>
-                                        update("bathrooms", Number(e.target.value))
-                                    }
-                                    className="w-full text-sm"
+                                    value={form.bathrooms === null ? "" : (form.bathrooms ?? "")}
+                                    onChange={(e) => update("bathrooms", Number(e.target.value))}
+                                    className="w-full"
                                     placeholder="3"
                                     min={0}
                                 />
@@ -818,13 +874,15 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Toilets */}
                             <div>
-                                <Label htmlFor="toilets" className="text-sm font-medium mb-1">Toilets</Label>
+                                <Label htmlFor="toilets" className="text-sm font-medium mb-1">
+                                    Toilets
+                                </Label>
                                 <Input
                                     id="toilets"
                                     type="number"
-                                    value={form.toilets === null ? "" : form.toilets ?? ""}
+                                    value={form.toilets === null ? "" : (form.toilets ?? "")}
                                     onChange={(e) => update("toilets", Number(e.target.value))}
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="4"
                                     min={0}
                                 />
@@ -832,7 +890,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Parking Space */}
                             <div>
-                                <Label htmlFor="parking-spaces" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="parking-spaces"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Parking Spaces
                                 </Label>
                                 <Input
@@ -841,12 +902,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     value={
                                         form.parkingSpaces === null
                                             ? ""
-                                            : form.parkingSpaces ?? ""
+                                            : (form.parkingSpaces ?? "")
                                     }
                                     onChange={(e) =>
                                         update("parkingSpaces", Number(e.target.value))
                                     }
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="2"
                                     min={0}
                                 />
@@ -854,7 +915,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Parking Capacity */}
                             <div>
-                                <Label htmlFor="parking-capacity" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="parking-capacity"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Parking Capacity
                                 </Label>
                                 <Input
@@ -863,12 +927,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     value={
                                         form.parkingCapacity === null
                                             ? ""
-                                            : form.parkingCapacity ?? ""
+                                            : (form.parkingCapacity ?? "")
                                     }
                                     onChange={(e) =>
                                         update("parkingCapacity", Number(e.target.value))
                                     }
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="15"
                                     min={0}
                                 />
@@ -876,7 +940,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Furnishing */}
                             <div>
-                                <Label htmlFor="furnishing" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="furnishing"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Furnishing
                                 </Label>
                                 <Select
@@ -885,11 +952,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         update("furnishing", value as Furnishing)
                                     }
                                 >
-                                    <SelectTrigger id="furnishing" className="w-full cursor-pointer">
-                                        <SelectValue
-                                            placeholder="Select furnishing"
-                                            className="text-sm"
-                                        />
+                                    <SelectTrigger
+                                        id="furnishing"
+                                        className="w-full cursor-pointer"
+                                    >
+                                        <SelectValue placeholder="Select furnishing" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {FURNISHING.map((f) => (
@@ -916,11 +983,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         update("condition", value as Condition)
                                     }
                                 >
-                                    <SelectTrigger id="condition" className="w-full cursor-pointer">
-                                        <SelectValue
-                                            placeholder="Select condition"
-                                            className="text-sm"
-                                        />
+                                    <SelectTrigger
+                                        id="condition"
+                                        className="w-full cursor-pointer"
+                                    >
+                                        <SelectValue placeholder="Select condition" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {CONDITION.map((c) => (
@@ -945,7 +1012,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     <Input
                                         id="size"
                                         type="number"
-                                        value={form.size === null ? "" : form.size ?? ""}
+                                        value={form.size === null ? "" : (form.size ?? "")}
                                         onChange={(e) => update("size", Number(e.target.value))}
                                         className=" text-sm"
                                         placeholder="120"
@@ -957,7 +1024,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         }
                                     >
                                         <SelectTrigger className="w-full sm:w-auto cursor-pointer">
-                                            <SelectValue placeholder="Unit" className="text-sm" />
+                                            <SelectValue placeholder="Unit" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {SIZE_UNIT.map((s) => (
@@ -976,69 +1043,77 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                             {/* Year built */}
                             <div>
-                                <Label htmlFor="year-built" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="year-built"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Year Built
                                 </Label>
                                 <Input
                                     id="year-built"
                                     type="number"
-                                    value={form.yearBuilt === null ? "" : form.yearBuilt ?? ""}
-                                    onChange={(e) =>
-                                        update("yearBuilt", Number(e.target.value))
-                                    }
-                                    className="w-full text-sm"
+                                    value={form.yearBuilt === null ? "" : (form.yearBuilt ?? "")}
+                                    onChange={(e) => update("yearBuilt", Number(e.target.value))}
+                                    className="w-full"
                                     placeholder="2015"
                                 />
                             </div>
 
                             {/* Floor Level */}
                             <div>
-                                <Label htmlFor="floor-level" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="floor-level"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Floor Level
                                 </Label>
                                 <Input
                                     id="floor-level"
                                     value={
-                                        form.floorLevel === null ? "" : form.floorLevel ?? ""
+                                        form.floorLevel === null ? "" : (form.floorLevel ?? "")
                                     }
                                     onChange={(e) => update("floorLevel", e.target.value)}
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="Ground / 1st / 2nd"
                                 />
                             </div>
 
                             {/* Total Floors */}
                             <div>
-                                <Label htmlFor="total-floor" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="total-floor"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Total Floors
                                 </Label>
                                 <Input
                                     id="total-floor"
                                     type="number"
                                     value={
-                                        form.totalFloors === null ? "" : form.totalFloors ?? ""
+                                        form.totalFloors === null ? "" : (form.totalFloors ?? "")
                                     }
                                     onChange={(e) =>
                                         update("totalFloors", Number(e.target.value))
                                     }
-                                    className="w-full text-sm"
+                                    className="w-full"
                                     placeholder="3"
                                 />
                             </div>
 
                             {/* Floor Area */}
                             <div>
-                                <Label htmlFor="floor-area" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="floor-area"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Floor Area
                                 </Label>
                                 <Input
                                     id="floor-area"
                                     type="number"
-                                    value={form.floorArea === null ? "" : form.floorArea ?? ""}
-                                    onChange={(e) =>
-                                        update("floorArea", Number(e.target.value))
-                                    }
-                                    className="w-full text-sm"
+                                    value={form.floorArea === null ? "" : (form.floorArea ?? "")}
+                                    onChange={(e) => update("floorArea", Number(e.target.value))}
+                                    className="w-full"
                                     placeholder="2000"
                                 />
                             </div>
@@ -1048,9 +1123,12 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 <Label htmlFor="amenities" className="text-sm font-medium mb-1">
                                     Amenities
                                 </Label>
-                                <div id="amenities" className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div
+                                    id="amenities"
+                                    className="grid grid-cols-2 md:grid-cols-4 gap-2"
+                                >
                                     {AMENITIES.map((amen) => (
-                                        <Label                                            
+                                        <Label
                                             key={amen}
                                             className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950 cursor-pointer"
                                         >
@@ -1081,13 +1159,16 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                         <div className="w-full space-y-6">
                             {/* Images */}
                             <div>
-                                <Label htmlFor="display-imagge" className="text-sm font-medium mb-1">
+                                <Label
+                                    htmlFor="display-imagge"
+                                    className="text-sm font-medium mb-1"
+                                >
                                     Display Images
                                 </Label>
                                 <ScrollArea>
                                     <div id="display-imagge" className="flex gap-2">
-                                        {form.images?.length ?
-                                            form.images.map((src, idx) => (
+                                        {form.images?.length
+                                            ? form.images.map((src, idx) => (
                                                 <DisplayImage
                                                     key={idx}
                                                     className="w-36 h-28 flex-shrink-0 rounded-xl"
@@ -1100,11 +1181,15 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                         );
                                                     }}
                                                 />
-                                            )) :
-                                            null
-                                        }
+                                            ))
+                                            : null}
                                         <GalleryModal
-                                            setGetSelected={(img) => update("images", [...form.images, ...img.map(img => img.url)])}
+                                            setGetSelected={(img) =>
+                                                update("images", [
+                                                    ...form.images,
+                                                    ...img.map((img) => img.url),
+                                                ])
+                                            }
                                         />
                                     </div>
                                     <ScrollBar orientation="horizontal" />
@@ -1121,17 +1206,21 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     value={form.videoUrl ?? ""}
                                     onChange={(e) => update("videoUrl", e.target.value)}
                                     placeholder="YouTube link or 360 tour URL"
-                                    className="w-full text-sm"
+                                    className="w-full"
                                 />
                                 <p className="block text-xs text-gray-500 text-center text-wrap mt-1">
-                                    Please upload your property video to <span className="text-red-500 font-medium">YouTube</span> and share the link here.
+                                    Please upload your property video to{" "}
+                                    <span className="text-red-500 font-medium">YouTube</span> and
+                                    share the link here.
                                 </p>
-
                             </div>
 
                             {/* Agent / Owner details */}
                             <div>
-                                <Label htmlFor="agent" className="text-sm font-medium mb-1 mt-4">
+                                <Label
+                                    htmlFor="agent"
+                                    className="text-sm font-medium mb-1 mt-4"
+                                >
                                     Agent / Owner
                                 </Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1139,48 +1228,39 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                         id="agent"
                                         value={form.agentName}
                                         onChange={(e) => update("agentName", e.target.value)}
-                                        className="w-full text-sm"
+                                        className="w-full"
                                         placeholder="Agent name"
+                                        readOnly
                                     />
 
                                     {/* Phone number */}
-                                    <div className="flex w-full overflow-hidden rounded border">
-                                        <Select defaultValue="+234">
-                                            <SelectTrigger className="rounded-none border-0 bg-gray-50 px-2 w-[100px] focus-visible:ring-0 cursor-pointer">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="cursor-pointer">
-                                                <SelectItem value="+234">🇳🇬 +234</SelectItem>
-                                                <SelectItem value="+1">🇺🇸 +1</SelectItem>
-                                                <SelectItem value="+44">🇬🇧 +44</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-
-                                        <Input
-                                            type="tel"
-                                            placeholder="Phone number"
-                                            className="border-0 rounded-none flex-1 focus-visible:ring-0"
-                                            value={
-                                                form.agentPhone === null ? "" : form.agentPhone ?? ""
-                                            }
-                                            onChange={(e) => {
-                                                if (isNaN(Number(e.target.value))) return;
-                                                update("agentPhone", Number(e.target.value));
-                                            }}
-                                        />
-                                    </div>
+                                    <Input
+                                        type="tel"
+                                        placeholder="Phone number"
+                                        className="border-0 rounded-none flex-1 focus-visible:ring-0"
+                                        value={
+                                            form.agentPhone === null ? "" : (form.agentPhone ?? "")
+                                        }
+                                        onChange={(e) => {
+                                            if (isNaN(Number(e.target.value))) return;
+                                            update("agentPhone", e.target.value);
+                                        }}
+                                        readOnly
+                                    />
                                     <Input
                                         type="email"
                                         value={form.agentEmail}
                                         onChange={(e) => update("agentEmail", e.target.value)}
-                                        className="w-full text-sm"
+                                        className="w-full"
                                         placeholder="Email"
+                                        readOnly
                                     />
                                     <Input
                                         value={form.agentCompany}
                                         onChange={(e) => update("agentCompany", e.target.value)}
-                                        className="w-full text-sm"
+                                        className="w-full"
                                         placeholder="Company name"
+                                        readOnly
                                     />
                                     <div className="flex gap-2">
                                         <Checkbox
@@ -1205,7 +1285,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                     Meta / Listing Management
                                 </Label>
 
-                                <div id="meta" className="space-y-4 md:grid md:grid-col-2 md:gap-4 mt-4">
+                                <div
+                                    id="meta"
+                                    className="space-y-4 md:grid md:grid-col-2 md:gap-4 mt-4"
+                                >
                                     {/* SEO Slug */}
                                     <div className="flex-1 flex flex-col col-span-2">
                                         <Label
@@ -1246,7 +1329,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                                     {/* Listing Availibility */}
                                     <div className="flex flex-col">
-                                        <Label htmlFor="availibility" className="text-sm font-medium mb-1">
+                                        <Label
+                                            htmlFor="availibility"
+                                            className="text-sm font-medium mb-1"
+                                        >
                                             Availability
                                         </Label>
                                         <Select
@@ -1255,11 +1341,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                 update("availability", value as Availability)
                                             }
                                         >
-                                            <SelectTrigger id="availibility" className="w-full cursor-pointer">
-                                                <SelectValue
-                                                    placeholder="Select status"
-                                                    className="text-sm"
-                                                />
+                                            <SelectTrigger
+                                                id="availibility"
+                                                className="w-full cursor-pointer"
+                                            >
+                                                <SelectValue placeholder="Select status" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {AVAILABILITY.map((av) => (
@@ -1277,7 +1363,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                                     {/* Package Type */}
                                     <div className="flex flex-col">
-                                        <Label htmlFor="package-type" className="text-sm font-medium mb-1">
+                                        <Label
+                                            htmlFor="package-type"
+                                            className="text-sm font-medium mb-1"
+                                        >
                                             Package Type
                                         </Label>
                                         <Select
@@ -1286,11 +1375,11 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                                 update("packageType", value as PackageType)
                                             }
                                         >
-                                            <SelectTrigger id="package-type" className="w-full cursor-pointer">
-                                                <SelectValue
-                                                    placeholder="Select package type"
-                                                    className="text-sm"
-                                                />
+                                            <SelectTrigger
+                                                id="package-type"
+                                                className="w-full cursor-pointer"
+                                            >
+                                                <SelectValue placeholder="Select package type" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {PACKAGE_TYPE.map((p) => (
@@ -1323,7 +1412,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                             value={
                                                 form.priorityRank === null
                                                     ? ""
-                                                    : form.priorityRank ?? ""
+                                                    : (form.priorityRank ?? "")
                                             }
                                             onChange={(e) =>
                                                 update("priorityRank", Number(e.target.value))
@@ -1337,8 +1426,10 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
 
                                     {/* Date Listed */}
                                     <div className="col-span-2 w-full">
-                                        <Label htmlFor="date" className="text-sm font-medium mb-1">Date Listed</Label>
-                                        <CustomCalendar                                        
+                                        <Label htmlFor="date" className="text-sm font-medium mb-1">
+                                            Date Listed
+                                        </Label>
+                                        <CustomCalendar
                                             id="date"
                                             date={form.createdAt}
                                             setDate={(date) => update("createdAt", date)}
@@ -1354,7 +1445,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                 {step === 5 && (
                     <Property
                         property={form}
-                        viewer={accountType}                       
+                        viewer={accountType}
                         placeViewing="PREVIEW"
                     />
                 )}
@@ -1368,7 +1459,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                             className="flex gap-2 cursor-pointer"
                             onClick={() => changeSteps("Back")}
                         >
-                            <ArrowLeftIcon className="h-5 w-5" />  Back
+                            <ArrowLeftIcon className="h-5 w-5" /> Back
                         </Button>
                     )}
                     {step < 5 && (
@@ -1386,7 +1477,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                 </div>
 
                 {/* Create | Update new listing button */}
-                {step === 5 &&
+                {step === 5 && (
                     <div className="sticky bottom-4 left-0 right-0">
                         <div className="w-full h-full flex justify-center px-4">
                             <FormButton
@@ -1398,7 +1489,7 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                             />
                         </div>
                     </div>
-                }
+                )}
             </form>
             <div>
                 {/* Unsaved Changes Alert */}
@@ -1412,19 +1503,28 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
 
-                            <button onClick={() => setOpenPrompt(false)} className="p-1 rounded hover:bg-gray-100">
+                            <button
+                                onClick={() => setOpenPrompt(false)}
+                                className="p-1 rounded hover:bg-gray-100"
+                            >
                                 <X className="w-5 h-5 text-gray-600" />
                             </button>
                         </div>
 
                         <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
-                            <AlertDialogAction onClick={saveDraftAndLeave} className="bg-blue-600">
+                            <AlertDialogAction
+                                onClick={saveDraftAndLeave}
+                                className="bg-blue-600"
+                            >
                                 Save Draft & Leave
                             </AlertDialogAction>
-                            <AlertDialogAction onClick={() => {
-                                setForm(() => DEFAULT_PROPERTY_FORM);
-                                leaveWithoutSaving()
-                            }} className="bg-red-600">
+                            <AlertDialogAction
+                                onClick={() => {
+                                    setForm(() => DEFAULT_PROPERTY_FORM);
+                                    leaveWithoutSaving();
+                                }}
+                                className="bg-red-600"
+                            >
                                 Leave Without Saving
                             </AlertDialogAction>
                         </AlertDialogFooter>
@@ -1433,17 +1533,22 @@ export default function PropertyFormEditor({ accountType, loadingForm, documentT
             </div>
         </div>
     );
+}
+
+function FormSection({
+    title,
+    children,
+}: {
+    title: string;
+    children: ReactNode;
+}) {
+    return (
+        <section className="w-full h-auto">
+            <Card className="shadow-sm py-6 px-4 md:px-6 rounded-sm text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-900">
+                <h2 className="text-lg text-wrap font-semibold uppercase">{title}</h2>
+                <>{children}</>
+            </Card>
+        </section>
+    );
 };
 
-
-function FormSection({ title, children }: { title: string, children: ReactNode }){
-    return <section className="w-full h-auto">
-        <Card className="shadow-sm py-6 px-4 md:px-6 rounded-sm text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-900">
-            <h2 className="text-lg text-wrap font-semibold uppercase">{title}</h2>
-            <>
-                {children}
-            </>
-
-        </Card>
-    </section>;
-};

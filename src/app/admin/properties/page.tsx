@@ -8,14 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AVAILABILITY, PROPERTY_CATEGORIES, PROPERTY_TYPES, STATUS } from "@/components/add_property/defaultData";
 import TableDisplay from "@/components/property/TableDisplay";
 import { CustomCalendar } from "@/components/CustomCalader";
-import { sampleProperties } from "@/data/property";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { usePropertyStore } from "@/store/usePropertyStore";
+import PageLoading from "@/components/loaders/PageLoader";
 
 export default function ListPropertiesPage() {
-  const [tabs, setTabs] = useState(0);
 
-  const [properties, setProperties] = useState(sampleProperties);
+  const { properties, loading } = usePropertyStore();
 
+  const [tab, setTab] = useState<"Admin" | "Agent">("Admin");
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -32,9 +33,9 @@ export default function ListPropertiesPage() {
   // Filtering logic (including date filter)
   const filteredProperties = useMemo(() => {
     return properties.filter((p) => {
-      const matchesSearch =
-        (p.id||"").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = (p.id || "").toLowerCase().includes(searchTerm.toLowerCase()) || p.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const accountType = tab === "Admin" || tab === p.accountType;
 
       const matchesCat = categoryFilter === "all" || p.category === categoryFilter;
 
@@ -48,13 +49,13 @@ export default function ListPropertiesPage() {
       const matchesAvail =
         availabilityFilter === "all" || p.availability === availabilityFilter;
 
-      // ✅ Date filtering
       const date = new Date((p.updatedAt || ""));
       const afterStart = !startDate || date >= new Date(startDate);
       const beforeEnd = !endDate || date <= new Date(endDate);
 
       return (
         matchesSearch &&
+        accountType &&
         matchesCat &&
         matchesType &&
         matchesStatus &&
@@ -64,8 +65,9 @@ export default function ListPropertiesPage() {
         beforeEnd
       );
     });
+
   }, [
-    searchTerm,
+    searchTerm,    
     categoryFilter,
     typeFilter,
     statusFilter,
@@ -74,7 +76,10 @@ export default function ListPropertiesPage() {
     startDate,
     endDate,
     properties,
+    tab,
   ]);
+
+  if (loading) return <PageLoading loading={loading} />
 
   // Pagination
   const totalPages = Math.ceil(filteredProperties.length / perPage);
@@ -91,29 +96,23 @@ export default function ListPropertiesPage() {
     setSelected((pre) =>
       pre.includes(id) ? pre.filter(s => s !== id) : [...pre, id]
     );
-  };  
-
+  };
 
   return (
     <div className="w-full">
       {/* Tab menu */}
       <div className="flex gap-2 flex-wrap mb-10">
-        {["Admin", "Agents"].map((tab, idx) => (
+        {[{ n: "Admin", v: "Admin" }, { n: "Agents", v: "Agent" }].map((t,) => (
           <Button
-            key={tab}
-            variant={tabs === idx ? "default" : "outline"}
+            key={t.v}
+            variant={t.v === tab ? "default" : "outline"}
             className="cursor-pointer"
-            onClick={() => {
-              setTabs(idx);
-
-              const clearOut = setTimeout(() => {
-                setProperties(tab === "Admin" ? sampleProperties : []);
-                clearTimeout(clearOut);
-              }, 100);
+            onClick={() => {              
+              setTab(t.v as "Admin" | "Agent");              
 
             }}
           >
-            {tab}
+            {t.n}
           </Button>
         ))}
       </div>
@@ -333,7 +332,7 @@ export default function ListPropertiesPage() {
             ) : (
               <tr>
                 <td colSpan={6} className="text-center py-10 text-gray-500">
-                  No properties found.
+                    <p>No properties found.</p>
                 </td>
               </tr>
             )}
@@ -367,4 +366,4 @@ export default function ListPropertiesPage() {
       )}
     </div>
   );
-}
+};

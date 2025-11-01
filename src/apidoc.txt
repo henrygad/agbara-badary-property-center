@@ -1,0 +1,45 @@
+api's for ab proper center
+
+for client api
+
+/api/client/
+
+/api/client/contact
+
+/api/client/request
+
+/api/client/whoami
+
+
+for auth api
+
+/api/auth/login
+
+/api/auth/register
+
+
+for otp api
+
+/api/otp
+
+/api/otp/verify/email
+
+/api/otp/verify/resetpassword
+
+
+for reCAPTCHA api
+
+/api/reCAPTCHA
+
+
+for change password api
+
+/api/changepassword
+
+
+
+for files api
+
+/api/file
+
+

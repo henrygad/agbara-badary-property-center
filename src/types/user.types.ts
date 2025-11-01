@@ -1,22 +1,32 @@
+import { RegisterTypes } from "./auth.types"
 
-
-type UserTypes = {
-    firstName: string
-    lastName: string
-    authEmail: string
+interface UserTypes extends RegisterTypes {
+    id?: string,
     profileImage?: {
         url: string,
         publicId: string,
     }
-    accountType: "Admin" | "Agent"
     bio?: string;
-    gender?: "Male" | "Female" | "Other"
-    email?: string
-    phone?: string
-    company?: string;
-    role?: string,
-    createdAt: Date 
-    lastLogin: Date
+    gender?: "Male" | "Female" | "Other"   
+    company?: string;     
+
+    emailIsVerified: boolean
+    emailVerificationOtp?: string,
+    emailVerificationOtpExpireingTime?: number,
+
+    resetPasswordVerificationOtp?: string,
+    resetPasswordVerificationOtpExpireingTime?: number,
+    
+    rememberMe: boolean,
+    lastLogin: Date | string,
+
+    createdAt: Date
+
+    resetToken?: {
+        token: string,
+        expiresAt: number
+    }
+
 };
 
 

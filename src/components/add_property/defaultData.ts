@@ -163,7 +163,7 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     longitude: null,
     // agent
     agentName: "",
-    agentPhone: null,
+    agentPhone: "",
     agentEmail: "",
     agentCompany: "",
     showContact: true,
@@ -173,6 +173,9 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     packageType: "Free",
     seoSlug: "",
     priorityRank: null,
+    //others    
+    accountType: "",
+
     // amenities
     createdAt: new Date(),
     updatedAt: undefined,

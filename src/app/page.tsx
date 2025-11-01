@@ -1,17 +1,26 @@
 "use client";
 
 import SearchForm from "../components/SearchForm";
-import backgroundimage from "../../public/images/background-image-for-slider.jpg";
+import backgroundimage from "../../public/images/home_hero_image.jpg";
 import { Building2, ThumbsUp, Users, Star } from "lucide-react";
 import CountUp from "react-countup";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ClientCard from "@/components/property/ClientCard";
-import { sampleProperties } from "../data/property";
+import { useMemo } from "react";
+import { useClientStore } from "@/store/useClientStore";
+import GroundLoader from "@/components/loaders/GroundLoader";
 
 
 export default function Home() {
+  const {  properties, loading } = useClientStore();
 
+  // Filtering logic (including date filter)
+  const filteredProperties = useMemo(() => {
+    return properties.sort(
+      (a, b) => new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime()
+    )
+  }, [properties]);
 
   return <div className="relative">
     {/* Hero */}
@@ -150,11 +159,15 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {
-            sampleProperties?.length ?
-              sampleProperties.map((p) =>
-                <ClientCard key={p.id} property={p} />
+            !loading && filteredProperties.length ?
+              filteredProperties.map((p, idx) => {
+                if (idx > 4) {
+                  return;
+                }
+                return <ClientCard key={p.id} property={p} />
+              }
               ) :
-              <div>loading</div>
+               <GroundLoader loading={loading} />
           }
         </div>
         <div className="flex justify-end mt-10">

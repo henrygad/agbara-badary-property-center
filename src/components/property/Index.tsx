@@ -22,8 +22,6 @@ import RequestForm from "./RequestForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import CustomCard from "../CustomCrad";
 
-
-
 type Props = {
     property: PropertyTypes
     viewer: "ADMIN" | "AGENT" | "CLIENT"
@@ -367,7 +365,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                         <div className="p-4 space-y-8">
                             <div className="flex justify-center">
                                 <DisplayImage
-                                    src={property.agentPhoto || " "}
+                                    src={property.agentPhoto || "avata.png"}
                                     useRemove={false}
                                     alt={property.agentName}
                                     className="w-24 h-24 rounded-full border-2 border-primary object-cover"

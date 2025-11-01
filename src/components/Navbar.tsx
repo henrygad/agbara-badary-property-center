@@ -8,9 +8,13 @@ import { cn } from "@/lib/utils";
 import useClickOutSide from "@/hooks/useClickOutSide";
 import DisplayImage from "./gallery/DisplayImage";
 import { useUserStore } from "@/store/useUserStore";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 export default function Navbar() {
-  const { user } = useUserStore();
+  const { user, loading: userLoading } = useUserStore();
+
+  const { notifications, loading: noticLoading } = useNotificationStore();
+  const unreadCount = notifications.filter((n) => !n.viewed).length;
 
   const pathname = usePathname();
   const [dark, setDark] = useState(false);
@@ -66,8 +70,18 @@ export default function Navbar() {
           className="relative cursor-pointer"
           onClick={() => router.push("/admin/notifications")}
         >
-          <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-          <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span>
+          <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />    
+          {noticLoading ?
+            <p>loading...</p> :
+            <>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </>
+          }
+          {/* <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span> */}
         </button>
 
         {/* Dark mode toggle */}
@@ -91,23 +105,23 @@ export default function Navbar() {
           className="relative"
           ref={showMenuEleRef}
         >
-          <button
+          {userLoading ?
+            <p>loading...</p> :
+            <button
             onClick={() => setShowMenu(!showMenu)}
             className="flex items-center gap-2"
           >
             <motion.div
               whileHover={{ rotate: 5 }}
               className="h-8 w-8 rounded-full"
-            >
-              {user?.profileImage?.url &&
+              >              
                 <DisplayImage
-                  src={user?.profileImage.url}
+                  src={user?.profileImage?.url || "avata.png"}
                   alt={user?.accountType + " " + "Avatar"}
                   useRemove={false}
                   type="Profile"
-                  className="h-8 w-8 rounded-full"
-                />
-              }
+                  className="h-8 w-8 rounded-full border-primary border-2"
+                />            
             </motion.div>
 
             <ChevronDown
@@ -116,7 +130,7 @@ export default function Navbar() {
                 showMenu && "rotate-180"
               )}
             />
-          </button>
+            </button>}
 
           <AnimatePresence>
             {showMenu && (

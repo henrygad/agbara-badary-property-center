@@ -30,6 +30,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import ReCAPTCHA from "react-google-recaptcha";
 
 // Zod validation schema
 const RequestSchema = z.object({
@@ -52,6 +53,8 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
   const [warning, setWarning] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState("");
 
   const form = useForm<RequestFormData>({
     resolver: zodResolver(RequestSchema),
@@ -63,38 +66,72 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
     },
   });
 
+  const verifyCaptchaToken = async () => {
+    setCaptchaError("");
+
+    if (!captchaToken) {
+      setCaptchaError("Please verify that you're not a robot.");
+      throw new Error("Please verify that you're not a robot.")
+    }
+    // Send captchaToken to backend for verification
+    const res = await fetch("/api/auth/reCAPTCHA", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: captchaToken }),
+    });
+
+    const captchaData = await res.json();
+    if (!captchaData?.success) {
+      setCaptchaError("reCAPTCHA verification failed. Try again.");
+      throw new Error("reCAPTCHA verification failed. Try again.")
+    }
+
+    return true;
+  };
+
   // Handle request submission
   async function onSubmit(values: RequestFormData) {
     if (loading) return;
     setWarning("");
     setSuccess(false);
-
     setLoading(true);
 
-    const payLoad = {
-      propertyId: property.id || "",
-      referenceId: property.referenceId,
-      propertyTitle: property.title,
-      ...values,
-    };
-
     try {
+
+      await verifyCaptchaToken();
+
+      const payLoad = {
+        propertyId: property.id || "",
+        referenceId: property.referenceId,
+        propertyTitle: property.title,
+        ...values,
+      };
+
       const res = await fetch("/api/client/request", {
         method: "POST",
-        body: JSON.stringify(payLoad),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payLoad),       
       });
 
-      const data = (await res.json()) as { response: "Exists" | "Success" };
-      setLoading(false);
+      const data = (await res.json()) as { success: boolean, message: string, response: "Exists" | "Success" };      
 
-      if (data.response === "Exists")
-        setWarning(
-          "You’ve already sent a request for this property today. Please try again tomorrow."
-        );
-      if (data.response === "Success") setSuccess(true);
+      if (!data.success) {
+        if (data.response === "Exists")
+          setWarning(
+            "You’ve already sent a request for this property today. Please try again tomorrow."
+          );
+
+      } else {          
+        if (data.response === "Success") setSuccess(true);
+      }
+
     } catch (error) {
       console.error(error);
+      setWarning("Try again later.");
+    } finally {
+      setLoading(false);
     }
+
   }
 
   return (
@@ -218,7 +255,19 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+                />
+
+                {/* <ReCAPTCHA */}
+                <div className="my-6 flex justify-center">
+                  <ReCAPTCHA
+                    sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
+                    onChange={(token: string | null) => setCaptchaToken(token)}
+                  />
+                </div>
+
+                {captchaError && (
+                  <p className="text-red-600 text-sm mb-3">{captchaError}</p>
+                )}
 
               <AlertDialogFooter className="mt-4">
                 <div className="flex flex-col w-full gap-3">

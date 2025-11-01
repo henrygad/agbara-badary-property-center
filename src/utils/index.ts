@@ -30,8 +30,8 @@ export const formatDate = (date: Date | undefined) => {
     })
 }
 
-export const getCookieFromClient = (req: NextRequest) => {
-    const DNS = process.env.NEXT_PUBLIC_APP_DSN;
+export const getCookieFromClient = (req: NextRequest) => {    
+    const DNS = process.env.NEXT_PUBLIC_APP_DSN || "agbarabadagrypropertycenter.com";
     const pattern = new RegExp(`__Host-${DNS}_client_id=([^;]+)`);
 
     const cookie = req.headers.get("cookie") || "";
@@ -53,5 +53,26 @@ export function getOptimizedImage(url: string, width = 1200) {
 export const formatteFireStoreDate = (data: DocumentData) => {
     data.createdAt = new Date(data.createdAt?.seconds * 1000);
     data.updatedAt = new Date(data.updatedAt?.seconds * 1000);
+    if (data?.lastLogin) {
+        data.lastLogin = new Date(data.lastLogin.seconds * 1000);
+    }
     return data;
+}
+
+export const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+export function maskEmail(email: string): string {
+    if (!email || !email.includes("@")) return email;
+
+    const [local, domain] = email.split("@");
+    if (local.length <= 2) {
+        // If the local part is very short, just hide one char
+        return `${local[0] || "*"}***@${domain}`;
+    }
+
+    const visiblePart = local.slice(0, 2);
+    const hiddenPart = "*".repeat(Math.max(4, local.length - 2));
+    return `${visiblePart}${hiddenPart}@${domain}`;
 }
