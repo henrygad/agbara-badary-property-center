@@ -140,7 +140,7 @@ export default function Register() {
       } else {
         console.log(resData);
 
-        router.push("/auth/verify-email?email=" + email);
+        router.push("/auth/verify-email?email=" + data.email);
       }
 
       form.reset();

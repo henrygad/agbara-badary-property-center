@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     // Send notifaction email to admin
     const adminHtml = await render(AdminNotification({
-        subject: "New Property Request Received<",
+        subject: "New Property Request Received",
         message: `${name} just requested information about ${propertyTitle}.`,
         name,
         phone,

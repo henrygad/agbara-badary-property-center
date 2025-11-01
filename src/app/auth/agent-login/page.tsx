@@ -246,9 +246,7 @@ export default function Login() {
             <Link href="/auth/agent-register">Register here</Link>
           </Button>
         </div>
-      </div>
-
-      < OverlayLoader loading={loading} />
+      </div>      
     </div>
   );
 };

@@ -93,8 +93,8 @@ export async function POST(req: Request) {
 
         // 4) Handle agent email verification
         const name = `${newAgent.firstName} ${newAgent.lastName}`;
-        const { otp, expiresAt } = generateOTPWithExpiry(15);
-        const verifyLink = `${process.env.NEXT_PUBLIC_APP_DNS}/auth/verify-email?email=${newAgent.email}&otp=${otp}`;
+        const { otp, expiresAt } = generateOTPWithExpiry(15);        
+        const verifyLink = `${process.env.NEXT_PUBLIC_APP_DNS}/auth/verify-email/link/?email=${newAgent.email}&otp=${otp}`;
 
         // 4.i) Store update to db
         await updateAgentDb(newAgent.id,

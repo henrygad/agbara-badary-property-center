@@ -14,7 +14,7 @@ export default function PageLoader({ loading }: { loading: boolean }) {
             >
                 <Image src={logo} alt="Loading..." width={56} height={56} />
             </motion.div>
-            <p className="mt-2 text-gray-500 text-sm">Fetching properties...</p>
+            <p className="mt-2 text-gray-500 text-sm">Loading...</p>
         </div>
     );
 }

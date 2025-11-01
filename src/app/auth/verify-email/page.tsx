@@ -24,14 +24,12 @@ type OtpSchema = z.infer<typeof otpSchema>;
 
 export default function VerifyEmail() {
   const query = useSearchParams();
-
   const router = useRouter();
 
   const form = useForm<OtpSchema>({
     resolver: zodResolver(otpSchema),
     defaultValues: { code: "", email: "" },
   });
-
 
   const [resendTimer, setResendTimer] = useState(60);
   const [otpError, setOtpError] = useState("");

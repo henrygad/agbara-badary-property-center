@@ -110,10 +110,10 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
       const res = await fetch("/api/client/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payLoad),       
+        body: JSON.stringify(payLoad),
       });
 
-      const data = (await res.json()) as { success: boolean, message: string, response: "Exists" | "Success" };      
+      const data = (await res.json()) as { success: boolean, message: string, response: "Exists" | "Success" };
 
       if (!data.success) {
         if (data.response === "Exists")
@@ -121,7 +121,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
             "You’ve already sent a request for this property today. Please try again tomorrow."
           );
 
-      } else {          
+      } else {
         if (data.response === "Success") setSuccess(true);
       }
 
@@ -144,117 +144,117 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
         </div>
       </AlertDialogTrigger>
 
-      <AlertDialogContent
-        className={cn(
-          "max-w-md w-[95%] sm:rounded-2xl rounded-t-2xl p-4 md:p-6 border-t-4 border-red-700",
-          "animate-in slide-in-from-bottom-10"
-        )}
-      >
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-bold text-red-700">
-            Send a Request
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
-            Please fill out your contact details and we’ll reach out soon.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+        <AlertDialogContent
+          className={cn(
+            "max-w-md w-[95%] sm:rounded-2xl rounded-t-2xl p-4 md:p-6 border-t-4 border-red-700",
+            "animate-in slide-in-from-bottom-10 max-w-full max-h-[100vh] w-full h-full overflow-y-auto"
+          )}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-red-700">
+              Send a Request
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
+              Please fill out your contact details and we’ll reach out soon.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-        {/* Warning Dialog */}
-        {warning && (
-          <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 p-3 rounded-md mb-3">
-            {warning}
-          </div>
-        )}
+          {/* Warning Dialog */}
+          {warning && (
+            <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 p-3 rounded-md mb-3">
+              {warning}
+            </div>
+          )}
 
-        {/* Success Dialog */}
-        {success ? (
-          <div className="text-center py-6">
-            <h3 className="text-lg font-semibold text-green-600">
-              Request Sent Successfully 🎉
-            </h3>
-            <p className="text-gray-500 mt-2">
-              We’ve received your request and will contact you soon.
-            </p>
-            <Button
-              className="mt-4 bg-green-600 hover:bg-green-700 text-white"
-              onClick={() => setOpen(false)}
-            >
-              Close
-            </Button>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 mt-4 text-sm"
-            >
-              {/* Fullname */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          {/* Success Dialog */}
+          {success ? (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-semibold text-green-600">
+                Request Sent Successfully 🎉
+              </h3>
+              <p className="text-gray-500 mt-2">
+                We’ve received your request and will contact you soon.
+              </p>
+              <Button
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => setOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 mt-4 text-sm"
+              >
+                {/* Fullname */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Email */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="you@example.com"
-                        type="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* Email */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="you@example.com"
+                          type="email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Phone Number */}
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number (optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+234 810 000 0000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* Phone Number */}
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+234 810 000 0000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Message */}
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Message *</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Type your message here..."
-                        rows={4}
-                        {...field}
-                        className="min-h-[100px] max-h-[100px] overflow-auto resize-none"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                {/* Message */}
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Message *</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Type your message here..."
+                          rows={4}
+                          {...field}
+                          className="min-h-[100px] max-h-[100px] overflow-auto resize-none"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 {/* <ReCAPTCHA */}
@@ -269,31 +269,31 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                   <p className="text-red-600 text-sm mb-3">{captchaError}</p>
                 )}
 
-              <AlertDialogFooter className="mt-4">
-                <div className="flex flex-col w-full gap-3">
-                  {!loading ? (
-                    <>
-                      <AlertDialogCancel className="cursor-pointer w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700">
-                        Close
-                      </AlertDialogCancel>
-                      <Button
-                        type="submit"
-                        className="cursor-pointer w-full bg-primary  text-white"
-                      >
-                        Send Request
+                <AlertDialogFooter className="mt-4">
+                  <div className="flex flex-col w-full gap-3">
+                    {!loading ? (
+                      <>
+                        <AlertDialogCancel className="cursor-pointer w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700">
+                          Close
+                        </AlertDialogCancel>
+                        <Button
+                          type="submit"
+                          className="cursor-pointer w-full bg-primary  text-white"
+                        >
+                          Send Request
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="ghost">
+                        <Spinner /> Sending...
                       </Button>
-                    </>
-                  ) : (
-                    <Button variant="ghost">
-                      <Spinner /> Sending...
-                    </Button>
-                  )}
-                </div>
-              </AlertDialogFooter>
-            </form>
-          </Form>
-        )}
-      </AlertDialogContent>
+                    )}
+                  </div>
+                </AlertDialogFooter>
+              </form>
+            </Form>
+          )}
+        </AlertDialogContent>
     </AlertDialog>
   );
 }

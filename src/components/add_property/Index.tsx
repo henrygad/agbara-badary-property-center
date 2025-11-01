@@ -70,6 +70,7 @@ import Property from "../property/Index";
 import { useUserStore } from "@/store/useUserStore";
 import { Card } from "../ui/card";
 import ReturnBack from "../ReturnBack";
+import OverlayLoader from "../loaders/OverlayLoader";
 
 type Props = {
     accountType: "ADMIN" | "AGENT";
@@ -1531,6 +1532,8 @@ export default function PropertyFormEditor({
                     </AlertDialogContent>
                 </AlertDialog>
             </div>
+
+            <OverlayLoader loading={loading} />
         </div>
     );
 }
