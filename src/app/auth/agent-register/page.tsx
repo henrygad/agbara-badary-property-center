@@ -89,6 +89,7 @@ export default function Register() {
     },
   });
 
+
   const verifyCaptchaToken = async () => {
     setCaptchaError("");
 
@@ -97,7 +98,7 @@ export default function Register() {
       throw new Error("Please verify that you're not a robot.")
     }
     // Send captchaToken to backend for verification
-    const res = await fetch("/api/auth/reCAPTCHA", {
+    const res = await fetch("/api/reCAPTCHA", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: captchaToken }),
