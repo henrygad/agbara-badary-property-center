@@ -8,7 +8,7 @@ export type RegisterTypes = {
     confirmPassword: string,
     agreeToTerms: boolean,
     accountType: "Admin" | "Agent"
-    accountStatus: "Pending" | "Approved"
+    accountStatus: "Pending" | "Approved" | "Rejected" | "Suspended"
 }
 export type LoginTypes = {   
     email: string,   

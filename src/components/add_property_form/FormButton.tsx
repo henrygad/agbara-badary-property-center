@@ -6,7 +6,8 @@ import { Spinner } from "../ui/spinner"
 export default function FormButton({ loading, title, accountType, documentType, isDocEdited }:
     {
         loading: boolean, title: string, accountType: "ADMIN" | "AGENT"
-        documentType: "NEW" | "UPDATE" | "DUPLICATE" | "REVIEW", isDocEdited: boolean
+        documentType: "NEW" | "UPDATE" | "DUPLICATE" | "DRAFT" | "REVIEW",
+        isDocEdited: boolean
     }
 ) {
 

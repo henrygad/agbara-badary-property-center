@@ -3,13 +3,9 @@ type NotificationTypes = {
     type: "Contact"
     | "New Account"
     | "Listed Property"
-    | "Request"
-    | "Listing Approved" 
-    | "Listing Reviewing"
-    | "Listing Rejected"
-    | "Account Approved" 
-    | "Account Reviewing"
-    | "Account Rejected"   
+    | "Request" 
+    | "Property"
+    | "Account"    
     to: string   
     title: string,
     message: string

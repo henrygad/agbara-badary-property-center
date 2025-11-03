@@ -54,7 +54,8 @@ export async function searchPropertiesDb(params: SearchTypes) {
     // For genaral location
     if (params.location) {
         results = results.filter(property =>
-            (property.street + property.city + property.state).trim().includes((params.location || "").trim()));
+            (property.street + property.city + property.state).toLowerCase().trim()
+                .includes((params.location || "").toLowerCase().trim()));
     }
 
     // For all amenities (AND logic)

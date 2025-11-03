@@ -36,7 +36,11 @@ for change password api
 
 /api/changepassword
 
+for agents api
 
+/api/agent/account
+
+/api/agent/property
 
 for files api
 

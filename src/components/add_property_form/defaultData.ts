@@ -86,11 +86,7 @@ export const REGIONAL_TOWNS = [
         ]
     },
 ];
-export const AVAILABILITY = [
-    {
-        name: "Draft",
-        value: "Draft"
-    },
+export const AVAILABILITY = [    
     {
         name: "Pending",
         value: "Pending"
@@ -162,6 +158,7 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     latitude: null,
     longitude: null,
     // agent
+    agentId: "",
     agentName: "",
     agentPhone: "",
     agentEmail: "",
@@ -169,7 +166,7 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     showContact: true,
     // meta
     referenceId: "",
-    availability: "Draft",
+    availability: "Pending",
     packageType: "Free",
     seoSlug: "",
     priorityRank: null,

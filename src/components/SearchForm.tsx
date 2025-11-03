@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RotateCcw } from "lucide-react";
-import { CONDITION, FURNISHING, PROPERTY_CATEGORIES, PROPERTY_TYPES } from "./add_property/defaultData";
+import { CONDITION, FURNISHING, PROPERTY_CATEGORIES, PROPERTY_TYPES } from "./add_property_form/defaultData";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
 import { SearchTypes } from "@/types/search.types";

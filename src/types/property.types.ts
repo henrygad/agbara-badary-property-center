@@ -47,7 +47,7 @@ export type PropertyType =
     | "Short Let"
     | "Other";
 
-export type Availability = "Draft" | "Pending" | "Reviewing" | "Accepted" | "Trash" | "Rejected";
+export type Availability =  "Pending" | "Reviewing" | "Accepted" | "Trash" | "Rejected";
 
 export interface PropertyTypes {
     id?: string; // Fire strore iD
@@ -108,6 +108,7 @@ export interface PropertyTypes {
     powerSupplyNotes?: string
 
     // Agent Info
+    agentId: string,
     agentName: string;
     agentPhone: string | null;
     agentEmail: string;

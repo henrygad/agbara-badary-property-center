@@ -1,6 +1,6 @@
 "use client";
 
-import PropertyFormEditor from "@/components/add_property/Index";
+import PropertyFormEditor from "@/components/add_property_form/Index";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import { PropertyTypes } from "@/types/property.types";
 import { useEffect, useState } from "react";

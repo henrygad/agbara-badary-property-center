@@ -4,6 +4,8 @@ import React from 'react'
 import DisplayImage from '../gallery/DisplayImage';
 import Status from './Status';
 import { PropertyTypes } from '@/types/property.types';
+import { formatCurrency } from '@/utils';
+
 
 export default function AdminCard({property}: {property: PropertyTypes}) {
     return <div className="flex items-center gap-4">
@@ -21,7 +23,7 @@ export default function AdminCard({property}: {property: PropertyTypes}) {
 
             <div className="flex items-center gap-2 mt-1">
                 <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    {property.price}
+                    {formatCurrency(property.price)}
                 </p>
 
                 {/*Property Purpose Badge (rent/sell/sold/leased) */}

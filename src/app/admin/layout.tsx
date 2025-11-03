@@ -10,7 +10,7 @@ import { usePropertyStore } from "@/store/usePropertyStore";
 import { useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { usePathname } from "next/navigation";
-import { DEFAULT_PROPERTY_FORM } from "@/components/add_property/defaultData";
+import { DEFAULT_PROPERTY_FORM } from "@/components/add_property_form/defaultData";
 import { getAgentByEmailDb, getAgentsDb } from "@/lib/firebase/agent_service";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { getNotificationByUserIdDb } from "@/lib/firebase/notification._service";
@@ -42,6 +42,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     const fetchAdmin = async () => {      
       setAdminLoading(true);
+      setPropertyLoading(true, false);
+      setImageLoading(true, false);
+      setNotificationLoading(true, false);
+      setRequestsLoading(true, false);
+      setAgentsLoading(true, false);
+
       try {
         const admin = await getAgentByEmailDb("henrygad.orji@gmail.com");
         setAdminLoading(false);
@@ -50,37 +56,36 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           admin.password = "";
           setUser(admin);
 
-          // Fetch All properties
-          setPropertyLoading(true, false);
+          // Fetch All properties        
           const properties = await getPropertiesDb();
           if (properties) {
             setProperties(properties);
           }
           setPropertyLoading(false, false);
 
-          // Fetch admin properties
-          setImageLoading(true, false);
+          // Fetch admin properties         
           const images = await getImagesDb(admin.id!);
           if (images) {
             setImages(images);
           }
           setImageLoading(false, false);
 
-          setNotificationLoading(true, false);
+          
+          // Fetch notifications
           const notics = await getNotificationByUserIdDb("admin");
           if (notics) {
             setNotification(notics);
           }
           setNotificationLoading(false, false);
 
-          setRequestsLoading(true, false);
+          // Fetch requests
           const request = await getRequestsDb();
           if (request) {
             setRequests(request);
           }
           setRequestsLoading(false, false);
 
-          setAgentsLoading(true, false);
+          // Fetch agents
           const agents = await getAgentsDb();
           if (agents) {
             setAgents(agents);
@@ -133,14 +138,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <Navbar />
         <main className="p-3 md:px-6 py-6 dark:bg-gray-800 min-h-screen">
           {children}
-        </main>
-        <footer className="flex">
-          <div className="flex justify-center">
-            {/* <p className="text-sm">
-              &copy; copy right Agbara Badagry Property Center
-            </p> */}
-          </div>
-        </footer>
+        </main>        
       </div>
     </div>
   );

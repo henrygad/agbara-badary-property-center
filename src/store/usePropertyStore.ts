@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_PROPERTY_FORM } from "@/components/add_property/defaultData";
+import { DEFAULT_PROPERTY_FORM } from "@/components/add_property_form/defaultData";
 import { PropertyTypes } from "@/types/property.types";
 import { create } from "zustand";
 

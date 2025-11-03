@@ -20,7 +20,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Eye, EyeOff } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import UserTypes from "@/types/user.types";
-import OverlayLoader from "@/components/loaders/OverlayLoader";
 
 
 const loginSchema = z.object({

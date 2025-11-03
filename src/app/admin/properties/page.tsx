@@ -5,16 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AVAILABILITY, PROPERTY_CATEGORIES, PROPERTY_TYPES, STATUS } from "@/components/add_property/defaultData";
+import { AVAILABILITY, PROPERTY_CATEGORIES, PROPERTY_TYPES, STATUS } from "@/components/add_property_form/defaultData";
 import TableDisplay from "@/components/property/TableDisplay";
 import { CustomCalendar } from "@/components/CustomCalader";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import PageLoading from "@/components/loaders/PageLoader";
+import { updatePropertyDb } from "@/lib/firebase/property_service";
+import { showWarning } from "@/components/ui/toasts";
+import OverlayLoader from "@/components/loaders/OverlayLoader";
 
 export default function ListPropertiesPage() {
 
-  const { properties, loading } = usePropertyStore();
+  const { properties, loading: loadingProperties, updateProperty } = usePropertyStore();
 
   const [tab, setTab] = useState<"Admin" | "Agent">("Admin");
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,16 +26,17 @@ export default function ListPropertiesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [stateFilter, setStateFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [loadind, setLoading] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [selected, setSelected] = useState<string[]>([]);
   const [page, setPage] = useState(1);
-  const perPage = 5;
+  const perPage = 10;
 
-  // Filtering logic (including date filter)
+  // Filtering logic
   const filteredProperties = useMemo(() => {
-    return properties.filter((p) => {
+    return properties.filter(p => p.availability !== "Trash").filter((p) => {
       const matchesSearch = (p.id || "").toLowerCase().includes(searchTerm.toLowerCase()) || p.title.toLowerCase().includes(searchTerm.toLowerCase());
 
       const accountType = tab === "Admin" || tab === p.accountType;
@@ -79,7 +83,7 @@ export default function ListPropertiesPage() {
     tab,
   ]);
 
-  if (loading) return <PageLoading loading={loading} />
+  if (loadingProperties) return <PageLoading loading={loadingProperties} />
 
   // Pagination
   const totalPages = Math.ceil(filteredProperties.length / perPage);
@@ -98,10 +102,34 @@ export default function ListPropertiesPage() {
     );
   };
 
+  const handleTrash = async (id?: string) => {
+    if (!id) return;
+
+    setLoading(true);
+    try {
+      const res = await updatePropertyDb(id, { availability: "Trash" });
+      if (res) {
+        updateProperty(res);
+        showWarning("Property moved to Trash!");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const trashAll = () => {
+    selected.map(s => {
+      handleTrash(s);
+    })
+
+  };
+
   return (
     <div className="w-full">
       {/* Tab menu */}
-      <div className="flex gap-2 flex-wrap mb-10">
+      <div className="flex gap-2 flex-wrap mb-6">
         {[{ n: "Admin", v: "Admin" }, { n: "Agents", v: "Agent" }].map((t,) => (
           <Button
             key={t.v}
@@ -109,7 +137,6 @@ export default function ListPropertiesPage() {
             className="cursor-pointer"
             onClick={() => {              
               setTab(t.v as "Admin" | "Agent");              
-
             }}
           >
             {t.n}
@@ -119,9 +146,27 @@ export default function ListPropertiesPage() {
 
       {/* Filter and Search Bar */}
       <div
-        className="mb-6 bg-white dark:bg-transparent p-4"
+        className="mb-4 p-4"
       >
-        <h2 className="text-lg font-medium mb-3">Filter Properties</h2>
+        {selected.length > 0 ? (
+          <div className="relative flex justify-end gap-2 px-2 items-center shadow-sm">
+            <div className="absolute top-1/2 -translate-1/2 left-3">
+              <Button
+                variant="ghost"
+                onClick={() => setSelected([])}
+              >
+                <X size={20} />
+              </Button>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={trashAll}
+            >
+              Trash
+            </Button>
+          </div>
+        ) :
         <div className="flex gap-6 flex-wrap flex-row md:items-end md:justify-between">
           {/* Selection Filters */}
           <div className="flex flex-wrap gap-2">
@@ -283,7 +328,7 @@ export default function ListPropertiesPage() {
             </Select>
           </div>
 
-          {/* 📅 Date Filters */}
+            {/* Date Filters */}
           <div className="flex gap-6">
             <div className="flex flex-col">
               <label className="text-sm block mb-2">From</label>
@@ -302,7 +347,9 @@ export default function ListPropertiesPage() {
           </div>
 
         </div>
+        }  
       </div>
+
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg border bg-white dark:bg-gray-900">
@@ -326,12 +373,13 @@ export default function ListPropertiesPage() {
                   key={p.id}
                   p={p}
                   selected={selected}
-                  setSelected={toggleSelect}                 
+                  setSelected={toggleSelect}   
+                  placeViewing="Normal"
                 />
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-500">
+                  <td colSpan={6} className="w-full text-center text-sm font-medium text-gray-600">
                     <p>No properties found.</p>
                 </td>
               </tr>
@@ -364,6 +412,7 @@ export default function ListPropertiesPage() {
           </Button>
         </div>
       )}
+      <OverlayLoader loading={loadind} />
     </div>
   );
 };

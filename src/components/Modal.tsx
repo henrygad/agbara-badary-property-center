@@ -14,7 +14,6 @@ type Props = {
     className?: string
 }
 
-
 export default function Modal({ open, setOpen, children, className = "" }: Props) {
     
     return (

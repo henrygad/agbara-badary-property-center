@@ -147,7 +147,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
         <AlertDialogContent
           className={cn(
             "max-w-md w-[95%] sm:rounded-2xl rounded-t-2xl p-4 md:p-6 border-t-4 border-red-700",
-            "animate-in slide-in-from-bottom-10 max-w-full max-h-[100vh] w-full h-full overflow-y-auto"
+            "animate-in slide-in-from-bottom-10 max-w-full max-h-[100vh] w-full overflow-y-auto"
           )}
         >
           <AlertDialogHeader>

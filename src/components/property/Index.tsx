@@ -10,7 +10,7 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import { formatCurrency, formatDate } from "@/utils";
-import { Bath, Toilet, Bed, CalendarDays, Car, Mail, MapPin, Phone, Ruler, User, Sofa, Hammer, Layers, Building2, Briefcase, CarFront } from "lucide-react";
+import { Bath, Toilet, Bed, CalendarDays, Car, Mail, MapPin, Phone, Ruler, User, Sofa, Hammer, Layers, Building2, Briefcase, CarFront, MoreVertical, Clipboard, Flag } from "lucide-react";
 import DisplayImage from "@/components/gallery/DisplayImage";
 import { PropertyTypes } from "@/types/property.types";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,11 @@ import ImageGallery from "@/components/gallery/ImageGallery";
 import RequestForm from "./RequestForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import CustomCard from "../CustomCrad";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+import { showSuccess } from "../ui/toasts";
+import { useRouter } from "next/navigation";
 
 type Props = {
     property: PropertyTypes
@@ -30,6 +35,9 @@ type Props = {
 
 
 export default function Listings({ property, viewer, placeViewing }: Props) {
+    const router = useRouter();
+
+
     const plugin = useRef(
         Autoplay({
             delay: 8000,
@@ -37,6 +45,16 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
             stopOnMouseEnter: true,
         })
     );
+
+    const handleReport = async (id?: string) => {
+        if (!id) return;
+        router.push("/contact");
+    };
+
+    const handleCopy = (id?: string) => {
+        navigator.clipboard.writeText(`${window.location.origin}/property/${id}`);
+        showSuccess("Copied", "Property link copied!");
+    };
 
 
     return <div className="w-full">
@@ -54,6 +72,41 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 {property.category && <Badge variant="secondary">{property.category}</Badge>}
                 {property.type && <Badge>{property.type}</Badge>}
             </div>
+            {placeViewing === "CLIENT" &&
+                <div className="absolute top-4 right-4 z-20">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent
+                            onClick={(e) => e.stopPropagation()}
+                            align="end"
+                            className="w-40 space-y-4 p-4"
+                        >
+
+                            {/* Copy Link */}
+                            <DropdownMenuItem
+                                onClick={() => handleCopy(property.id)}
+                                className="flex gap-2 items-center"
+                            >
+                                <Clipboard className="w-4 h-4 mr-2 text-agray-text-gray-600" />
+                                Copy Link
+                            </DropdownMenuItem>
+                            {/* Report */}
+                            <DropdownMenuItem
+                                className="text-primary flex gap-2 items-center"
+                                onClick={() => handleReport(property.id)}
+                            >
+                                <Flag className="w-4 h-4 mr-2 text-agray-text-gray-600" />
+                                Report
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            }
 
             {
                 property.images.length ?
@@ -82,7 +135,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 <h1 className="text-3xl font-bold">{property.title}</h1>
                 <div className="mt-2 space-y-2">
                     <div className="flex gap-2 text-base mt-2">
-                        <p className="text-primary text-2xl font-semibold">{formatCurrency(property.price)}</p> / <span className='text-muted-foreground'>{property.priceFrequency}</span>
+                        <p className="text-primary text-2xl font-semibold">{formatCurrency(property.price)}</p>{property.price && <>/ <span className='text-muted-foreground'>{property.priceFrequency}</span></>}
                     </div> 
                     {property.negotiable && <Badge variant="outline" className="text-sm text-primary ">Price is Negotiable</Badge>}
                 </div>
@@ -269,7 +322,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                         <div className="p-4 grid lg:grid-cols-3 gap-3">
                             <div>
                                 <p className="text-sm text-muted-foreground">Service Charge</p>
-                                <p>{formatCurrency(property.serviceCharge) || "0"} /{property.serviceChargeFrequency}</p>
+                                <p>{formatCurrency(property.serviceCharge) || "0"}</p> {property.serviceCharge && <p>/{property.serviceChargeFrequency}</p>}
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Agency Fee</p>
@@ -406,4 +459,3 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
         }
     </div>
 };
-

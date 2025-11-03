@@ -1,6 +1,6 @@
 "use client";
 
-import PropertyFormEditor from "@/components/add_property/Index";
+import PropertyFormEditor from "@/components/add_property_form/Index";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import { PropertyTypes } from "@/types/property.types";
 import { useEffect, useState } from "react";
@@ -10,12 +10,15 @@ export default function AddProperty() {
     const [loadingForm, setLoadingForm] = useState(false);   
 
     useEffect(() => {        
-        // Get duplicated data from localStorage
-        // Check if duplicate data is present
+        // Get duplicated data in localStorage        
         const duplicate = localStorage.getItem("duplicateProperty");
 
+        // Get drafted data in localStorage 
+        const draft = localStorage.getItem("draftProperty");
+
+        setLoadingForm(true);
+
         if (duplicate) {
-            setLoadingForm(true);
 
             const parsed = JSON.parse(duplicate) as PropertyTypes;
             // clear the  UID so it will generate a new one
@@ -25,11 +28,23 @@ export default function AddProperty() {
             setTimeout(() => {
                 setForm(() => parsed);
                 localStorage.removeItem("duplicateProperty");                
-                setLoadingForm(false);               
             }, 200);
-
+            
             // return () => clearTimeout(clearOut);
-        } 
+        } else if (draft) {
+            const parsed = JSON.parse(draft) as PropertyTypes;                              
+            parsed.createdAt = undefined;
+            parsed.updatedAt = undefined;
+
+            setTimeout(() => {
+                setForm(() => parsed);
+                localStorage.removeItem("draftProperty");
+            }, 200);
+        }
+        
+        
+        setLoadingForm(false);               
+
     }, [setForm]);
 
     return <div>

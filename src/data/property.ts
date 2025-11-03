@@ -4,6 +4,7 @@ import sampleImages from "./images";
 export const sampleProperties: PropertyTypes[] = [
     {
         id: "1",
+        agentId: "b",
         title: "Luxury 3-Bedroom Apartment in Lekki Phase 1",
         description: "Modern fully furnished apartment with sea view and 24/7 power.",
         category: "Residential",
@@ -49,6 +50,7 @@ export const sampleProperties: PropertyTypes[] = [
     },
     {
         id: "2",
+        agentId: "b",
         title: "5-Bedroom Duplex with BQ in Abuja",
         description: "Spacious duplex with modern kitchen and ample parking space.",
         category: "Residential",
@@ -88,6 +90,7 @@ export const sampleProperties: PropertyTypes[] = [
     },
     {
         id: "3",
+        agentId: "b",
         title: "Commercial Office Space for Lease in Ikeja",
         description: "Spacious 200sqm office on a main road with parking and generator.",
         category: "Commercial",
@@ -122,6 +125,7 @@ export const sampleProperties: PropertyTypes[] = [
     },
     {
         id: "4",
+        agentId: "b",
         title: "Land for Sale in Epe Lagos",
         description: "Dry land suitable for residential or commercial development.",
         category: "Commercial",
@@ -156,6 +160,7 @@ export const sampleProperties: PropertyTypes[] = [
     },
     {
         id: "5",
+        agentId: "b",
         title: "Mini Flat for Rent in Yaba",
         description: "Affordable mini flat close to Unilag with good water supply.",
         category: "Residential",
@@ -183,7 +188,7 @@ export const sampleProperties: PropertyTypes[] = [
         accountType: "Admin",
         agentEmail: "info@solahomes.ng",
         showContact: true,
-        availability: "Draft",
+        availability: "Pending",
         referenceId: "YAB-MFL-031",
         seoSlug: "mini-flat-yaba",
         packageType: "Free",
@@ -193,6 +198,7 @@ export const sampleProperties: PropertyTypes[] = [
     },
     {
         id: "6",
+        agentId: "b",
         title: "Retail Shop Space in Surulere",
         description: "Compact retail space in a busy market area, perfect for fashion stores.",
         category: "Commercial",
@@ -217,7 +223,7 @@ export const sampleProperties: PropertyTypes[] = [
         accountType: "Admin",
         agentEmail: "sales@topdeal.ng",
         showContact: true,
-        availability: "Draft",
+        availability: "Reviewing",
         referenceId: "SURL-RTL-011",
         seoSlug: "retail-shop-surulere",
         packageType: "Premium",

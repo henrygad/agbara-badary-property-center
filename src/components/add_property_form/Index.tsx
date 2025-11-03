@@ -74,7 +74,7 @@ import OverlayLoader from "../loaders/OverlayLoader";
 
 type Props = {
     accountType: "ADMIN" | "AGENT";
-    documentType: "NEW" | "UPDATE" | "DUPLICATE" | "REVIEW";
+    documentType: "NEW" | "UPDATE" | "DUPLICATE" | "DRAFT" | "REVIEW";
     loadingForm: boolean;
     setLoadingForm: (l: boolean) => void;
 };
@@ -84,6 +84,7 @@ export default function PropertyFormEditor({
     loadingForm,
     documentType,
 }: Props) {
+
     const { user, loading: loadingUser } = useUserStore();
     const { addProperty, form, setForm, updateProperty } = usePropertyStore();
 
@@ -136,25 +137,27 @@ export default function PropertyFormEditor({
                 agentPhone: user?.phoneCode + user?.phone || "",
                 agentCompany: user?.company || "",
                 accountType: user?.accountType || "",
-                isFake: false,
+                agentId: user?.id || "",
+                availability: user.accountType === "Admin" ? "Accepted" : "Pending",
             }));
         }
     }, [user, setForm]);
-    
 
-    if (loadingForm || !user || loadingUser)
+
+    if (loadingForm || loadingUser)
         return (
-            <PageLoading loading={loadingForm || !user || loadingUser}/>               
+            <PageLoading loading={loadingForm || loadingUser} />
         );
 
     function saveDraft() {
-        const getPropertyDraft = JSON.parse(
-            localStorage.getItem("property-draft") || "[]"
-        );
+        const drafts = JSON.parse(
+            localStorage.getItem("drafts") || "[]"
+        ) as PropertyTypes[]
+
         localStorage.setItem(
-            "property-draft",
+            "drafts",
             JSON.stringify([
-                ...getPropertyDraft,
+                ...drafts,
                 { ...form, draftId: String(Date.now() + Math.random()) },
             ])
         );
@@ -196,6 +199,19 @@ export default function PropertyFormEditor({
         }
         window.scrollTo(0, 0);
     }
+
+    const handleDeleteDraft = (draftId?: string) => {
+        if (!draftId) return;
+
+        const draft = JSON.parse(localStorage.getItem("drafts") || "[]") as PropertyTypes[];
+        if (draft.length) {
+            localStorage.setItem(
+                "drafts",
+                JSON.stringify(draft.filter(d => d.draftId !== draftId))
+            );
+        }
+
+    };
 
     async function submitNewProperty(payload: PropertyTypes) {
         // Simulate API call
@@ -284,13 +300,13 @@ export default function PropertyFormEditor({
                 property = await submitReviewedProperty(payload);
             }
 
-            const draftId = payload.draftId;
-
-            // Simulate successful response
             if (!property) return;
+            // Simulate successful response
 
+            // Was a drafted property
+            const draftId = payload.draftId;
             if (draftId) {
-                // Delete draf from store
+                handleDeleteDraft(draftId);
             }
 
             let heading = "";
@@ -340,7 +356,8 @@ export default function PropertyFormEditor({
         } finally {
             setLoading(false);
         }
-    }
+    };
+
 
     return (
         <div className="w-full bg-inherit">

@@ -29,8 +29,8 @@ const links = [
         href: "/admin/properties",
         icon: Building2,
         children: [
-            { name: "Drafts", href: "/admin/drafts", icon: FileText },
-            { name: "Trash", href: "/admin/trash", icon: FileX2 },
+            { name: "Drafts", href: "/admin/properties/drafts", icon: FileText },
+            { name: "Trash", href: "/admin/properties/trash", icon: FileX2 },
         ]
     },
     { name: "Agents", href: "/admin/agents", icon: Users },

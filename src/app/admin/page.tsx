@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Building2, Clock, Inbox, Users, Plus } from "lucide-react";
 import { useMemo } from "react";
 import { usePropertyStore } from "@/store/usePropertyStore";
+import { useRouter } from "next/navigation";
+import GroundLoader from "@/components/loaders/GroundLoader";
+import Agent from "@/components/Agent";
+import { useAgentStore } from "@/store/useAgentStore";
+import { useRequestStore } from "@/store/useRequestStore";
+import RequestCrad from "@/components/RequestCrad";
 
 const Metrics = [
     {
@@ -47,13 +53,30 @@ const Metrics = [
 ];
 
 export default function AdminDashboard() {
-    const { properties, loading } = usePropertyStore();
+    const router = useRouter();
+
+    const { properties, loading: loadingProperties } = usePropertyStore();
+
+    const { agents, loading: loadingAgents } = useAgentStore();
+
+    const { requests, loading: loadingRequests } = useRequestStore();
 
     const onlyPeningProperties = useMemo(() =>
         properties.filter(p => p.availability === "Pending" || p.availability === "Reviewing"),
         [properties]
     );
 
+    const onlyPeningAgents = useMemo(() =>
+        agents.filter(a => a.accountStatus === "Pending" || a.accountStatus === "Rejected"),
+        [agents]
+    );
+
+    const onlyUnviewRequests = useMemo(() =>
+        requests.filter(r => !r.view),
+        [requests]
+    );
+
+    
     return <div className="h-auto w-full">
         {/* Key Metric */}
         <div className="w-full flex justify-end mb-10">
@@ -75,6 +98,7 @@ export default function AdminDashboard() {
                         className="gap-2 py-4 flex items-center cursor-pointer"
                         variant="destructive"
                         datatype="icon"
+                        onClick={() => router.push("/admin/add-property")}
                     >
                         <Plus className="h-5 w-5" />
                         Add Property
@@ -82,6 +106,7 @@ export default function AdminDashboard() {
                     <Button
                         className="gap-2 py-4 flex items-center cursor-pointer"
                         variant="ghost"
+                        onClick={() => router.push("/admin/agents")}
                     >
                         <Users className="h-5 w-5" />
                         Manage Agents
@@ -89,9 +114,10 @@ export default function AdminDashboard() {
                     <Button
                         className="gap-2 py-4 flex items-center cursor-pointer"
                         variant="outline"
+                        onClick={() => router.push("/admin/requests")}
                     >
                         <Inbox className="h-5 w-5" />
-                        Send Email
+                        Manage Requests
                     </Button>
 
                 </div>
@@ -116,7 +142,7 @@ export default function AdminDashboard() {
             <h2 className="text-xl font-semibold mb-2 text-text-light dark:text-text-dark">
                 Performance Metrics
             </h2>
-            {!loading ? <div className="mb-8 mt-6">
+            {!loadingProperties ? <div className="mb-8 mt-6">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                     Listings requiring your attention
                 </p>
@@ -138,12 +164,15 @@ export default function AdminDashboard() {
                                     <TableDisplay
                                         key={p.id}
                                         p={p}
+                                        placeViewing="Normal"
                                     />
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="text-center py-10 text-gray-500">
-                                        No properties found.
+                                        <td colSpan={6}
+                                            className="text-center py-10 text-gray-500"
+                                        >
+                                            Clear
                                     </td>
                                 </tr>
                             )}
@@ -152,30 +181,78 @@ export default function AdminDashboard() {
                 </div>
 
             </div> :
-                <div>loading...</div>
+                <GroundLoader loading={loadingProperties} />
             }
-            <div className="mb-8">
+            {!loadingAgents ? <div className="mb-8">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                     Agent accounts requiring your attention
                 </p>
-            </div>
+                {/* Table */}
+                <div className="overflow-x-auto rounded-lg border bg-white dark:bg-gray-900 mt-6">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-100 dark:bg-gray-800">
+                            <tr>
+                                <th className="p-3 text-left whitespace-pre text-nowrap">Full Name</th>
+                                <th className="p-3 text-left whitespace-pre text-nowrap">Email</th>
+                                <th className="p-3 text-left whitespace-pre text-nowrap">Status</th>
+                                <th className="p-3 text-left whitespace-pre text-nowrap">Joined</th>
+                                <th className="p-3 text-right whitespace-pre text-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {onlyPeningAgents.length > 0 ? (
+                                onlyPeningAgents.map((agent) => (
+                                    <Agent agent={agent} key={agent.id} />
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={6}
+                                        className="text-center py-10 text-gray-500"
+                                    >
+                                        Clear
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div> :
+                <GroundLoader loading={loadingAgents} />
+            }
 
             <div className="mb-8">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                     Requests requiring your attention
                 </p>
+                {!loadingRequests ? <div>
+                    {onlyUnviewRequests.length === 0 ? (
+                        <div className="h-full w-full flex justify-center items-center">
+                            <p
+                                className="text-center py-10 text-gray-500"
+                            >
+                                Clear
+                            </p>
+                        </div>
+                    ) : (
+                        <ul className="space-y-3">
+                            {onlyUnviewRequests.map((req) => (
+                                <RequestCrad
+                                    key={req.id}
+                                    req={req}
+                                />
+                            ))}
+                        </ul>
+                    )}
+
+                </div> :
+                    <GroundLoader loading={loadingRequests} />
+                }
             </div>
 
 
         </section>
-        {/* Treading Properties */}
-        <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-text-light dark:text-text-dark">
-                Treading Properties
-            </h2>
-            <div>
 
-            </div>
-        </section>
     </div>;
 }
