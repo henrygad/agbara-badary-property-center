@@ -68,6 +68,7 @@ export default function AdminProfilePage() {
     form.setValue("lastName", user?.lastName ?? "");
     form.setValue("gender", user?.gender);
     form.setValue("phone", user?.phone ?? "");
+    form.setValue("phone", user?.phoneCode ?? "");
     form.setValue("email", user?.email ?? "");
     form.setValue("company", user?.company ?? "");
     form.setValue("bio", user?.bio ?? "");
@@ -253,7 +254,7 @@ export default function AdminProfilePage() {
           {/* Phone Number */}
           <div className="flex items-center flex-wrap gap-2">
             <div>
-              <Label className="text-sm">Code *</Label>
+              <Label className="text-sm">Code</Label>
               <Input
                 className="text-sm"
                 placeholder="+234"

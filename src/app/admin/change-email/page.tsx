@@ -38,6 +38,7 @@ export default function ChangeEmailPage() {
         },
     });
 
+
     const verifyEmailSendOtp = async (email: string) => {
         try {
 
@@ -57,7 +58,6 @@ export default function ChangeEmailPage() {
                 router.push("/auth/verify-email?email=" + email);
                 showSuccess("OTP sent.", "A one time password have been sent to your new email.")
             }
-
 
         } catch (error) {
             console.log(error);

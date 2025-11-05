@@ -31,6 +31,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import ReCAPTCHA from "react-google-recaptcha";
+import { createPortal } from "react-dom";
 
 // Zod validation schema
 const RequestSchema = z.object({
@@ -147,7 +148,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
         <AlertDialogContent
           className={cn(
             "w-[90%] max-w-[90%] sm:rounded-2xl rounded-t-2xl px-4 py-8 border-t-4 border-red-700",
-            "animate-in slide-in-from-bottom-10 max-h-[85vh] overflow-y-auto overflow-x-hidden"
+            "animate-in slide-in-from-bottom-10 max-h-[85vh] overflow-y-auto"
           )}
         >
           <AlertDialogHeader>
@@ -258,13 +259,13 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                 />
 
                 {/* <ReCAPTCHA */}
-                <div className="relative my-6 flex justify-center">
+                <CaptchaPortal setCaptchaToken={setCaptchaToken} />
+                {/* <div className="relative my-6 flex justify-center">
                   <ReCAPTCHA
-                    className="z-50"
                     sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
                     onChange={(token: string | null) => setCaptchaToken(token)}
                   />
-                </div>
+                </div> */}
 
                 {captchaError && (
                   <p className="text-red-600 text-sm mb-3">{captchaError}</p>
@@ -297,4 +298,20 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
         </AlertDialogContent>
     </AlertDialog>
   );
+};
+
+
+function CaptchaPortal({ setCaptchaToken }: { setCaptchaToken: (token: string | null) => void }) {
+  return typeof window !== "undefined"
+    ? createPortal(
+      <div className="fixed bottom-10 right-10 z-[9999]">
+        <ReCAPTCHA
+          sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
+          onChange={(token: string | null) => setCaptchaToken(token)}
+        />
+      </div>,
+      document.body
+    )
+    : null;
 }
+

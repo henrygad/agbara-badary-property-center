@@ -1,19 +1,59 @@
 "use client";
 
 import UserTypes from '@/types/user.types'
-import React from 'react'
+import React, { useState } from 'react'
 import DisplayImage from './gallery/DisplayImage'
 import { Building2, CalendarDays, Clock, Edit, Mail, Pencil, Phone, UserCircle } from "lucide-react";
 import { formatDate } from '@/utils';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
+import OverlayLoader from './loaders/OverlayLoader';
+import { showError, showSuccess } from './ui/toasts';
 
 export default function ProfileCard({ user, placeViewing }: { user: UserTypes, placeViewing: "Agents" | "Profile" }) {
     const router = useRouter();
 
+    const [loading, setLoading] = useState(false);
+
+
     const goEdit = () => {
-        router.push("/admin/profile/edit-profile")
+        if (placeViewing === "Profile") {
+            router.push("/admin/profile/edit-profile")
+        }
+    };
+
+    const verifyEmailSendOtp = async () => {
+        if (placeViewing === "Profile") {
+            const email = user.email;
+            if (!email) return;
+
+            setLoading(true)
+            try {
+
+                const payload = { email, type: "Verify Email" };
+
+                const res = await fetch("/api/otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                const resData = await res.json() as { message: string, success: boolean };
+
+                if (!resData.success) {
+                    showError(resData.message);
+                } else {
+                    router.push("/auth/verify-email?email=" + email);
+                    showSuccess("OTP sent.", "A one time password have been sent to your new email.")
+                }
+            } catch (error) {
+                console.error(error);
+                showError("Something went wrong. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        }
     };
 
     return (
@@ -81,7 +121,25 @@ export default function ProfileCard({ user, placeViewing }: { user: UserTypes, p
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className='flex items-center'>
                     <Info placeViewing={placeViewing} goEdit={goEdit} name="email" label="Email" value={user.email} />
-                    {user.emailIsVerified && <span className='text-lime-700 py-1 px-2 text-shadow-2xs text-xs'>Verified</span>}
+                    {user.emailIsVerified ?
+                        <span className='text-lime-700 py-1 px-2 text-shadow-2xs text-xs'>Verified</span> :
+                        <>
+                            {
+                                placeViewing === "Profile" ?
+                                    <>
+                                        <button
+                                            type='button'
+                                            className='text-primary py-1 px-2 text-shadow-2xs text-xs'
+                                            onClick={verifyEmailSendOtp}
+                                        >
+                                            Unverified, Click to verify
+                                        </button>
+                                        <OverlayLoader loading={loading} />
+                                    </> :
+                                    <span className='text-primary py-1 px-2 text-shadow-2xs text-xs'>Unverified</span>
+                            }
+                        </>
+                    }
                 </div>
                 <Info placeViewing={placeViewing} goEdit={goEdit} name="phone" label="Phone" value={user.phoneCode + user.phone} />
                 <Info placeViewing={placeViewing} goEdit={goEdit} name="company" label="Company" value={user.company} />

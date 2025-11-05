@@ -39,7 +39,7 @@ export const usePropertyStore = create<PropertyStore>(
         setProperties: (properties: PropertyTypes[]) => set({ properties }),
 
         addProperty: (property: PropertyTypes) =>
-            set((state) => ({ properties: [...state.properties, property] })),
+            set((state) => ({ properties: [property, ...state.properties] })),
 
         updateProperty: (property: PropertyTypes) =>
             set((state) => ({
