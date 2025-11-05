@@ -147,15 +147,15 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
 
         <AlertDialogContent
           className={cn(
-            "w-[90%] max-w-[90%] sm:rounded-2xl rounded-t-2xl px-4 py-8 border-t-4 border-red-700",
+            "w-[90%] max-w-[90%] sm:rounded-2xl rounded-t-2xl p-5 border-t-4 border-red-700",
             "animate-in slide-in-from-bottom-10 max-h-[85vh] overflow-y-auto"
           )}
         >
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold text-red-700">
+            <AlertDialogTitle className="text-xl font-bold text-red-700 text-center">
               Send a Request
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
+          <AlertDialogDescription className="text-gray-500 dark:text-gray-400 text-center">
               Please fill out your contact details and we’ll reach out soon.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -259,13 +259,14 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                 />
 
                 {/* <ReCAPTCHA */}
-                <CaptchaPortal setCaptchaToken={setCaptchaToken} />
-                {/* <div className="relative my-6 flex justify-center">
+                {/* <CaptchaPortal setCaptchaToken={setCaptchaToken} /> */}
+                <div className="fixed top-0 right-0 z-[9999]" style={{ zIndex: 100, }}>
                   <ReCAPTCHA
+                    style={{zIndex: 100, position: "relative"}}
                     sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
                     onChange={(token: string | null) => setCaptchaToken(token)}
                   />
-                </div> */}
+                </div>
 
                 {captchaError && (
                   <p className="text-red-600 text-sm mb-3">{captchaError}</p>
@@ -301,17 +302,17 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
 };
 
 
-function CaptchaPortal({ setCaptchaToken }: { setCaptchaToken: (token: string | null) => void }) {
-  return typeof window !== "undefined"
-    ? createPortal(
-      <div className="fixed bottom-10 right-10 z-[9999]">
-        <ReCAPTCHA
-          sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
-          onChange={(token: string | null) => setCaptchaToken(token)}
-        />
-      </div>,
-      document.body
-    )
-    : null;
-}
+// function CaptchaPortal({ setCaptchaToken }: { setCaptchaToken: (token: string | null) => void }) {
+//   return typeof window !== "undefined"
+//     ? createPortal(
+//       <div className="fixed bottom-10 right-10 z-[9999]">
+//         <ReCAPTCHA
+//           sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
+//           onChange={(token: string | null) => setCaptchaToken(token)}
+//         />
+//       </div>,
+//       document.body
+//     )
+//     : null;
+// }
 
