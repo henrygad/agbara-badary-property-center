@@ -39,7 +39,7 @@ export default function NotFoundPage() {
 
       {/* Return Button */}
       <Button
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/auth/agent-login")}
         className="bg-primary hover:bg-red-600 text-white flex items-center gap-2"
       >
         <MoveLeft size={18} />

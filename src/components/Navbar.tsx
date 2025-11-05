@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Sun, Moon, ChevronDown } from "lucide-react";
+import { Bell, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -9,24 +9,31 @@ import useClickOutSide from "@/hooks/useClickOutSide";
 import DisplayImage from "./gallery/DisplayImage";
 import { useUserStore } from "@/store/useUserStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { listenToNotifications } from "@/lib/firebase/notification._service";
+import NotificationTypes from "@/types/notification.types";
+import NotificationPopup from "./NotificationPopup";
+import Link from "next/link";
 
 export default function Navbar() {
-  const { user, loading: userLoading } = useUserStore();
+  const { user, } = useUserStore();
 
-  const { notifications, loading: noticLoading } = useNotificationStore();
+  const {
+    notifications,
+    addNotification,
+  } = useNotificationStore();
   const unreadCount = notifications.filter((n) => !n.viewed).length;
 
   const pathname = usePathname();
-  const [dark, setDark] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const showMenuEleRef = useRef(null);
   const [pageTitle, setPageTitle] = useState("Dashboard");
-  const router = useRouter()
+  const router = useRouter();
+
+  const [popupNotic, setPopupNotic] = useState<NotificationTypes[]>([]);
 
   useClickOutSide(showMenuEleRef, () => setShowMenu(false));
 
   useEffect(() => {
-
     if (pathname.trim()) {
       const path = pathname.split("/");
       const getPath = path[path.length - 1];
@@ -37,23 +44,29 @@ export default function Navbar() {
       } else {
         setPageTitle(getPageName);
       }
-
     }
   }, [pathname]);
 
   useEffect(() => {
-    const theme = JSON.parse(localStorage.getItem("theme") || "{}");
-    if (theme.dark) {
-      setDark(theme.dark)
-    }
+    if (!user?.id) return;
 
-    if (dark) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-  }, [dark]);
-
+    listenToNotifications(user?.id, (notic) => {
+      addNotification(notic);
+      setPopupNotic(notic);
+    });
+  }, [user, addNotification]);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b px-3 sm:px-6 shadow-sm bg-white dark:bg-gray-900 md:bg-white md:shadow-sm dark:border-gray-800">
+      {/* Notification popup */}
+      <NotificationPopup
+        message="You have a new notification."
+        show={popupNotic.length !== 0}
+        onClose={() => {
+          setPopupNotic([]);
+        }}
+      />
+
       <div className="flex-1 pl-12 md:pl-0">
         <motion.h2
           key={pageTitle}
@@ -70,58 +83,35 @@ export default function Navbar() {
           className="relative cursor-pointer"
           onClick={() => router.push("/admin/notifications")}
         >
-          <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />    
-          {noticLoading ?
-            <p>loading...</p> :
-            <>
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </>
+          <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+
+          {unreadCount > 0 &&
+            <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
+              {unreadCount}
+            </span>
           }
+
           {/* <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span> */}
         </button>
 
-        {/* Dark mode toggle */}
-        <motion.button
-          whileTap={{ scale: 0.8 }}
-          onClick={() => setDark((prev) => {
-            localStorage.setItem("theme", JSON.stringify({ dark: !prev }));
-            return !prev
-          })}
-          className="cursor-pointer"
-        >
-          {dark ? (
-            <Sun className="h-5 w-5 text-yellow-400" />
-          ) : (
-            <Moon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-          )}
-        </motion.button>
-
         {/* Avatar dropdown */}
-        <div
-          className="relative"
-          ref={showMenuEleRef}
-        >
-          {userLoading ?
-            <p>loading...</p> :
-            <button
+        <div className="relative" ref={showMenuEleRef}>
+          <button
             onClick={() => setShowMenu(!showMenu)}
             className="flex items-center gap-2"
           >
             <motion.div
               whileHover={{ rotate: 5 }}
-              className="h-8 w-8 rounded-full"
-              >              
+              className="h-8 w-8 rounded-full bg-gray-100"
+            >
+              {user?.profileImage?.url &&
                 <DisplayImage
-                  src={user?.profileImage?.url || "avata.png"}
-                  alt={user?.accountType + " " + "Avatar"}
-                  useRemove={false}
-                  type="Profile"
-                  className="h-8 w-8 rounded-full border-primary border-2"
-                />            
+                src={user?.profileImage?.url || "avata.png"}
+                alt={user?.accountType + " " + "Avatar"}
+                useRemove={false}
+                type="Profile"
+                className="h-8 w-8 rounded-full border-primary border-2"
+                />}
             </motion.div>
 
             <ChevronDown
@@ -130,7 +120,7 @@ export default function Navbar() {
                 showMenu && "rotate-180"
               )}
             />
-            </button>}
+          </button>
 
           <AnimatePresence>
             {showMenu && (
@@ -140,23 +130,24 @@ export default function Navbar() {
                 exit={{ opacity: 0, y: -10 }}
                 className="absolute right-0 mt-2 w-40 rounded-md border bg-white py-2 shadow-md dark:bg-gray-800 dark:border-gray-700"
               >
-                <button
+                <Link
+                  href="/admin/profile"
                   className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
-                  onClick={() => {
-                    router.push("/admin/profile");
-                    setShowMenu(false)
-                  }}
-                >
-                  Profile
-                </button>
-                <button
-                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                  onClick={() => {                
+                  onClick={() => {                    
                     setShowMenu(false);
                   }}
                 >
-                  Logout
-                </button>
+                  Profile
+                </Link>
+                <Link
+                  href="/admin/settings"
+                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                  onClick={() => {
+                    setShowMenu(false);
+                  }}
+                >
+                 Settings
+                </Link>
               </motion.div>
             )}
           </AnimatePresence>
@@ -164,4 +155,4 @@ export default function Navbar() {
       </div>
     </header>
   );
-};
+}

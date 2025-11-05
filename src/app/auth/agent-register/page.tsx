@@ -21,6 +21,9 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { Eye, EyeOff } from "lucide-react";
 import { RegisterTypes } from "@/types/auth.types";
 import { useRouter } from "next/navigation";
+import UserTypes from "@/types/user.types";
+import { useUserStore } from "@/store/useUserStore";
+import { LoginSchema } from "../agent-login/page";
 
 const signupSchema = z
   .object({
@@ -65,6 +68,9 @@ type SignupSchema = z.infer<typeof signupSchema>;
 
 export default function Register() {
   const router = useRouter();
+
+  const { setUser } = useUserStore();
+
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState("");
 
@@ -89,7 +95,6 @@ export default function Register() {
     },
   });
 
-
   const verifyCaptchaToken = async () => {
     setCaptchaError("");
 
@@ -113,6 +118,32 @@ export default function Register() {
     return true;
   };
 
+  const onSubmitLogin = async (data: LoginSchema) => {
+
+    try {
+
+      const payload = data;
+
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const resData = await res.json() as { message: string, success: boolean, agent: UserTypes };
+
+      if (!resData.success) {
+        setError(resData.message)
+      } else {
+        setUser(resData.agent);
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+
+  };
+
   const onSubmit = async (data: SignupSchema) => {
     if (loading) return;
     setLoading(true);
@@ -123,7 +154,7 @@ export default function Register() {
       await verifyCaptchaToken();
 
       const payload: RegisterTypes = {
-        ...data, accountType: "Admin", accountStatus: "Approved"
+        ...data, accountType: "Agent", accountStatus: "Pending"
       };
 
       const res = await fetch("/api/auth/register", {
@@ -134,11 +165,11 @@ export default function Register() {
 
       const resData = await res.json() as { message: string, success: boolean };
 
-      if (!resData.success) {
-        console.log(resData);
+      if (!resData.success) {        
         setError(resData.message)
       } else {
-        console.log(resData);
+
+        await onSubmitLogin({ email: payload.email, password: payload.password, rememberMe: false });
 
         router.push("/auth/verify-email?email=" + data.email);
       }
@@ -146,8 +177,7 @@ export default function Register() {
       form.reset();
 
     } catch (error) {
-      console.error(error);
-      console.log(error);
+      console.error(error);     
       setError("Please Try again later.")
 
     } finally {
@@ -156,6 +186,7 @@ export default function Register() {
 
   };
 
+  
   return (
     <div className="flex justify-center items-center w-full px-3 py-10">
       <div className="space-y-12 bg-white shadow-md rounded-md px-3 py-8 md:p-12 md:max-w-4xl">

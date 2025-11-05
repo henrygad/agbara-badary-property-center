@@ -1,4 +1,5 @@
 import { DocumentData } from "firebase/firestore";
+import { JWTPayload, jwtVerify } from "jose";
 import { NextRequest } from "next/server";
 
 export const formatCurrency = (value?: number | null) => {
@@ -75,4 +76,23 @@ export function maskEmail(email: string): string {
     const visiblePart = local.slice(0, 2);
     const hiddenPart = "*".repeat(Math.max(4, local.length - 2));
     return `${visiblePart}${hiddenPart}@${domain}`;
+}
+
+const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET!);
+
+interface JwtPayload extends JWTPayload {
+    id: string;
+    email: string;
+    accountType: "Agent" | "Admin";
+    exp: number;
+}
+
+export async function verifyToken(token: string): Promise<JwtPayload | null> {
+    try {
+        const { payload } = await jwtVerify(token, SECRET_KEY);
+        return payload as JwtPayload;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
 }

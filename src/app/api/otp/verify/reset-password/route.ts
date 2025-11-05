@@ -56,21 +56,7 @@ export async function POST(req: NextRequest) {
 
         // Update db
         await updateAgentDb(foundAgent.id, { resetToken, resetPasswordVerificationOtp: "", resetPasswordVerificationOtpExpireingTime: 0 });
-        
-        // const res = NextResponse.json({
-        //     success: true,
-        //     message: "OTP has been verified successfully!",
-        // });
-
-        // res.cookies.set({
-        //     name: "resetToken",
-        //     value: token,
-        //     httpOnly: true,
-        //     secure: true,
-        //     sameSite: "lax",
-        //     maxAge: 10 * 60, // 10 minutes
-        //     path: "/", 
-        // });
+                
 
         // Set reset token cookies for agent
         const cookieStore = await cookies();

@@ -50,7 +50,7 @@ export default function GlobalFooter() {
                         <li><Link className="block hover:text-gray-300" href="/about">About US</Link></li>
                         <li><Link className="block hover:text-gray-300" href="/contact">Contact Agents</Link></li>
                         <li><Link className="block hover:text-gray-300" href="/faq">FAQ</Link></li>
-                        <li><Link className="block hover:text-gray-300" href="/blog">Blog</Link></li>
+                
                     </ul>
                     </div>
                 </div>

@@ -21,7 +21,7 @@ type PropertyStore = PropertyStoreState & PropertyStoreActions;
 export const useClientStore = create<PropertyStore>(
     (set) => ({
         properties: [],
-        loading: false,
+        loading: true,
         loadingMore: false,
         setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
         setProperties: (properties: PropertyTypes[]) => set({ properties: properties.filter(p => p.availability === "Accepted") }),

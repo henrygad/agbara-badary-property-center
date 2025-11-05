@@ -43,7 +43,7 @@ export default function Contact() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-base text-gray-900 dark:text-white">Office Address</h3>
-                                    <p className="text-gray-600 text-sm">Plot 45, Agbara Industrial Estate <br />Badagary, Lagos State, Nigeria</p>
+                                    <p className="text-gray-600 text-sm">Mango bus stop Agbara-Lusada Road <br />Ogun State, Nigeria</p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">

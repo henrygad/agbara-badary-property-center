@@ -1,21 +1,30 @@
+
+
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { validateEmail } from "@/utils";
 import { getAgentByEmailDb, updateAgentDb } from "@/lib/firebase/agent_service";
 import { mailOptions, transporter } from "@/lib/nodemailer/config";
 import { render } from "@react-email/components";
-import { PasswordChangedEmail } from "../../../../emails/PasswordChangedEmail";
+import { PasswordChangedEmail } from "../../../../../emails/PasswordChangedEmail";
 
 export async function POST(req: Request) {
-    const { newPassword, email } = await req.json() as { newPassword: string, email: string };
+    const body = await req.json() as {
+        currentPassword: string;
+        newPassword: string;
+        confirmPassword: string;
+        email: string
+    };
 
-    // Get reset token
-    const cookieStore = await cookies();
-    const token = cookieStore.get("resetToken")?.value;
+    const { currentPassword, newPassword, email } = body;
 
-    // Validate request
-    if (!token || !email) return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
+    // Validate incoming requests
+    if (!currentPassword || !newPassword || !email) {
+        return NextResponse.json(
+            { success: false, message: "Incomplate data!" },
+            { status: 400 }
+        );
+    }
 
     if (!validateEmail(email)) {
         return NextResponse.json(
@@ -24,23 +33,12 @@ export async function POST(req: Request) {
         );
     }
 
-    // Check if Otp is valid
+    // Find  user
     const foundAgent = await getAgentByEmailDb(email);
-    if (!foundAgent ||
-        !foundAgent.id ||
-        foundAgent?.resetToken?.token.trim() !== token.trim()
-    ) {
+    if (!foundAgent || !foundAgent.id) {
         return NextResponse.json(
-            { success: false, message: "Invalid reset token!" },
-            { status: 400 }
-        );
-    }
-
-    // Check if otp has expired
-    if (Date.now() > (foundAgent.resetToken.expiresAt || 0)) {
-        return NextResponse.json(
-            { success: false, message: "token has expired! Can't reset password this time." },
-            { status: 400 }
+            { success: false, message: "User not found!" },
+            { status: 404 }
         );
     }
 
@@ -53,15 +51,12 @@ export async function POST(req: Request) {
         );
     }
 
-    // Create new agent account
-    // 1) hash password
+    // hash password
     const hashedPassword = await bcrypt.hash(newPassword, 10); // saltRounds = 10
 
     // Update user password
-    await updateAgentDb(foundAgent.id, { password: hashedPassword, resetToken: { token: "", expiresAt: 0 } });
+    await updateAgentDb(foundAgent.id, { password: hashedPassword });
 
-    // Clear cookie
-    cookieStore.set("resetToken", "", { maxAge: 0 });
 
     // Send email to agent
     const name = `${foundAgent.firstName} ${foundAgent.lastName}`;
@@ -75,6 +70,6 @@ export async function POST(req: Request) {
         html: changedHtml,
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: "sucessfully change password!" });
 };
 

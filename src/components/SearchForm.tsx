@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Tabs,
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectTrigger,
@@ -21,6 +20,7 @@ import { CONDITION, FURNISHING, PROPERTY_CATEGORIES, PROPERTY_TYPES } from "./ad
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
 import { SearchTypes } from "@/types/search.types";
+import LocationSearch from "./LocationSearch";
 
 const dafaultData: SearchTypes = {
     status: "Sale",
@@ -45,28 +45,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
     const router = useRouter();
 
     const [showMore, setShowMore] = useState(false);
-    const locationRef = useRef<HTMLInputElement | null>(null);
-
-    // const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-
-    // Initialize Google Places Autocomplete
-    // useEffect(() => {
-    //     if (!window.google || !locationRef.current) return;
-    //     const autocomplete = new window.google.maps.places.Autocomplete(locationRef.current, {
-    //         types: ["(cities)"],
-    //         componentRestrictions: { country: "ng" }, // Nigeria only
-    //     });
-    //     autocomplete.addListener("place_changed", () => {
-    //         const place = autocomplete.getPlace();
-    //         setSearch((prev) => ({
-    //             ...prev,
-    //             location: place.formatted_address || place.name || "",
-    //         }));
-    //     });
-    //     autocompleteRef.current = autocomplete;
-    // }, []);
-
-    // Handle field change
+    //const locationRef = useRef<HTMLInputElement | null>(null);
 
 
     const handleChange = (field: keyof SearchTypes, value: string) => {
@@ -149,13 +128,18 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                 {/* Location */}
                 <div className="col-span-2">
                     <Label id="location" className="text-sm mb-1">Location</Label>
-                    <Input
+                    {/* <Input
                         id="location"
                         ref={locationRef}
                         value={search.location}
                         onChange={(e) => handleChange("location", e.target.value)}
                         placeholder="Enter state, city, or area"
                         className="text-sm w-full py-3 px-4 rounded-full"
+                    /> */}
+                    <LocationSearch
+                        id="location"
+                        value={search.location}
+                        onChange={(value) => handleChange("location", value.name)}
                     />
                 </div>
 

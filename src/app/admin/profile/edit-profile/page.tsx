@@ -19,6 +19,8 @@ import { uploadImageToCloud } from "@/lib/cloudinary/services";
 import { updateAgentDb } from "@/lib/firebase/agent_service";
 import ReturnBack from "@/components/ReturnBack";
 import ImageLoader from "@/components/loaders/ImageLoader";
+import PageLoader from "@/components/loaders/PageLoader";
+import Link from "next/link";
 
 
 // Zod schema for validation
@@ -26,6 +28,10 @@ const profileSchema = z.object({
   firstName: z.string().min(2, "First name required"),
   lastName: z.string().min(2, "Last name required"),
   gender: z.enum(["Male", "Female", "Other"]).optional(),
+  phoneCode: z
+    .string()
+    .min(1, "Country code is required")
+    .max(5, "Invalid country code format"),
   phone: z
     .string()
     .regex(/^[0-9]{11}$/, "Enter a valid 11-digit phone number"),
@@ -68,7 +74,7 @@ export default function AdminProfilePage() {
   }, [user, form]);
 
 
-  if (loading || !user) return <div>Loading profile...</div>;
+  if (loading || !user) return <PageLoader loading={loading} />;
 
 
   // Handle image upload
@@ -137,9 +143,12 @@ export default function AdminProfilePage() {
       // Update profile data in db
       const updatedAdminResult = await updateAgentDb(user.id, { ...values });
       if (updatedAdminResult) {
+        const { password, ...rest } = updatedAdminResult;
+        if (password) {
+          // nothing
+        }
         // Update user profile image locally
-        updateUser(updatedAdminResult);
-
+        updateUser(rest);
         showSuccess("Profile updated successfully!");
 
       }
@@ -155,7 +164,7 @@ export default function AdminProfilePage() {
   return (
     <div className="space-y-8">
       {/* return back */}
-      <menu className="my-3">
+      <menu className="mb-8">
         <ReturnBack />
       </menu>
       {/* Profile Header */}
@@ -242,13 +251,23 @@ export default function AdminProfilePage() {
           </div>
 
           {/* Phone Number */}
-          <div>
+          <div className="flex items-center flex-wrap gap-2">
+            <div>
+              <Label className="text-sm">Code *</Label>
+              <Input
+                className="text-sm"
+                placeholder="+234"
+                {...form.register("phoneCode")}
+              />
+            </div>
+            <div className="flex-1">
             <Label className="text-sm font-medium mb-2">Phone Number</Label>
             <Input
               className="text-sm font-normal"
-              {...form.register("phone")}
-              placeholder="08012345678"
+                placeholder="08012345678"
+                {...form.register("phone")}
             />
+            </div>
             {form.formState.errors.phone && (
               <p className="text-red-500 text-xs mt-1">{form.formState.errors.phone.message}</p>
             )}
@@ -257,12 +276,12 @@ export default function AdminProfilePage() {
           {/* Email (auth email) */}
           <div>
             <Label className="text-sm font-medium mb-2">Email (Auth)</Label>
-            <div
-              className="text-sm text-blue-400 cursor-pointer hover:underline"
-              onClick={() => window.location.href = "/admin/change-email"}
+            <Link
+              className="text-sm text-blue-400 cursor-pointer hover:underline"              
+              href="/admin/change-email"
             >
               {form.getValues("email")}
-            </div>
+            </Link>
           </div>
 
           {/* Company */}

@@ -10,8 +10,8 @@ import { useEffect, useMemo, useState } from "react";
 
 export default function Properties() {
   const { properties, loading } = useClientStore();
-  const query = useSearchParams();
-  const qTab = query.get("tab");
+  const query = useSearchParams(); 
+
   const [tab, setTab] = useState("All");
 
   // Filtering logic (including date filter)
@@ -19,11 +19,13 @@ export default function Properties() {
     return properties.filter(p => tab === "All" || tab === p.status)
   }, [tab, properties]);
 
+
   useEffect(() => {
+    const qTab = query.get("tab");    
     if (qTab) {
       setTab(qTab);
     }
-  }, [qTab]);
+  }, [query]);
   
   if (loading) return <PageLoading loading={(loading)} />;
 
@@ -45,7 +47,7 @@ export default function Properties() {
 
           <TabsTrigger
             type="button"
-            value="For Sale"
+            value="Sale"
             onClick={() => setTab("Sale")}
             className="data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white dark:data-[state=active]:text-white cursor-pointer"
           >
@@ -53,7 +55,7 @@ export default function Properties() {
           </TabsTrigger>
           <TabsTrigger
             type="button"
-            value="For Rent"
+            value="Rent"
             onClick={() => setTab("Rent")}
             className="data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white dark:data-[state=active]:text-white cursor-pointer"
           >

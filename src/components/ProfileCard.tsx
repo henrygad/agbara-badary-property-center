@@ -37,9 +37,12 @@ export default function ProfileCard({ user, placeViewing }: { user: UserTypes, p
                         {user.firstName} {user.lastName}
                     </h2>
                     {user.gender &&
-                        <Badge variant="outline" className="border-primary text-primary">
-                            {user.gender}
-                        </Badge>}
+                        <div className='flex justify-center items-center'>
+                            <Badge variant="outline" className="border-primary text-primary">
+                                {user.gender}
+                            </Badge>
+                        </div>
+                    }
                     <div className='flex justify-center items-center'>
                         <span
                             className={`px-2 py-1 rounded-full text-xs font-medium 

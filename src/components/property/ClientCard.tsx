@@ -49,7 +49,14 @@ export default function ClientCard({ property }: { property: PropertyTypes }) {
         <MapPin className="w-4 h-4 text-muted-foreground font-medium" />
         <span className='text-sm'>{property.area}, {property.city}, {property.state}</span>
       </div>
-      
+
+      {/* Description */}
+      <div className='flex items-center gap-1 mt-1'>
+        <p className="text-xs font-normal text-gray-600 max-h-10 max-w-full truncate py-2">
+          {property.description}
+        </p>
+      </div>
+
 
       {/* Details */}
       <div className="flex flex-wrap justify-end items-center gap-3 mt-4">

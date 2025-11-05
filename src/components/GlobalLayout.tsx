@@ -13,6 +13,7 @@ export default function GlobalLayout({ children }: { children: ReactNode }) {
 
   // Use pathname to check current route
   const isAdminOrAgentRoute = pathname.startsWith("/admin") || pathname.startsWith("/agent");
+  const isEmailVerificationroute = pathname.startsWith("/auth/verify-email");
 
 
   useEffect(() => {
@@ -46,9 +47,9 @@ export default function GlobalLayout({ children }: { children: ReactNode }) {
       ) : (
         <div className="bg-gray-50">
           <div className="max-w-screen-2xl mx-auto break-words text-wrap">
-            <GlobalHeader />
+              {!isEmailVerificationroute && <GlobalHeader />}
             <main className=" sm:p-8">{children}</main>
-            <GlobalFooter />
+              {!isEmailVerificationroute && <GlobalFooter />}
           </div>
         </div>
       )}

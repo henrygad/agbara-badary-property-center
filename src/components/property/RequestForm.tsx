@@ -146,8 +146,8 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
 
         <AlertDialogContent
           className={cn(
-            "max-w-md w-[95%] sm:rounded-2xl rounded-t-2xl p-4 md:p-6 border-t-4 border-red-700",
-            "animate-in slide-in-from-bottom-10 max-w-full max-h-[100vh] w-full overflow-y-auto"
+            "w-[90%] max-w-[90%] sm:rounded-2xl rounded-t-2xl px-4 py-8 border-t-4 border-red-700",
+            "animate-in slide-in-from-bottom-10 max-h-[85vh] overflow-y-auto overflow-x-hidden"
           )}
         >
           <AlertDialogHeader>
@@ -258,8 +258,9 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                 />
 
                 {/* <ReCAPTCHA */}
-                <div className="my-6 flex justify-center">
+                <div className="relative my-6 flex justify-center">
                   <ReCAPTCHA
+                    className="z-50"
                     sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
                     onChange={(token: string | null) => setCaptchaToken(token)}
                   />

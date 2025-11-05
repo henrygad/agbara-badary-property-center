@@ -9,8 +9,7 @@ import {
     Users,
     FileText,
     BarChart3,
-    Settings,
-    LogOut,
+    Settings,  
     X,
     Menu,    
     Mails,    
@@ -20,6 +19,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import useLockScroll from "@/hooks/useLockScroll";
 import SidebarLink from "./SidebarLink";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const links = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -35,8 +36,7 @@ const links = [
     },
     { name: "Agents", href: "/admin/agents", icon: Users },
     { name: "Request", href: "/admin/requests", icon: Mails },
-    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { name: "Settings", href: "/admin/settings", icon: Settings },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },    
 ];
 
 export default function Sidebar() {
@@ -44,7 +44,9 @@ export default function Sidebar() {
     const [open, setOpen] = useState(false);
 
     // Disable page from scrolling
-        useLockScroll({ open });
+    useLockScroll({ open });
+    
+    const active = pathname === "/admin/settings";
 
     return (
         <>
@@ -98,12 +100,17 @@ export default function Sidebar() {
                             </nav>
 
                             <div className="border-t p-4 dark:border-gray-800">
-                                <button
-                                    className="flex w-full items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-all dark:text-gray-300"
-                                    onClick={() => console.log("logout clicked")}
+                                <Link
+                                    className={cn(
+                                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                                        active
+                                            ? "bg-primary text-white"
+                                            : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                                    )}
+                                    href="/admin/settings"
                                 >
-                                    <LogOut className="h-4 w-4" /> Logout
-                                </button>
+                                    <Settings className="h-4 w-4" /> Settings
+                                </Link>
                             </div>
                         </motion.aside>
                     </>
@@ -123,12 +130,17 @@ export default function Sidebar() {
                 </nav>
 
                 <div className="border-t p-4 dark:border-gray-800">
-                    <button
-                        className="flex w-full items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-all dark:text-gray-300"
-                        onClick={() => console.log("logout clicked")}
+                    <Link
+                        className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                            active
+                                ? "bg-primary text-white"
+                                : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                        )}
+                        href="/admin/settings"
                     >
-                        <LogOut className="h-4 w-4" /> Logout
-                    </button>
+                        <Settings className="h-4 w-4" /> Settings
+                    </Link>
                 </div>
 
             </aside>

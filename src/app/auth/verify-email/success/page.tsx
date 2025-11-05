@@ -27,7 +27,7 @@ export default function VerifySuccess() {
           <Button
             className="bg-primary hover:bg-red-600 text-white px-6"
           >
-            <Link href="/agent" >
+            <Link href="/auth/agent-login">
               Go to Dashboard
             </Link>
           </Button>

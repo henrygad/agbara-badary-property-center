@@ -3,6 +3,9 @@ import { LoginTypes } from "@/types/auth.types";
 import { validateEmail } from "@/utils";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { SignJWT } from "jose";
+
+const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET!);
 
 export async function POST(req: Request) {
 
@@ -45,19 +48,44 @@ export async function POST(req: Request) {
             );
         }
 
-        // Keep user login        
-        await updateAgentDb(foundAgent.id, { rememberMe: rememberMe && !foundAgent.rememberMe ? true : false, lastLogin: new Date() });
+        // Update user last login    
+        await updateAgentDb(foundAgent.id, { lastLogin: new Date() });
 
         const { password: p, ...rest } = foundAgent;
         if (p) {
             //nothing
         }
+        const agent = rest
 
-        return NextResponse.json({
+        // Expiration depends on "Remember Me"
+        const jwtExpiresIn = rememberMe ? "7d" : "2h";
+
+        const token = await new SignJWT({
+            id: agent.id,
+            email: agent.email,
+            accountType: agent.accountType
+        })
+            .setProtectedHeader({ alg: "HS256" })
+            .setIssuedAt()
+            .setExpirationTime(jwtExpiresIn) // Remember me → 7 days, else 1 hour
+            .sign(SECRET_KEY);
+
+        const response = NextResponse.json({
             success: true,
-            message: "Agent login successfully !",
-            agent: rest,
+            message: "Agent login successfully!",
+            agent,
         });
+
+        // Set HTTP-only cookie for security        
+        response.cookies.set("auth_token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            maxAge: rememberMe ? 7 * (24 * (60 * 60)) : 2 * (60 * 60), // 7 days or 2 hours
+            path: "/",
+        });
+
+        return response;     
 
     } catch (error) {
         console.error("Registration email error:", error);

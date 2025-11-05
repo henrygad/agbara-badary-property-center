@@ -15,6 +15,7 @@ import GroundLoader from "@/components/loaders/GroundLoader";
 export default function Home() {
   const {  properties, loading } = useClientStore();
 
+  
   // Filtering logic (including date filter)
   const filteredProperties = useMemo(() => {
     return properties.sort(

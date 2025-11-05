@@ -20,6 +20,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Eye, EyeOff } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import UserTypes from "@/types/user.types";
+import { useUserStore } from "@/store/useUserStore";
+import { useRouter } from "next/navigation";
 
 
 const loginSchema = z.object({
@@ -33,8 +35,10 @@ const loginSchema = z.object({
 export type LoginSchema = z.infer<typeof loginSchema>;
 
 
-export default function Login() {
+export default function Login() {  
+  const router = useRouter();
 
+  const { setUser } = useUserStore();
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -92,15 +96,25 @@ export default function Login() {
 
       if (!resData.success) {        
         setError(resData.message)
-      } else {
-        console.log(resData);
+      } else {   
+
+        form.reset();
+
+        const agent = resData.agent;
+        setUser(agent);
+
+        if (agent.accountType === "Agent") {          
+          router.push("/agent");
+        }
+        
+        else if (agent.accountType === "Admin") {         
+          router.push("/admin");
+        }
+
       }
 
-      form.reset();
-
     } catch (error) {
-      console.error(error);
-      console.log(error);
+      console.error(error);     
       setError("Please Try again later.")
 
     } finally {

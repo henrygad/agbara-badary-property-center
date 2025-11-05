@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         value: clientId,
         httpOnly: true,
         secure: true,
-        sameSite: "lax",
+        sameSite: 'strict',
         path: "/",       // required for __Host-; next will accept it
         maxAge: (60 * 60 * 24 * 365), // 1 year in seconds
     });

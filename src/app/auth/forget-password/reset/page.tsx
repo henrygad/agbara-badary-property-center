@@ -52,7 +52,7 @@ export default function ResetPassword() {
 
             const payload = { newPassword: data.password, email: data.email };
 
-            const res = await fetch("/api/changepassword", {
+            const res = await fetch("/api/reset-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

@@ -17,6 +17,8 @@ for auth api
 
 /api/auth/register
 
+/api/auth/logout
+
 
 for otp api
 
@@ -34,11 +36,15 @@ for reCAPTCHA api
 
 for change password api
 
-/api/changepassword
+/api/reset-password
 
 for agents api
 
 /api/agent/account
+
+/api/agent/change-password
+
+/api/agent/change-email
 
 /api/agent/property
 

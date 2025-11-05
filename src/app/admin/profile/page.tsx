@@ -14,7 +14,7 @@ export default function AdminProfile() {
 
 
   return <div className="px-2">
-    <menu className="my-3">
+    <menu className="mb-8">
       <ReturnBack />
     </menu>
     <ProfileCard user={user} placeViewing="Profile" />

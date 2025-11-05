@@ -66,7 +66,7 @@ export default function VerifyAccount() {
   
         const payload = { otp, email };
   
-        const res = await fetch("/api/otp/verify/resetpassword", {
+        const res = await fetch("/api/otp/verify/reset-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

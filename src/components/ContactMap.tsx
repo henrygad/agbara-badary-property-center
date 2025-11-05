@@ -7,15 +7,15 @@ import "leaflet/dist/leaflet.css";
 
 export default function ContactMap() {
     // Approximate coordinates for Agbara–Lusada Way
-    const position: [number, number] = [6.5145, 3.0412];
-
+    const position: [number, number] = [6.5344, 3.0303];
 
     // Custom light red marker icon
     const markerIcon = new L.Icon({
         iconUrl: "https://cdn-icons-png.flaticon.com/512/2776/2776067.png",
-        iconSize: [38, 38],
-        iconAnchor: [19, 38],
-        popupAnchor: [0, -30],
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
     });
 
     return <div className="w-full flex-1 rounded-xl overflow-hidden shadow-lg">
@@ -33,9 +33,11 @@ export default function ContactMap() {
             />
             <Marker position={position} icon={markerIcon}>
                 <Popup>
-                    <strong>Agbara–Badagry Property Center</strong>
-                    <br />
-                    12, Mango Bus Stop, Agbara–Lusada Way
+                    <Popup>
+                        <strong>Our Office</strong><br />
+                        Mango Bus Stop, Agbara–Lusada Road<br />
+                        Ogun State, Nigeria
+                    </Popup>
                 </Popup>
             </Marker>
         </MapContainer>

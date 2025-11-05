@@ -11,12 +11,13 @@ import { useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { usePathname } from "next/navigation";
 import { DEFAULT_PROPERTY_FORM } from "@/components/add_property_form/defaultData";
-import { getAgentByEmailDb, getAgentsDb } from "@/lib/firebase/agent_service";
+import { getAgentsDb } from "@/lib/firebase/agent_service";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { getNotificationByUserIdDb } from "@/lib/firebase/notification._service";
 import { useRequestStore } from "@/store/useRequestStore";
 import { getRequestsDb } from "@/lib/firebase/request_service";
 import { useAgentStore } from "@/store/useAgentStore";
+import UserTypes from "@/types/user.types";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -40,7 +41,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   // Fetch Admin datas
   useEffect(() => {
 
-    const fetchAdmin = async () => {      
+    const fetchAdmin = async () => {
       setAdminLoading(true);
       setPropertyLoading(true, false);
       setImageLoading(true, false);
@@ -49,12 +50,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       setAgentsLoading(true, false);
 
       try {
-        const admin = await getAgentByEmailDb("henrygad.orji@gmail.com");
-        setAdminLoading(false);
+        const res = await fetch("/api/agent/account");
+        const { agent, success } = await res.json() as { message: string, success: string, agent: UserTypes };
 
-        if (admin) {
-          admin.password = "";
-          setUser(admin);
+        if (!success || !agent || !agent.id) return;
+
+        setUser(agent);
+        setAdminLoading(false);
 
           // Fetch All properties        
           const properties = await getPropertiesDb();
@@ -64,13 +66,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           setPropertyLoading(false, false);
 
           // Fetch admin properties         
-          const images = await getImagesDb(admin.id!);
+        const images = await getImagesDb(agent.id!);
           if (images) {
             setImages(images);
           }
           setImageLoading(false, false);
 
-          
+
           // Fetch notifications
           const notics = await getNotificationByUserIdDb("admin");
           if (notics) {
@@ -92,15 +94,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           }
           setAgentsLoading(false, false);
 
-
-        }
-
       } catch (error) {
         console.error("Error fetching admin:", error);
-      } 
+      }
     };
 
-    fetchAdmin();  
+    fetchAdmin();
   }, [
     setImageLoading,
     setImages,
@@ -129,7 +128,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     }
   }, [pathname, setForm]);
 
-  
+
 
   return (
     <div className="break-words text-wrap flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">
@@ -138,7 +137,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <Navbar />
         <main className="p-3 md:px-6 py-6 dark:bg-gray-800 min-h-screen">
           {children}
-        </main>        
+        </main>
       </div>
     </div>
   );
