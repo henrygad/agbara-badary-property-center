@@ -21,7 +21,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import ReCAPTCHA from "react-google-recaptcha";
-//import { createPortal } from "react-dom";
 
 // Zod validation schema
 const RequestSchema = z.object({
@@ -126,7 +125,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
   }
 
   return (
-    <div>
+    <>
       <div className="sticky bottom-2 left-0 right-0">
         <CustomButton type="button" onClick={() => setOpen(true)}>
           Send Request
@@ -135,9 +134,9 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
 
       {open &&
         <div
-          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-40 bg-white rounded-xl p-5 border-t-4 border-primary")}
+          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-40 max-w-[480px] bg-white shadow-2xl shadow-accent-foreground rounded-xl p-5 border-t-4 border-primary")}
         >
-          <div className="animate-in slide-in-from-bottom-10 min-w-[320px] max-w-[480px] max-h-[85vh] overflow-y-auto">
+          <div className="animate-in slide-in-from-bottom-10 max-h-[85vh] min-w-[320px] overflow-y-auto">
             <div>
               <h3 className="text-xl font-bold text-red-700 text-center">
                 Send a Request
@@ -237,7 +236,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                             placeholder="Type your message here..."
                             rows={4}
                             {...field}
-                            className="min-h-[100px] max-h-[100px] overflow-auto resize-none"
+                            className="min-h-[100px] max-h-[100px] text-sm overflow-auto resize-none"
                           />
                         </FormControl>
                         <FormMessage />
@@ -245,18 +244,16 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                     )}
                   />
 
-                  {/* <ReCAPTCHA */}
-                  {/* <CaptchaPortal setCaptchaToken={setCaptchaToken} /> */}
+                  {/* <ReCAPTCHA */}                 
                   <div className="flex justify-end">
-                    <ReCAPTCHA
-                      // style={{zIndex: 100, position: "relative"}}
+                    <ReCAPTCHA                      
                       sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
                       onChange={(token: string | null) => setCaptchaToken(token)}
                     />
                   </div>
 
                   {captchaError && (
-                    <p className="text-red-600 text-sm mb-3">{captchaError}</p>
+                    <p className="text-primary text-sm mb-3">{captchaError}</p>
                   )}
 
                   <div className="mt-4">
@@ -292,22 +289,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
           </div>
         </div>
       }
-    </div>
+    </>
   );
 };
-
-
-// function CaptchaPortal({ setCaptchaToken }: { setCaptchaToken: (token: string | null) => void }) {
-//   return typeof window !== "undefined"
-//     ? createPortal(
-//       <div className="fixed bottom-10 right-10 z-[9999]">
-//         <ReCAPTCHA
-//           sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
-//           onChange={(token: string | null) => setCaptchaToken(token)}
-//         />
-//       </div>,
-//       document.body
-//     )
-//     : null;
-// }
 
