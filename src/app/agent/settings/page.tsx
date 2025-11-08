@@ -40,7 +40,7 @@ const sections = [
   {
     title: "Account",
     items: [
-      { icon: User, label: "Edit Profile", href: "/agent/profile/edit" },
+      { icon: User, label: "Edit Profile", href: "/agent/profile/dit-profile" },
       { icon: Mail, label: "Change Email", href: "/agent/change-email" },
     ],
   },
@@ -85,7 +85,7 @@ export default function SettingsPage() {
                 className="flex items-center justify-between text-sm p-4 border rounded-xl  "
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5 text-gray-700" />
+                  <Icon className="w-5 h-5 text-gray-500" />
                   <span className="font-medium">{label}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                 className="flex text-sm items-center justify-between p-4 border rounded-xl  "
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5 text-gray-700" />
+                  <Icon className="w-5 h-5 text-gray-500" />
                   <span className="font-medium">{l.label}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -145,7 +145,7 @@ function DarkMode() {
 
   <button className="w-full text-sm flex items-center justify-between p-4 border rounded-xl  ">
     <div className="flex items-center gap-3">
-      <Headphones className="w-5 h-5 text-gray-700" />
+      <Headphones className="w-5 h-5 text-gray-500" />
       <span className="font-medium">Contact / Support</span>
     </div>
     <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -180,7 +180,7 @@ function Logout() {
       const data = await res.json();
       if (data) {
         logout();
-        router.push("/auth/agent-login")
+        router.push("/auth/login")
       }
     } catch (error) {
       console.log(error);
@@ -195,7 +195,7 @@ function Logout() {
       onClick={handleLogOut}
     >
       <div className="flex items-center gap-3">
-        <LogOut className="w-5 h-5 text-gray-700" />
+        <LogOut className="w-5 h-5 text-gray-500" />
         <span className="font-medium">Logout</span>
       </div>
     </button>
@@ -219,7 +219,7 @@ function DeleteAccount() {
       const data = await res.json();
       if (data) {
         logout();
-        router.push("/auth/agent-login")
+        router.push("/auth/login")
       }
     } catch (error) {
       console.log(error);

@@ -8,7 +8,7 @@ export default function NotFoundPage() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gray-50 text-center px-6 py-12">
+    <div className="flex flex-col items-center justify-center bg-gray-50 text-center px-6 py-12 min-h-[80vh]">
       {/* 404 Illustration */}
       <div className="mb-6">
         <svg
@@ -39,7 +39,7 @@ export default function NotFoundPage() {
 
       {/* Return Button */}
       <Button
-        onClick={() => router.push("/auth/agent-login")}
+        onClick={() => router.push("/auth/login")}
         className="bg-primary hover:bg-red-600 text-white flex items-center gap-2"
       >
         <MoveLeft size={18} />

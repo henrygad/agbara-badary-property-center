@@ -24,7 +24,7 @@ export default function Search() {
   const [openSearchForm, setOpenSearchForm] = useState(false);
 
   const [results, setResult] = useState<PropertyTypes[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
