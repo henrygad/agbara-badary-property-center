@@ -1,5 +1,6 @@
 "use client";
 
+import ItemNotFound from "@/components/ItemNotFound";
 import Draft from "@/components/property/Draft";
 import { PropertyTypes } from "@/types/property.types"
 import { useEffect, useState } from "react"
@@ -26,8 +27,8 @@ export default function Drafts() {
               <div key={d.draftId} className="border rounded-md">
                 <Draft property={d} setDrafts={setDrafts} />
               </div>
-            ) :
-            <p className="w-full text-center text-sm font-medium text-gray-600">No draft yet</p>
+            ) :            
+            <ItemNotFound>No draft</ItemNotFound>
         }
       </div>
     </div>

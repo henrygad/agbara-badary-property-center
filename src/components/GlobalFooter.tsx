@@ -36,45 +36,43 @@ export default function GlobalFooter() {
                                     <p className='text-xs font-medium  hover:text-foreground'>Read More</p>
                                 </Link>
                             </button>
-                        </div>   
-                    </div>                 
+                        </div>
+                    </div>
                 </div>
                 <div className='flex md:justify-center'>
                     <div>
                         <h4 className="font-bold mb-4 text-sm">Quick Links</h4>
-                        <ul className="space-y-2 text-xs">                        
-                        <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Sale" } }}>Properties for Buy</Link></li>
-                        <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Rent" } }}>Properties for Rent</Link></li>
-                        <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Short-let" } }}>Properties for Short-let</Link></li>
-                        <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Commercial" } }}>Properties for Commercial</Link></li>
-                        <li><Link className="block hover:text-gray-300" href="/about">About US</Link></li>
-                        <li><Link className="block hover:text-gray-300" href="/contact">Contact Agents</Link></li>
-                        <li><Link className="block hover:text-gray-300" href="/faq">FAQ</Link></li>
-                
-                    </ul>
+                        <ul className="space-y-2 text-xs">
+                            <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Sale" } }}>Buy</Link></li>
+                            <li><Link className="block hover:text-gray-300" href="/auth/register">Sell</Link></li>
+                            <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Rent" } }}>Rent</Link></li>
+                            <li><Link className="block hover:text-gray-300" href="/about">About US</Link></li>
+                            <li><Link className="block hover:text-gray-300" href="/contact">Contact</Link></li>
+                            <li><Link className="block hover:text-gray-300" href="/faq">FAQ</Link></li>
+                        </ul>
                     </div>
                 </div>
                 <div className='flex md:justify-center'>
                     <div>
                         <h4 className="font-bold mb-4 text-base">Services</h4>
                         <ul className="space-y-2 text-xs">
-                        <li><Link className="hover:text-gray-300" href="#">Property Valuation</Link></li>
-                        <li><Link className="hover:text-gray-300" href="#">Property Management</Link></li>
-                        <li><Link className="hover:text-gray-300" href="#">Legal Support</Link></li>
-                        <li><Link className="hover:text-gray-300" href="#">Real Estate Advisory</Link></li>
-                        <li><Link className="hover:text-gray-300" href="#">Mortgage Services</Link></li>
+                            <li><Link className="hover:text-gray-300" href="#">Property Valuation</Link></li>
+                            <li><Link className="hover:text-gray-300" href="#">Property Management</Link></li>
+                            <li><Link className="hover:text-gray-300" href="#">Legal Support</Link></li>
+                            <li><Link className="hover:text-gray-300" href="#">Real Estate Advisory</Link></li>
+                            <li><Link className="hover:text-gray-300" href="#">Mortgage Services</Link></li>
                         </ul>
                     </div>
                 </div>
-                
+
                 <div className='flex md:justify-center'>
                     <div>
                         <h4 className="font-bold mb-4 text-base">Legal</h4>
                         <ul className="space-y-2 text-xs">
                             <li><Link className="hover:text-gray-300" href="/terms">Terms and Conditions</Link></li>
-                        <li><Link className="hover:text-gray-300" href="/privacy-policy">Privacy Policy</Link></li>
-                        <li><Link className="hover:text-gray-300" href="/cookies">Cookie Policy</Link></li>
-                        <li><Link className="hover:text-gray-300" href="/disclaimer">Disclaimer</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/privacy-policy">Privacy Policy</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/cookies">Cookie Policy</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/disclaimer">Disclaimer</Link></li>
                         </ul>
                     </div>
                 </div>

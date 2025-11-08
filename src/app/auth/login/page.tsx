@@ -256,7 +256,7 @@ export default function Login() {
             variant="ghost"
             className="test-sm text-primary font-semibold"
           >
-            <Link href="/auth/agent-register">Register here</Link>
+            <Link href="/auth/register">Register here</Link>
           </Button>
         </div>
       </div>      

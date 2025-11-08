@@ -21,8 +21,9 @@ import useLockScroll from "@/hooks/useLockScroll";
 import SidebarLink from "./SidebarLink";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useUserStore } from "@/store/useUserStore";
 
-const links = [
+const adminLinks = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Add Property", href: "/admin/add-property", icon: Plus },
     {
@@ -39,14 +40,34 @@ const links = [
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },    
 ];
 
+const agentLinks = [
+    { name: "Dashboard", href: "/agent", icon: LayoutDashboard },
+    { name: "Add Property", href: "/agent/add-property", icon: Plus },
+    {
+        name: "Properties",
+        href: "/agent/properties",
+        icon: Building2,
+        children: [
+            { name: "Drafts", href: "/agent/properties/drafts", icon: FileText },
+            { name: "Trash", href: "/agent/properties/trash", icon: FileX2 },
+        ]
+    },
+];
+
 export default function Sidebar() {
+
+    const { user } = useUserStore();
+
+
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
 
     // Disable page from scrolling
     useLockScroll({ open });
-    
-    const active = pathname === "/admin/settings";
+
+    const settingsUrl = user?.accountType === "Admin" ? "/admin/settings" : "/agent/settings";
+
+    const active = pathname === settingsUrl;
 
     return (
         <>
@@ -94,7 +115,9 @@ export default function Sidebar() {
                             </div>
 
                             <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
-                                {links.map((v) =>
+                                {(user?.accountType === "Admin" ?
+                                    adminLinks :
+                                    agentLinks).map((v) =>
                                     <SidebarLink key={v.name} {...v} pathname={pathname} setOpen={setOpen} />
                                 )}
                             </nav>
@@ -107,7 +130,8 @@ export default function Sidebar() {
                                             ? "bg-primary text-white"
                                             : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                                     )}
-                                    href="/admin/settings"
+                                    href={settingsUrl}
+                                    onClick={() => setOpen(false)}
                                 >
                                     <Settings className="h-4 w-4" /> Settings
                                 </Link>
@@ -120,11 +144,13 @@ export default function Sidebar() {
             {/* Desktop sidebar (always visible) */}
             <aside className="hidden md:fixed md:left-0 md:top-0 md:z-40 md:flex md:h-screen md:w-64 md:flex-col md:border-r md:bg-white md:shadow-sm dark:bg-gray-900 dark:border-gray-800">
                 <div className="flex items-center justify-start h-16 border-b dark:border-gray-800 px-7">
-                    <h1 className="text-xl font-bold text-primary">Admin</h1>
+                    <h1 className="text-xl font-bold text-primary">{user?.accountType === "Admin" ? "Admin": "Agent"}</h1>
                 </div>
 
                 <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
-                    {links.map((v) =>
+                    {(user?.accountType === "Admin" ?
+                        adminLinks :
+                        agentLinks).map((v) =>
                         <SidebarLink key={v.name} {...v} pathname={pathname} setOpen={setOpen} />
                     )}
                 </nav>
@@ -137,7 +163,7 @@ export default function Sidebar() {
                                 ? "bg-primary text-white"
                                 : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                         )}
-                        href="/admin/settings"
+                        href={settingsUrl}
                     >
                         <Settings className="h-4 w-4" /> Settings
                     </Link>

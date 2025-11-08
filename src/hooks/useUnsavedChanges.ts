@@ -9,13 +9,13 @@ export type GuardOptions = {
     // callback to persist draft (sync or async)
     onSaveDraft?: () => void | Promise<void>;
     // array of guarded paths (exact match or prefix)
-    guardedPaths?: string[]; // default ['/admin/add-property', '/admin/edit-property']
+    guardedPaths?: string[];
 };
 
 export default function useUnsavedChanges({
     when,
     onSaveDraft,
-    guardedPaths = ["/admin/add-property", "/admin/edit-property"],
+    guardedPaths
 }: GuardOptions) {
     const router = useRouter();
     const pathname = usePathname();
@@ -29,8 +29,7 @@ export default function useUnsavedChanges({
     // helper: check if current pathname is inside guardedPaths
     const isOnGuardedPath = useCallback(() => {
         if (!pathname) return false;
-        return guardedPaths.some((p) => {
-            // allow prefix match (so '/admin/edit-property/123' matches '/admin/edit-property')
+        return guardedPaths?.some((p) => {            
             return pathname === p || pathname.startsWith(p + "/") || pathname.startsWith(p);
         });
     }, [pathname, guardedPaths]);

@@ -2,7 +2,7 @@
 import { db } from "./config"
 import { PropertyTypes } from "@/types/property.types"
 import { formatteFireStoreDate } from "@/utils"
-import { collection, addDoc, serverTimestamp, getDocs, getDoc, doc, updateDoc, deleteDoc} from "firebase/firestore"
+import { collection, addDoc, serverTimestamp, getDocs, getDoc, doc, updateDoc, deleteDoc, query, where } from "firebase/firestore"
 
 // Fetch all properties
 export async function getPropertiesDb() {
@@ -12,6 +12,30 @@ export async function getPropertiesDb() {
         const data = formatteFireStoreDate(doc.data());
         return { id: doc.id, ...data };
     }) as PropertyTypes[]
+}
+
+// Fetch all properties
+export async function getPropertyByAgentId(agentId: string) {
+
+    try {
+
+        const q = query(
+            collection(db, "properties"),
+            where("agentId", "==", agentId),
+        );
+
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            const results = snapshot.docs.map(doc => ({ id: doc.id, ...formatteFireStoreDate(doc.data()) })) as PropertyTypes[];
+            return results as PropertyTypes[]
+        }
+
+        return null;
+    } catch (error) {
+        console.error("Error fetching properties by agent id:", error);
+        return null;
+    }
 }
 
 // Fetch single property by ID
@@ -35,17 +59,17 @@ export async function getPropertyByIdDb(id: string) {
 export async function addPropertyDb(property: PropertyTypes) {
     try {
         // Normalize payload before saving
-        const normalized = {                                                
+        const normalized = {
             ...Object.fromEntries(
-                Object.entries(property).map(([k, v]) => [k, v === undefined ? null : v])) as PropertyTypes,                                  
+                Object.entries(property).map(([k, v]) => [k, v === undefined ? null : v])) as PropertyTypes,
             updatedAt: serverTimestamp(),
         };
 
         const { id, ...rest } = normalized;
 
         if (id) {
-             // do nothing
-         }
+            // do nothing
+        }
 
         // Save to Firestore
         const docRef = await addDoc(collection(db, "properties"), rest);

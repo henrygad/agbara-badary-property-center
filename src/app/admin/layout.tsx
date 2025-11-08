@@ -18,9 +18,12 @@ import { useRequestStore } from "@/store/useRequestStore";
 import { getRequestsDb } from "@/lib/firebase/request_service";
 import { useAgentStore } from "@/store/useAgentStore";
 import UserTypes from "@/types/user.types";
+import { useClientStore } from "@/store/useClientStore";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+
+  const { dark, setDark } = useClientStore();
 
   const { setUser, setLoading: setAdminLoading } = useUserStore();
 
@@ -58,41 +61,50 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         setUser(agent);
         setAdminLoading(false);
 
-          // Fetch All properties        
-          const properties = await getPropertiesDb();
-          if (properties) {
-            setProperties(properties);
-          }
-          setPropertyLoading(false, false);
+        // Fetch All properties        
+        const properties = await getPropertiesDb();
+        if (properties) {
+          setProperties(properties);
+        }
+        setPropertyLoading(false, false);
 
-          // Fetch admin properties         
+        // Fetch admin images        
         const images = await getImagesDb(agent.id!);
-          if (images) {
-            setImages(images);
-          }
-          setImageLoading(false, false);
+        if (images) {
+          setImages(images);
+        }
+        setImageLoading(false, false);
 
 
-          // Fetch notifications
-          const notics = await getNotificationByUserIdDb("admin");
-          if (notics) {
-            setNotification(notics);
-          }
-          setNotificationLoading(false, false);
+        // Fetch notifications
+        const notics = await getNotificationByUserIdDb("admin");
+        if (notics) {
+          setNotification(notics);
+        }
+        setNotificationLoading(false, false);
 
-          // Fetch requests
-          const request = await getRequestsDb();
-          if (request) {
-            setRequests(request);
-          }
-          setRequestsLoading(false, false);
+        // Fetch requests
+        const request = await getRequestsDb();
+        if (request) {
+          setRequests(request);
+        }
+        setRequestsLoading(false, false);
 
-          // Fetch agents
-          const agents = await getAgentsDb();
-          if (agents) {
-            setAgents(agents);
-          }
-          setAgentsLoading(false, false);
+        // Fetch agents
+        let agents = await getAgentsDb();
+
+        if (agents) {
+          agents = agents.map(a => {
+            const { password, ...rest } = a;
+            if (password) {
+              //do nothing
+            }
+            return rest
+          }) as UserTypes[];
+
+          setAgents(agents);
+        }
+        setAgentsLoading(false, false);
 
       } catch (error) {
         console.error("Error fetching admin:", error);
@@ -116,6 +128,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   ]);
 
 
+  // Display page title
   useEffect(() => {
     // If we not in add-property or edit-property or review-property page
     // Clean setForm in property store
@@ -128,7 +141,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     }
   }, [pathname, setForm]);
 
+  // Dark mode
+  useEffect(() => {
+    const theme = JSON.parse(localStorage.getItem("theme") || "{}");
+    if (theme.dark) {
+      setDark(theme.dark);
+    }
 
+    if (dark) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+  }, [dark, setDark]);
 
   return (
     <div className="break-words text-wrap flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">

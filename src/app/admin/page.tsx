@@ -12,45 +12,8 @@ import Agent from "@/components/Agent";
 import { useAgentStore } from "@/store/useAgentStore";
 import { useRequestStore } from "@/store/useRequestStore";
 import RequestCrad from "@/components/RequestCrad";
-
-const Metrics = [
-    {
-        title: "Total Properties",
-        value: "1245",
-        suffix: "+12%",
-        duration: "last month",
-        icon: Building2,
-        iconColor: "text-indigo-500 dark:text-indigo-400",
-        suffixColor: "text-green-500",
-    },
-    {
-        title: "Pending Listings",
-        value: "38",
-        suffix: "-5%",
-        duration: "last week",
-        icon: Clock,
-        iconColor: "text-orange-500 dark:text-orange-400",
-        suffixColor: "text-red-500 ",
-    },
-    {
-        title: "Request",
-        value: "512",
-        suffix: "-8%",
-        duration: "last month",
-        icon: Inbox,
-        iconColor: " text-cyan-500 dark:text-cyan-400",
-        suffixColor: " text-red-500",
-    },
-    {
-        title: "Active Agents",
-        value: "89",
-        suffix: "+2%",
-        duration: "last month",
-        icon: Users,
-        iconColor: " text-green-500",
-        suffixColor: " text-emerald-500 dark:text-emerald-400",
-    },
-];
+import { calculateChange } from "@/utils/metrics_cal";
+import ItemNotFound from "@/components/ItemNotFound";
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -61,12 +24,12 @@ export default function AdminDashboard() {
 
     const { requests, loading: loadingRequests } = useRequestStore();
 
-    const onlyPeningProperties = useMemo(() =>
+    const onlyPendingProperties = useMemo(() =>
         properties.filter(p => p.availability === "Pending" || p.availability === "Reviewing"),
         [properties]
     );
 
-    const onlyPeningAgents = useMemo(() =>
+    const onlyPendingAgents = useMemo(() =>
         agents.filter(a => a.accountStatus === "Pending" || a.accountStatus === "Rejected"),
         [agents]
     );
@@ -75,6 +38,11 @@ export default function AdminDashboard() {
         requests.filter(r => !r.view),
         [requests]
     );
+
+    const propertyStats = calculateChange(properties, "month");
+    const pendingStats = calculateChange(onlyPendingProperties, "week");
+    const requestStats = calculateChange(requests, "month");
+    const agentStats = calculateChange(agents, "month");
 
     
     return <div className="h-auto w-full">
@@ -129,12 +97,34 @@ export default function AdminDashboard() {
                 Key Metrics
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {
-                    Metrics.map((m) => {
-                        return <MetricCard key={m.title} {...m} />
-                    })
-                }
-
+                <MetricCard
+                    title="Total Properties"
+                    value={properties.length}
+                    change={propertyStats.change}
+                    icon={Building2}
+                    iconColor="text-indigo-500 dark:text-indigo-400"
+                />
+                <MetricCard
+                    title="Pending Listings"
+                    value={onlyPendingProperties.length}
+                    change={pendingStats.change}
+                    icon={Clock}
+                    iconColor="text-orange-500 dark:text-orange-400"
+                />
+                <MetricCard
+                    title="Requests"
+                    value={requests.length}
+                    change={requestStats.change}
+                    icon={Inbox}
+                    iconColor=" text-cyan-500 dark:text-cyan-400"
+                />
+                <MetricCard
+                    title="Active Agents"
+                    value={agents.length}
+                    change={agentStats.change}
+                    icon={Users}
+                    iconColor="text-green-500"
+                />
             </div>
         </section>
         {/* Performance Metrics */}
@@ -159,8 +149,8 @@ export default function AdminDashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {onlyPeningProperties.length > 0 ? (
-                                onlyPeningProperties.map((p) => (
+                            {onlyPendingProperties.length > 0 ? (
+                                onlyPendingProperties.map((p) => (
                                     <TableDisplay
                                         key={p.id}
                                         p={p}
@@ -169,10 +159,8 @@ export default function AdminDashboard() {
                                 ))
                             ) : (
                                 <tr>
-                                        <td colSpan={6}
-                                            className="text-center py-10 text-gray-500"
-                                        >
-                                            Clear
+                                        <td colSpan={6}>
+                                            <ItemNotFound>Clear</ItemNotFound>
                                     </td>
                                 </tr>
                             )}
@@ -201,17 +189,16 @@ export default function AdminDashboard() {
                         </thead>
 
                         <tbody>
-                            {onlyPeningAgents.length > 0 ? (
-                                onlyPeningAgents.map((agent) => (
+                            {onlyPendingAgents.length > 0 ? (
+                                onlyPendingAgents.map((agent) => (
                                     <Agent agent={agent} key={agent.id} />
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
-                                        className="text-center py-10 text-gray-500"
+                                            colSpan={6}                                        
                                     >
-                                        Clear
+                                            <ItemNotFound>Clear</ItemNotFound>
                                     </td>
                                 </tr>
                             )}
@@ -228,13 +215,7 @@ export default function AdminDashboard() {
                 </p>
                 {!loadingRequests ? <div>
                     {onlyUnviewRequests.length === 0 ? (
-                        <div className="h-full w-full flex justify-center items-center">
-                            <p
-                                className="text-center py-10 text-gray-500"
-                            >
-                                Clear
-                            </p>
-                        </div>
+                        <ItemNotFound>Clear</ItemNotFound>
                     ) : (
                         <ul className="space-y-3">
                             {onlyUnviewRequests.map((req) => (

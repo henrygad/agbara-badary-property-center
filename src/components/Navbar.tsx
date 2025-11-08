@@ -33,13 +33,16 @@ export default function Navbar() {
 
   useClickOutSide(showMenuEleRef, () => setShowMenu(false));
 
+
   useEffect(() => {
     if (pathname.trim()) {
       const path = pathname.split("/");
       const getPath = path[path.length - 1];
       const getPageName = getPath.split("-").join(" ");
 
-      if (getPageName === "admin") {
+      if (getPageName === "admin" ||
+        getPageName === "agent"
+      ) {
         setPageTitle("Dashboard");
       } else {
         setPageTitle(getPageName);
@@ -50,10 +53,13 @@ export default function Navbar() {
   useEffect(() => {
     if (!user?.id) return;
 
-    listenToNotifications(user?.id, (notic) => {
+    listenToNotifications(user.accountType === "Admin" ? "Admin" : user?.id,
+      (notic) => {
+        console.log(notic, "new notification");
       addNotification(notic);
       setPopupNotic(notic);
     });
+
   }, [user, addNotification]);
 
   return (
@@ -81,7 +87,7 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         <button
           className="relative cursor-pointer"
-          onClick={() => router.push("/admin/notifications")}
+          onClick={() => router.push(user?.accountType === "Admin" ? "/admin/notifications" : "/agent/notifications")}
         >
           <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
 
@@ -131,7 +137,7 @@ export default function Navbar() {
                 className="absolute right-0 mt-2 w-40 rounded-md border bg-white py-2 shadow-md dark:bg-gray-800 dark:border-gray-700"
               >
                 <Link
-                  href="/admin/profile"
+                  href={user?.accountType === "Admin" ? "/admin/profile" : "/agent/profile"}
                   className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
                   onClick={() => {                    
                     setShowMenu(false);
@@ -140,7 +146,7 @@ export default function Navbar() {
                   Profile
                 </Link>
                 <Link
-                  href="/admin/settings"
+                  href={user?.accountType === "Admin" ? "/admin/settings" : "agent/settings"}
                   className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                   onClick={() => {
                     setShowMenu(false);

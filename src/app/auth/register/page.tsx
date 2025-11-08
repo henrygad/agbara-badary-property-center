@@ -23,7 +23,7 @@ import { RegisterTypes } from "@/types/auth.types";
 import { useRouter } from "next/navigation";
 import UserTypes from "@/types/user.types";
 import { useUserStore } from "@/store/useUserStore";
-import { LoginSchema } from "../agent-login/page";
+import { LoginSchema } from "../login/page";
 
 const signupSchema = z
   .object({
@@ -402,7 +402,7 @@ export default function Register() {
             variant="ghost"
             className="test-sm text-primary font-semibold"
           >
-            <Link href="/auth/agent-login">Login</Link>
+            <Link href="/auth/login">Login</Link>
           </Button>
         </div>
 

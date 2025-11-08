@@ -139,7 +139,7 @@ export default function ForgetPassword() {
                             variant="ghost"
                             className="test-sm text-primary font-semibold"
                         >
-                            <Link href="/auth/agent-login" className="text-sm">Return to Login</Link>
+                            <Link href="/auth/login" className="text-sm">Return to Login</Link>
                         </Button>
                     </div>
 

@@ -2,6 +2,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "./config";
 import { PropertyTypes } from "@/types/property.types";
 import { SearchTypes } from "@/types/search.types";
+import { formatteFireStoreDate } from "@/utils";
 
 
 export async function searchPropertiesDb(params: SearchTypes) {
@@ -46,9 +47,9 @@ export async function searchPropertiesDb(params: SearchTypes) {
 
     // Run Firestore query
     const q = query(collection(db, "properties"), ...queries);
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(q);    
 
-    let results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PropertyTypes[];
+    let results = snapshot.docs.map(doc => ({ id: doc.id, ...formatteFireStoreDate(doc.data()) })) as PropertyTypes[];
 
     // Local filter 
     // For genaral location

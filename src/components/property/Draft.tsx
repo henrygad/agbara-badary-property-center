@@ -11,14 +11,19 @@ import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu';
 import { showSuccess } from '../ui/toasts';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction } from 'react';
+import { useUserStore } from '@/store/useUserStore';
 
 export default function Draft({ property, setDrafts }: { property: PropertyTypes, setDrafts: Dispatch<SetStateAction<PropertyTypes[]>> }) {
   const router = useRouter();
 
+  const { user} = useUserStore();
+
   const continueingWriting = (property: PropertyTypes) => {
     localStorage.setItem("draftProperty", JSON.stringify(property));
     // Navigate to editor
-    router.push("/admin/add-property");
+    router.push(user?.accountType === "Admin" ?
+      "/admin/add-property" :
+      "/agent/add-property");
   };
 
   const handleDelete = (draftId?: string) => {
@@ -40,7 +45,7 @@ export default function Draft({ property, setDrafts }: { property: PropertyTypes
     <div className="flex items-center gap-4">
       <DisplayImage
         className="h-18 w-18 rounded-md object-cover"
-        src={property.images[0] || ""}
+        src={property.images[0] || "image.png"}
         alt={property.title}
         useRemove={false}
       />

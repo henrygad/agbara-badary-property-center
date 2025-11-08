@@ -10,8 +10,7 @@ import {
     PropertyCategory,
     PropertyTypes,
     PropertyType,
-    SizeUnit,
-    Availability,
+    SizeUnit,    
 } from "../../types/property.types";
 import {
     AMENITIES,
@@ -22,8 +21,7 @@ import {
     PRICE_FREQUENCY,
     PROPERTY_CATEGORIES,
     PROPERTY_TYPES,
-    SIZE_UNIT,
-    AVAILABILITY,
+    SIZE_UNIT,    
     DEFAULT_PROPERTY_FORM,
     PACKAGE_TYPE,
 } from "./defaultData";
@@ -69,8 +67,10 @@ import {
 import Property from "../property/Index";
 import { useUserStore } from "@/store/useUserStore";
 import { Card } from "../ui/card";
-import ReturnBack from "../ReturnBack";
 import OverlayLoader from "../loaders/OverlayLoader";
+import { addNotificationDb } from "@/lib/firebase/notification._service";
+import NotificationTypes from "@/types/notification.types";
+import { PendingApprovalDialog } from "../PendingApprovalDialog";
 
 type Props = {
     accountType: "ADMIN" | "AGENT";
@@ -87,6 +87,8 @@ export default function PropertyFormEditor({
 
     const { user, loading: loadingUser } = useUserStore();
     const { addProperty, form, setForm, updateProperty } = usePropertyStore();
+
+    const [pendingAgentDialogOpen, setpendingAgentDialogOpen] = useState(false);
 
     const router = useRouter();
     const [step, setStep] = useState(1);
@@ -122,8 +124,10 @@ export default function PropertyFormEditor({
     const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
         useUnsavedChanges({
             when: isFormDirty,
-            onSaveDraft: saveDraft,
-            guardedPaths: ["/admin/add-property", "/admin/edit-property"],
+            onSaveDraft: handleSaveDraft,
+            guardedPaths: user?.accountType === "Admin" ?
+                ["/admin/add-property", "/admin/edit-property"] :
+                ["/agent/add-property", "/agent/edit-property"],
         });
 
     // Populate agent details if account type is agent
@@ -136,7 +140,7 @@ export default function PropertyFormEditor({
                 agentPhoto: user?.profileImage?.url || "",
                 agentPhone: user?.phoneCode + user?.phone || "",
                 agentCompany: user?.company || "",
-                accountType: user?.accountType || "",
+                accountType: user?.accountType,
                 agentId: user?.id || "",
                 availability: user.accountType === "Admin" ? "Accepted" : "Pending",
             }));
@@ -149,7 +153,7 @@ export default function PropertyFormEditor({
             <PageLoading loading={loadingForm || loadingUser} />
         );
 
-    function saveDraft() {
+    function handleSaveDraft() {
         const drafts = JSON.parse(
             localStorage.getItem("drafts") || "[]"
         ) as PropertyTypes[]
@@ -272,6 +276,11 @@ export default function PropertyFormEditor({
     async function submitForm(e?: React.FormEvent) {
         e?.preventDefault();
 
+        if (user?.accountStatus !== "Approved") {
+            setpendingAgentDialogOpen(true);
+            return;
+        }
+
         if (loading) return;
 
         setLoading(true);
@@ -294,8 +303,30 @@ export default function PropertyFormEditor({
 
             if (documentType === "NEW") {
                 property = await submitNewProperty(payload);
+                if (user?.accountType === "Agent") {
+                    const payload: NotificationTypes = {
+                        type: "Property",
+                        to: "Admin",
+                        title: `New property by ${user.firstName} ${user.lastName}.`,
+                        message: `A new property - ${property?.referenceId} has been listed by ${user.firstName} ${user.lastName}, and waiting admin aprroval.`,
+                        viewed: false,
+                        createdAt: new Date()
+                    };
+                    await addNotificationDb(payload);
+                }
             } else if (documentType === "UPDATE" && payload.referenceId) {
                 property = await submitUpdatedProperty(payload);
+                if (user?.accountType === "Agent") {
+                    const payload: NotificationTypes = {
+                        type: "Property",
+                        to: "Admin",
+                        title: `Property updated by ${user.firstName} ${user.lastName}.`,
+                        message: `Property -${property?.referenceId} was updated by ${user.firstName} ${user.lastName}, and waiting admin approval.`,
+                        viewed: false,
+                        createdAt: new Date()
+                    };
+                    await addNotificationDb(payload);
+                }
             } else if (documentType === "REVIEW" && payload.referenceId) {
                 property = await submitReviewedProperty(payload);
             }
@@ -358,14 +389,10 @@ export default function PropertyFormEditor({
         }
     };
 
-
     return (
         <div className="w-full bg-inherit">
             {/* Steps */}
-            <menu className="mb-6">
-                <div className="mb-4">
-                    <ReturnBack />
-                </div>
+            <menu className="mb-6">              
                 <div className="flex gap-2">
                     {Array(5)
                         .fill("")
@@ -382,6 +409,7 @@ export default function PropertyFormEditor({
                         ))}
                 </div>
             </menu>
+
             {/* Property form editor */}
             <form onSubmit={submitForm} className="space-y-6">
                 {/* Basic info */}
@@ -548,7 +576,10 @@ export default function PropertyFormEditor({
                                 </Label>
                                 <Select
                                     value={form.state}
-                                    onValueChange={(value) => update("state", value)}
+                                    onValueChange={(value) => {
+                                        update("state", value);
+                                        setChooseCities(REGIONAL_TOWNS.find(r => r.state === value)?.cities || []);
+                                    }}
                                 >
                                     <SelectTrigger
                                         id="state"
@@ -566,8 +597,7 @@ export default function PropertyFormEditor({
                                             <SelectItem
                                                 className="cursor-pointer text-sm capitalize"
                                                 key={state.state}
-                                                value={state.state}
-                                                onClick={() => setChooseCities(state.cities)}
+                                                value={state.state}                                                
                                             >
                                                 {state.state}
                                             </SelectItem>
@@ -1346,7 +1376,7 @@ export default function PropertyFormEditor({
                                     </div>
 
                                     {/* Listing Availibility */}
-                                    <div className="flex flex-col">
+                                    {/* <div className="flex flex-col">
                                         <Label
                                             htmlFor="availibility"
                                             className="text-sm font-medium mb-1"
@@ -1377,7 +1407,7 @@ export default function PropertyFormEditor({
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                    </div>
+                                    </div> */}
 
                                     {/* Package Type */}
                                     <div className="flex flex-col">
@@ -1450,7 +1480,7 @@ export default function PropertyFormEditor({
                                         <CustomCalendar
                                             id="date"
                                             date={form.createdAt}
-                                            setDate={(date) => update("createdAt", date)}
+                                            setDate={(date) => update("createdAt", date!)}
                                         />
                                     </div>
                                 </div>
@@ -1503,15 +1533,18 @@ export default function PropertyFormEditor({
                                 isDocEdited={isDocEdited}
                                 documentType={documentType}
                                 accountType={accountType}
-                                title={form.title}
+                                title={form.title}                                
                             />
                         </div>
                     </div>
                 )}
             </form>
-            <div>
-                {/* Unsaved Changes Alert */}
-                <AlertDialog open={openPrompt} onOpenChange={setOpenPrompt}>
+
+            {/* Unsaved Changes Alert */}
+            <AlertDialog
+                open={openPrompt}
+                onOpenChange={setOpenPrompt}
+            >
                     <AlertDialogContent className="sm:max-w-md rounded-2xl">
                         <div className="flex justify-between items-start">
                             <AlertDialogHeader>
@@ -1547,11 +1580,17 @@ export default function PropertyFormEditor({
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
-                </AlertDialog>
-            </div>
+            </AlertDialog>
+
+            {/* Dialog for pending account */}
+            <PendingApprovalDialog
+                open={pendingAgentDialogOpen}
+                onClose={() => setpendingAgentDialogOpen(false)}
+                onSaveDraft={handleSaveDraft}
+            />    
 
             <OverlayLoader loading={loading} />
-        </div>
+        </div >
     );
 }
 

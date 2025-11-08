@@ -298,6 +298,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                         </div>
                     </CustomCard>
                 </div>
+
                 {/*amenities  */}
                 {property.amenities?.length ?
                     <div>
@@ -368,34 +369,9 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                         </div>
                     </CustomCard>
                 </div>
-                }
-                {/* Meta Agent view */}
-                {viewer === "AGENT" && <div className="mt-8">
-                    <h2 className="text-xl mb-1 font-semibold">Metadata</h2>
-                    <CustomCard>
-                        <div className="p-4 grid sm:grid-cols-2 gap-3">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Views</p>
-                                <p className="text-base">{property.views?.length ?? 0}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Reference ID</p>
-                                <p className="text-base">{property.referenceId}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Listed On</p>
-                                <p className="text-base">{formatDate(property.createdAt).toLocaleString()}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Last Updated</p>
-                                <p className="text-base">{formatDate(property.updatedAt).toLocaleString()}</p>
-                            </div>
-                        </div>
-                    </CustomCard>
-                </div>
-                }
+                }               
                 {/* Meta Client view */}
-                {viewer === "CLIENT" && <div className="mt-8">
+                <div className="mt-8">
                     <CustomCard>
                         <div className="p-4 grid sm:grid-cols-2 gap-3">
                             <div>
@@ -408,8 +384,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                             </div>
                         </div>
                     </CustomCard>
-                </div>
-                }
+                </div>                
 
                 {/* Agent details */}
                 {(placeViewing === "PREVIEW" || viewer === "ADMIN") && <div className="mt-8">
@@ -441,8 +416,8 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                                         <span>{property.agentEmail}</span>
                                     </div>}
                                 {property.agentCompany &&
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Company</p>
+                                    <div className="flex items-center gap-2">  
+                                        <Building2 className="w-4 h-4 text-muted-foreground" />
                                         <p>{property.agentCompany}</p>
                                     </div>}
                             </div>

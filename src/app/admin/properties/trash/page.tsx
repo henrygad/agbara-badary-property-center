@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 import { deletePropertyDb, updatePropertyDb } from "@/lib/firebase/property_service";
 import { showSuccess, showWarning } from "@/components/ui/toasts";
 import OverlayLoader from "@/components/loaders/OverlayLoader";
+import ItemNotFound from "@/components/ItemNotFound";
 
 export default function ListPropertiesPage() {
     const { properties, loading: loadingProperties, deleteProperty, updateProperty } = usePropertyStore();
@@ -138,8 +139,8 @@ export default function ListPropertiesPage() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="w-full text-center text-sm font-medium text-gray-600">
-                                    <p>No properties found.</p>
+                                    <td colSpan={6}>
+                                        <ItemNotFound> properties found.</ItemNotFound>
                                 </td>
                             </tr>
                         )}

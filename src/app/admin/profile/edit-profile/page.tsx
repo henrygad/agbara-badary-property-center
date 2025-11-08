@@ -68,7 +68,7 @@ export default function AdminProfilePage() {
     form.setValue("lastName", user?.lastName ?? "");
     form.setValue("gender", user?.gender);
     form.setValue("phone", user?.phone ?? "");
-    form.setValue("phone", user?.phoneCode ?? "");
+    form.setValue("phoneCode", user?.phoneCode ?? "");
     form.setValue("email", user?.email ?? "");
     form.setValue("company", user?.company ?? "");
     form.setValue("bio", user?.bio ?? "");
@@ -122,7 +122,7 @@ export default function AdminProfilePage() {
       if (updatedAdminResult) {
         // Update user profile image locally
         updateUser(updatedAdminResult);
-        showSuccess("Profile image updated!");        
+        showSuccess("Profile image updated!");
       }
 
     } catch (err) {
@@ -260,25 +260,28 @@ export default function AdminProfilePage() {
                 placeholder="+234"
                 {...form.register("phoneCode")}
               />
+              {form.formState.errors.phoneCode && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.phoneCode.message}</p>
+              )}
             </div>
             <div className="flex-1">
-            <Label className="text-sm font-medium mb-2">Phone Number</Label>
-            <Input
-              className="text-sm font-normal"
+              <Label className="text-sm font-medium mb-2">Phone Number</Label>
+              <Input
+                className="text-sm font-normal"
                 placeholder="08012345678"
                 {...form.register("phone")}
-            />
+              />
+              {form.formState.errors.phone && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.phone.message}</p>
+              )}
             </div>
-            {form.formState.errors.phone && (
-              <p className="text-red-500 text-xs mt-1">{form.formState.errors.phone.message}</p>
-            )}
           </div>
 
           {/* Email (auth email) */}
           <div>
             <Label className="text-sm font-medium mb-2">Email (Auth)</Label>
             <Link
-              className="text-sm text-blue-400 cursor-pointer hover:underline"              
+              className="text-sm text-blue-400 cursor-pointer hover:underline"
               href="/admin/change-email"
             >
               {form.getValues("email")}

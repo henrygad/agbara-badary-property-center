@@ -120,6 +120,12 @@ function Redirect({
     let href = "";
     if (type === "New Account") {
         href = "/admin/agents";
+    } else if (type === "Request") {
+        href = "/admin/requests"
+    } else if (type === "Listed Property") {
+        href = "/admin/properties?tab=Agent";
+    } else if (type === "Property") {
+        href = "/agent/properties?tab=Agent";
     }
 
     return <Link href={href}>{children}</Link>;

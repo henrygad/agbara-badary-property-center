@@ -25,6 +25,7 @@ export const AgentProperty = ({ name, availability, title, refId }: { refId: str
                         {title}
                     </Link>
                 </> :
+                availability === "Rejected" ?
                 <>
                     <Text style={{ color: brand.color.text }}>
                         Your property {title}, has been <Text style={{ color: "red", fontWeight: "bold", fontSize: "20" }}>{availability}</Text>
@@ -33,10 +34,22 @@ export const AgentProperty = ({ name, availability, title, refId }: { refId: str
                         <strong>Property title:</strong> {title}
                     </Text>
 
-                    <Text style={{ fontSize: "14px", color: brand.color.lightText }}>
-                        <strong>Property refid:</strong> {refId}
-                    </Text>
-                </>
+                        <Text style={{ fontSize: "14px", color: brand.color.lightText }}>
+                            <strong>Property refid:</strong> {refId}
+                        </Text>
+                    </> :
+                    <>
+                        <Text style={{ color: brand.color.text }}>
+                            Your property {title}, is under <Text style={{ color: "red", fontWeight: "bold", fontSize: "20" }}>{availability}</Text>
+                        </Text>
+                        <Text style={{ fontSize: "14px", color: brand.color.lightText }}>
+                            <strong>Property title:</strong> {title}
+                        </Text>
+
+                        <Text style={{ fontSize: "14px", color: brand.color.lightText }}>
+                            <strong>Property refid:</strong> {refId}
+                        </Text>
+                    </>                                                          
         }
     </BaseLayout>
 );

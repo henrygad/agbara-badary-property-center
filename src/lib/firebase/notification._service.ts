@@ -4,7 +4,6 @@ import { db } from "./config"
 import { formatteFireStoreDate } from "@/utils"
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc, query, where, orderBy, onSnapshot } from "firebase/firestore"
 
-
 // Listen for notifications
 export function listenToNotifications(userId: string, callback: (data: NotificationTypes[]) => void) {
     const q = query(
@@ -14,6 +13,7 @@ export function listenToNotifications(userId: string, callback: (data: Notificat
     );
 
     return onSnapshot(q, (snapshot) => {
+        console.log(snapshot.docs, "snapshot.docs");
         const data = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...formatteFireStoreDate(doc.data())

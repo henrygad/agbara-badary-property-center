@@ -15,8 +15,7 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
 
 import {
@@ -35,47 +34,45 @@ import { AlertTriangle } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import OverlayLoader from "@/components/loaders/OverlayLoader";
 import { useRouter } from "next/navigation";
+import { useClientStore } from "@/store/useClientStore";
+
+const sections = [
+  {
+    title: "Account",
+    items: [
+      { icon: User, label: "Edit Profile", href: "/admin/profile/edit" },
+      { icon: Mail, label: "Change Email", href: "/admin/change-email" },
+    ],
+  },
+  {
+    title: "Security",
+    items: [
+      {
+        icon: Lock,
+        label: "Change Password",
+        href: "/admin/change-password",
+      },
+      // { icon: ShieldCheck, label: "Two-Factor Authentication", href: "/2fa" },
+    ],
+  },
+  {
+    title: "Support",
+    items: [
+      { icon: Headphones, label: "Contact / Support", href: "/contact" },
+    ],
+  },
+];
+
+const legal = [
+  { icon: Info, label: "About", href: "/about" },
+  { icon: FileText, label: "Terms of Service", href: "/terms" },
+  { icon: Scale, label: "Privacy Policy", href: "/privacy-policy" },
+];
 
 export default function SettingsPage() {
-  const sections = [
-    {
-      title: "Account",
-      items: [
-        { icon: User, label: "Edit Profile", href: "/admin/profile/edit" },
-        { icon: Mail, label: "Change Email", href: "/admin/change-email" },
-      ],
-    },
-    {
-      title: "Security",
-      items: [
-        {
-          icon: Lock,
-          label: "Change Password",
-          href: "/admin/change-password",
-        },
-        // { icon: ShieldCheck, label: "Two-Factor Authentication", href: "/2fa" },
-      ],
-    },
-    {
-      title: "Support",
-      items: [
-        { icon: Headphones, label: "Contact / Support", href: "/contact" },
-      ],
-    },
-  ];
-
-  const legal = [
-    { icon: Info, label: "About", href: "/about" },
-    { icon: FileText, label: "Terms of Service", href: "/terms" },
-    { icon: Scale, label: "Privacy Policy", href: "/privacy-policy" },
-  ];
 
   return (
-    <div className="px-3 pb-4 space-y-6">
-      <div>
-        <p className="text-base mt-3">Manage your account and preferences</p>
-      </div>
-
+    <div className="px-3 pb-4 space-y-6">     
       {/* Settings Sections */}
       {sections.map((section) => (
         <section key={section.title}>
@@ -88,7 +85,7 @@ export default function SettingsPage() {
                 className="flex items-center justify-between text-sm p-4 border rounded-xl  "
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5 text-gray-400" />
+                  <Icon className="w-5 h-5 text-gray-700" />
                   <span className="font-medium">{label}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -124,7 +121,7 @@ export default function SettingsPage() {
                 className="flex text-sm items-center justify-between p-4 border rounded-xl  "
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5 text-gray-400" />
+                  <Icon className="w-5 h-5 text-gray-700" />
                   <span className="font-medium">{l.label}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -138,17 +135,14 @@ export default function SettingsPage() {
 }
 
 function DarkMode() {
-  const [dark, setDark] = useState(false);
+  const {dark, setDark} = useClientStore();
 
-  useEffect(() => {
-    const theme = JSON.parse(localStorage.getItem("theme") || "{}");
-    if (theme.dark) {
-      setDark(theme.dark);
-    }
 
-    if (dark) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-  }, [dark]);
+  const handDarkMode = () => { 
+    localStorage.setItem("theme", JSON.stringify({ dark: !dark }));
+    setDark(!dark)
+  };
+  
 
   <button className="w-full text-sm flex items-center justify-between p-4 border rounded-xl  ">
     <div className="flex items-center gap-3">
@@ -159,14 +153,8 @@ function DarkMode() {
   </button>;
 
   return (
-    <motion.button
-      whileTap={{ scale: 0.8 }}
-      onClick={() =>
-        setDark((prev) => {
-          localStorage.setItem("theme", JSON.stringify({ dark: !prev }));
-          return !prev;
-        })
-      }
+    <button    
+      onClick={handDarkMode}
       className="w-full flex items-center justify-between p-4 border rounded-xl  "
     >
       <div className="flex items-center gap-3">
@@ -177,7 +165,7 @@ function DarkMode() {
         )}
         <span className="font-medium">Appearance</span>
       </div>
-    </motion.button>
+    </button>
   );
 }
 

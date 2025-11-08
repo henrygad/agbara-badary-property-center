@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,8 +14,11 @@ import PageLoading from "@/components/loaders/PageLoader";
 import { updatePropertyDb } from "@/lib/firebase/property_service";
 import { showWarning } from "@/components/ui/toasts";
 import OverlayLoader from "@/components/loaders/OverlayLoader";
+import { useSearchParams } from "next/navigation";
+import ItemNotFound from "@/components/ItemNotFound";
 
 export default function ListPropertiesPage() {
+  const query = useSearchParams();
 
   const { properties, loading: loadingProperties, updateProperty } = usePropertyStore();
 
@@ -39,7 +42,7 @@ export default function ListPropertiesPage() {
     return properties.filter(p => p.availability !== "Trash").filter((p) => {
       const matchesSearch = (p.id || "").toLowerCase().includes(searchTerm.toLowerCase()) || p.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const accountType = tab === "Admin" || tab === p.accountType;
+      const accountType = tab === p.accountType;
 
       const matchesCat = categoryFilter === "all" || p.category === categoryFilter;
 
@@ -82,6 +85,13 @@ export default function ListPropertiesPage() {
     properties,
     tab,
   ]);
+
+  useEffect(() => {
+    const qTab = query.get("tab");
+    if (qTab) {
+      setTab(qTab as "Admin" | "Agent");
+    }
+  }, [query]);
 
   if (loadingProperties) return <PageLoading loading={loadingProperties} />
 
@@ -379,8 +389,10 @@ export default function ListPropertiesPage() {
               ))
             ) : (
               <tr>
-                  <td colSpan={6} className="w-full text-center text-sm font-medium text-gray-600">
-                    <p>No properties found.</p>
+                  <td
+                    colSpan={6}
+                  >
+                    <ItemNotFound>No properties found.</ItemNotFound>
                 </td>
               </tr>
             )}

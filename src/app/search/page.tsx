@@ -12,19 +12,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import SearchForm from '@/components/SearchForm';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEffect, useState } from 'react';
 import { searchPropertiesDb } from '@/lib/firebase/search_service';
 import { PropertyTypes } from '@/types/property.types';
 import ReturnBack from '@/components/ReturnBack';
 import PageLoading from '@/components/loaders/PageLoader';
+import ItemNotFound from '@/components/ItemNotFound';
 
 export default function Search() {
   const query = useSearchParams();
   const [openSearchForm, setOpenSearchForm] = useState(false);
 
   const [results, setResult] = useState<PropertyTypes[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
 
   useEffect(() => {
@@ -85,17 +85,13 @@ export default function Search() {
             <button
               className='w-full py-2.5 px-4 rounded-full flex justify-start items-center gap-4 text-sm bg-gray-100/70'
             >
-              <SearchIcon size={20} className='text-slate-800' /> Search properties...
+              <SearchIcon size={20} className='text-slate-800' /> Search...
             </button>
           </AlertDialogTrigger >
 
-          <AlertDialogContent className='w-full'>
+          <AlertDialogContent className='w-full max-w-none' style={{ maxWidth: "95%" }}>
             <AlertDialogTitle className='hidden'></AlertDialogTitle>
-
-            <ScrollArea className='w-full max-h-[480px] md:max-h-full overflow-y-auto overflow-x-hidden'>
-              <SearchForm open={openSearchForm} setOpen={setOpenSearchForm} />
-            </ScrollArea>
-
+            <SearchForm open={openSearchForm} setOpen={setOpenSearchForm} />           
             <AlertDialogFooter>
               <AlertDialogCancel type='button'>Close</AlertDialogCancel>
             </AlertDialogFooter>
@@ -119,8 +115,8 @@ export default function Search() {
                 results.map((p) =>
                   <ClientCard key={p.id} property={p} />
                 ) :
-                <div>
-                  <p>No result found</p>
+                <div className='col-span-3'>
+                  <ItemNotFound>No property found</ItemNotFound>
                 </div>
             }
           </div>

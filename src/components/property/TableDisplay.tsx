@@ -42,6 +42,8 @@ import {
 } from "@/lib/firebase/property_service";
 import { usePropertyStore } from "@/store/usePropertyStore";
 import OverlayLoader from "../loaders/OverlayLoader";
+import { useUserStore } from "@/store/useUserStore";
+
 
 type Props = {
     p: PropertyTypes;
@@ -56,6 +58,8 @@ export default function TableDisplay({
     setSelected = () => { },
     placeViewing
 }: Props) {
+    const { user } = useUserStore();
+
     const { updateProperty, deleteProperty } = usePropertyStore();
 
     const [displayDialogType, setDisplayDialogType] = useState({
@@ -78,7 +82,7 @@ export default function TableDisplay({
                 refId: p.referenceId,
                 availability,
             };
-
+            
             await fetch("/api/agent/property", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -177,14 +181,19 @@ export default function TableDisplay({
         // Save property temporarily in localStorage
         localStorage.setItem("duplicateProperty", JSON.stringify(property));
         // Navigate to editor
-        router.push("/admin/add-property");
+        router.push(user?.accountType === "Admin" ?
+            "/admin/add-property" :
+            "/agent/add-property");
     };
 
     const handleEdit = (property: PropertyTypes) => {
         // Save property temporarily in localStorage
         localStorage.setItem("updateProperty", JSON.stringify(property));
-        // Navigate to editor
-        router.push("/admin/add-property");
+        // Navigate to editor        
+        router.push(user?.accountType === "Admin" ?
+            "/admin/edit-property" :
+            "/agent/edit-property"
+        );
     };
 
     const handleTrash = async (id?: string) => {
@@ -225,7 +234,14 @@ export default function TableDisplay({
         if (!id) return;
         setLoading(true);
         try {
-            const res = await updatePropertyDb(id, { availability: "Pending" });
+            let res = null
+
+            if (user?.accountType === "Admin") {
+                res = await updatePropertyDb(id, { availability: "Accepted" });
+            } else {
+                res = await updatePropertyDb(id, { availability: "Pending" });
+            }
+
             if (res) {
                 updateProperty(res);
                 setDisplayDialogType({ display: false, type: "Restore" });
@@ -303,16 +319,18 @@ export default function TableDisplay({
                                                 <RotateCcw className="w-4 h-4 mr-2 text-gray-600" />
                                                 Restore
                                             </DropdownMenuItem>
+
                                             {/* Delete */}
-                                            <DropdownMenuItem
-                                                className="text-primary flex gap-2 items-center"
-                                                onClick={() =>
-                                                    setDisplayDialogType({ display: true, type: "Delete" })
-                                                }
-                                            >
-                                                <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
-                                                Delete
-                                            </DropdownMenuItem>
+                                            {p.accountType === user?.accountType &&
+                                                <DropdownMenuItem
+                                                    className="text-primary flex gap-2 items-center"
+                                                    onClick={() =>
+                                                        setDisplayDialogType({ display: true, type: "Delete" })
+                                                    }
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
+                                                    Delete
+                                                </DropdownMenuItem>}
                                         </>
                                     ) : (
                                         null
@@ -320,66 +338,77 @@ export default function TableDisplay({
                                 </> :
                                 <>
                                     {/* View */}
-                                    <DropdownMenuItem
-                                        className="flex gap-2 items-center"
-                                        onClick={() => {
-                                            view(p.id || "");
-                                        }}
-                                    >
-                                        <Eye className="w-4 h-4 mr-2 text-gray-600" />
-                                        View live
-                                    </DropdownMenuItem>
+                                    {p.availability === "Accepted" &&
+                                        <DropdownMenuItem
+                                            className="flex gap-2 items-center"
+                                            onClick={() => {
+                                                view(p.id || "");
+                                            }}
+                                        >
+                                            <Eye className="w-4 h-4 mr-2 text-gray-600" />
+                                            View live
+                                        </DropdownMenuItem>}
 
                                     {/* Review */}
-                                    <DropdownMenuItem
-                                        className="flex gap-2 items-center"
-                                        onClick={() => {
-                                            setDisplayDialogType({ display: true, type: "Review" });
-                                        }}
-                                    >
-                                        <ShieldAlert className="w-4 h-4 mr-2 text-gray-600" />
-                                        Review
-                                    </DropdownMenuItem>
+                                    {user?.accountType === "Admin" &&
+                                        p.accountType !== "Admin" &&
+                                        <DropdownMenuItem
+                                            className="flex gap-2 items-center"
+                                            onClick={() => {
+                                                setDisplayDialogType({ display: true, type: "Review" });
+                                            }}
+                                        >
+                                            <ShieldAlert className="w-4 h-4 mr-2 text-gray-600" />
+                                            Review
+                                        </DropdownMenuItem>}
 
                                     {/* Approve */}
-                                    {p.availability !== "Accepted" && <DropdownMenuItem
-                                        className="flex gap-2 items-center"
-                                        onClick={() => {
-                                            setDisplayDialogType({ display: true, type: "Approve" });
-                                        }}
-                                    >
-                                        <CheckCircle className="w-4 h-4 mr-2 text-gray-600" />
-                                        Approve
-                                    </DropdownMenuItem>}
+                                    {user?.accountType === "Admin" &&
+                                        p.accountType !== "Admin" &&
+                                        p.availability !== "Accepted" &&
+                                        <DropdownMenuItem
+                                            className="flex gap-2 items-center"
+                                            onClick={() => {
+                                                setDisplayDialogType({ display: true, type: "Approve" });
+                                            }}
+                                        >
+                                            <CheckCircle className="w-4 h-4 mr-2 text-gray-600" />
+                                            Approve
+                                        </DropdownMenuItem>}
 
                                     {/* Reject */}
-                                    {p.availability !== "Rejected" && <DropdownMenuItem
-                                        className="flex gap-2 items-center"
-                                        onClick={() => {
-                                            setDisplayDialogType({ display: true, type: "Reject" });
-                                        }}
-                                    >
-                                        <XCircle className="w-4 h-4 mr-2 text-gray-600" />
-                                        Reject
-                                    </DropdownMenuItem>}
+                                    {user?.accountType === "Admin" &&
+                                        p.accountType !== "Admin" &&
+                                        p.availability !== "Rejected" &&
+                                        <DropdownMenuItem
+                                            className="flex gap-2 items-center"
+                                            onClick={() => {
+                                                setDisplayDialogType({ display: true, type: "Reject" });
+                                            }}
+                                        >
+                                            <XCircle className="w-4 h-4 mr-2 text-gray-600" />
+                                            Reject
+                                        </DropdownMenuItem>}
 
                                     {/* Copy Link */}
-                                    <DropdownMenuItem
-                                        onClick={() => handleCopy(p.id)}
-                                        className="flex gap-2 items-center"
-                                    >
-                                        <Clipboard className="w-4 h-4 mr-2 text-gray-600" />
-                                        Copy Link
-                                    </DropdownMenuItem>
+                                    {p.availability === "Accepted" &&
+                                        <DropdownMenuItem
+                                            onClick={() => handleCopy(p.id)}
+                                            className="flex gap-2 items-center"
+                                        >
+                                            <Clipboard className="w-4 h-4 mr-2 text-gray-600" />
+                                            Copy Link
+                                        </DropdownMenuItem>}
 
                                     {/* Edit */}
-                                    <DropdownMenuItem                                        
-                                        className="flex gap-2 items-center"
-                                        onClick={() => handleEdit(p)}
-                                    >
-                                        <Edit className="w-4 h-4 mr-2 text-gray-600" />
-                                        Edit
-                                    </DropdownMenuItem>
+                                    {p.accountType === user?.accountType &&
+                                        <DropdownMenuItem
+                                            className="flex gap-2 items-center"
+                                            onClick={() => handleEdit(p)}
+                                        >
+                                            <Edit className="w-4 h-4 mr-2 text-gray-600" />
+                                            Edit
+                                        </DropdownMenuItem>}
 
                                     {/* Duplicate */}
                                     <DropdownMenuItem
@@ -391,15 +420,17 @@ export default function TableDisplay({
                                     </DropdownMenuItem>
 
                                     {/* Trash */}
-                                    <DropdownMenuItem
-                                        className="text-primary flex gap-2 items-center"
-                                        onClick={() =>
-                                            setDisplayDialogType({ display: true, type: "Trash" })
-                                        }
-                                    >
-                                        <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
-                                        Trash
-                                    </DropdownMenuItem>                                  
+                                    {p.accountType === user?.accountType &&
+                                        <DropdownMenuItem
+                                            className="text-primary flex gap-2 items-center"
+                                            onClick={() =>
+                                                setDisplayDialogType({ display: true, type: "Trash" })
+                                            }
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
+                                            Trash
+                                        </DropdownMenuItem>
+                                    }
                                 </>
                             }
 

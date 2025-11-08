@@ -99,14 +99,14 @@ export default function LocationSearch({
     };
 
     return (
-        <div className="relative w-full max-w-xl mx-auto">
+        <div className="relative w-full">
             <Input
                 id={id}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={placeholder}
-                className="text-sm w-full py-3 px-4 rounded-full"
+                className="text-sm w-full p-5 rounded-full text-black"
                 onFocus={() => results.length > 0 && setShowDropdown(true)}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
             />
@@ -118,7 +118,7 @@ export default function LocationSearch({
             )}
 
             {showDropdown && results.length > 0 && (
-                <ul className="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-md max-h-64 overflow-auto">
+                <ul className="absolute z-50 mt-1 w-full text-black bg-white border rounded-md shadow-md max-h-64 overflow-auto">
                     {results.map((place: LocationFeature) => (
                         <li
                             key={place.id}

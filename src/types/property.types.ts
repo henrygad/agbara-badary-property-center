@@ -23,11 +23,11 @@ export type Amenity =
     | "Internet Access"
     | "Electricity"
 
-export type Status = "" | "Sale" | "Rent" | "Lease" | "Sold" | "Rented" | "Leased" | "Short Let";
+export type Status = "" | "Sale" | "Rent" | "Lease" | "Sold" | "Rented" | "Leased";
 export type PackageType = "Free" | "Featured" | "Premium";
 export type Furnishing = "" | "Furnished" | "Semi-Furnished" | "Unfurnished";
 export type Condition = "" | "New" | "Renovated" | "Fairly Used" | "Needs Renovation";
-export type PropertyCategory = "" | "Residential" | "Commercial" | "Land" | "Short Let";
+export type PropertyCategory = "" | "Residential" | "Commercial" | "Industrial";
 export type SizeUnit = "sqm" | "sqft" | "plots" | "acres";
 export type PriceFrequency = "Monthly" | "Yearly" | "Daily" | "Total";
 export type PropertyType =
@@ -45,6 +45,7 @@ export type PropertyType =
     | "Hotel"
     | "Plot"
     | "Short Let"
+    | "Land"
     | "Other";
 
 export type Availability =  "Pending" | "Reviewing" | "Accepted" | "Trash" | "Rejected";
@@ -122,12 +123,12 @@ export interface PropertyTypes {
     seoSlug: string,
     packageType: PackageType;    
     priorityRank: number | null
-    createdAt: Date | undefined;   // ISO undefined
-    updatedAt: Date | undefined;  // ISO undefined
+    createdAt?: Date;   // ISO undefined
+    updatedAt?: Date;  // ISO undefined
 
     // others
     draftId?: string
     views?: string[]
     isFake?: boolean,
-    accountType: "Admin" | "Agent"| ""
+    accountType: "Admin" | "Agent"
 }

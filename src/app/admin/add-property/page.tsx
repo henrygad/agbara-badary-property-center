@@ -33,8 +33,8 @@ export default function AddProperty() {
             // return () => clearTimeout(clearOut);
         } else if (draft) {
             const parsed = JSON.parse(draft) as PropertyTypes;                              
-            parsed.createdAt = undefined;
-            parsed.updatedAt = undefined;
+            parsed.createdAt = undefined
+            parsed.updatedAt = undefined
 
             setTimeout(() => {
                 setForm(() => parsed);

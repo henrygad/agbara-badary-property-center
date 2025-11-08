@@ -24,9 +24,7 @@ export default function AdminCard({property}: {property: PropertyTypes}) {
             <div className="flex items-center gap-2 mt-1">
                 <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
                     {formatCurrency(property.price)}
-                </p>
-
-                {/*Property Purpose Badge (rent/sell/sold/leased) */}
+                </p>                
                 <Status status={property.status} />
             </div>
 

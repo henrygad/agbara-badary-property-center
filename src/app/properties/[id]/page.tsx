@@ -10,11 +10,13 @@ import PageLoading from "@/components/loaders/PageLoader";
 import { getPropertyByIdDb } from "@/lib/firebase/property_service";
 import { searchPropertiesDb } from "@/lib/firebase/search_service";
 import GroundLoader from "@/components/loaders/GroundLoader";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function PropertyDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
 
+  const { user} = useUserStore();
 
   const [loading, setLoading] = useState(true);
   const [property, setProperty] = useState<PropertyTypes | undefined>(undefined);
@@ -79,6 +81,8 @@ export default function PropertyDetailsPage() {
 
   if (!property || loading) return <PageLoading loading={(!property || loading)} />;
 
+  const viewer = user ? user.accountType.toUpperCase() as "CLIENT" | "ADMIN" | "AGENT" : "CLIENT";
+
   return <div className="w-full p-2">
     <menu className="w-full mb-4">
       <ReturnBack />
@@ -87,7 +91,7 @@ export default function PropertyDetailsPage() {
     <section className="w-full">
       <Property
         property={property}
-        viewer="ADMIN"
+        viewer={viewer}
         placeViewing="CLIENT"
       />
     </section>

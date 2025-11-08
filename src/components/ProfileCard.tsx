@@ -16,10 +16,11 @@ export default function ProfileCard({ user, placeViewing }: { user: UserTypes, p
 
     const [loading, setLoading] = useState(false);
 
-
     const goEdit = () => {
         if (placeViewing === "Profile") {
-            router.push("/admin/profile/edit-profile")
+            router.push(user.accountType === "Admin" ?
+                "/admin/profile/edit-profile" :
+                "/agent/profile/edit-profile");
         }
     };
 
@@ -59,7 +60,7 @@ export default function ProfileCard({ user, placeViewing }: { user: UserTypes, p
     return (
         <div className='space-y-4'>
             <div className="flex justify-center items-center flex-col gap-2">
-
+                
                 {/* Avata */}
                 <div className="overflow-hidden">
                     <DisplayImage
@@ -103,14 +104,14 @@ export default function ProfileCard({ user, placeViewing }: { user: UserTypes, p
                 {placeViewing === "Profile" &&
                     <div className="flex-1 flex justify-end">
                         <Button
-                            onClick={() => router.push("/admin/profile/edit-profile")}
+                            onClick={goEdit}
                             className="cursor-pointer"
                             variant="ghost"
                         >
                             <Edit className="w-4 h-4" /> Edit Profile
                         </Button>
                     </div>}
-
+                
             </div>
 
             {/* Bio */}

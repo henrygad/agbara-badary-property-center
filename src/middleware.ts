@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
 
     // Auth routes (login/register)
-    const authRoutes = ["/auth/agent-login", "/auth/agent-register", "/auth/forget-password"];
+    const authRoutes = ["/auth/login", "/auth/register", "/auth/forget-password"];
 
     // Protect these routes
     const agentRoutes = ["/agent"];
@@ -36,7 +36,7 @@ export async function middleware(req: NextRequest) {
         ) &&
         !token
     ) {
-        url.pathname = "/auth/agent-login";
+        url.pathname = "/auth/login";
         return NextResponse.redirect(url);
     }
 
@@ -46,7 +46,7 @@ export async function middleware(req: NextRequest) {
 
         // Token invalid or expired
         if (!decoded) {
-            url.pathname = "/auth/agent-login";
+            url.pathname = "/auth/login";
             return NextResponse.redirect(url);
         }
 

@@ -12,6 +12,7 @@ import UserTypes from "@/types/user.types";
 import { showSuccess, showWarning } from "@/components/ui/toasts";
 import { deleteAgentDb, updateAgentDb } from "@/lib/firebase/agent_service";
 import OverlayLoader from "@/components/loaders/OverlayLoader";
+import ItemNotFound from "@/components/ItemNotFound";
 
 export default function AgentsTable() {
   const { agents, loading: loadingAgents, updateAgent, deleteAgent } = useAgentStore();
@@ -259,9 +260,9 @@ export default function AgentsTable() {
               <tr>
                 <td
                   colSpan={6}
-                  className="text-center py-10 text-gray-500"
-                >
-                  No agents found
+                  className="text-center"
+                  >                    
+                    <ItemNotFound>No agents found</ItemNotFound>                                     
                 </td>
               </tr>
             )}

@@ -21,6 +21,8 @@ import {
   FormMessage,
 } from "../ui/form";
 import ReCAPTCHA from "react-google-recaptcha";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { useModal } from "@/hooks/useModal";
 
 // Zod validation schema
 const RequestSchema = z.object({
@@ -39,12 +41,14 @@ const RequestSchema = z.object({
 type RequestFormData = z.infer<typeof RequestSchema>;
 
 export default function RequestForm({ property }: { property: PropertyTypes }) {
-  const [open, setOpen] = useState(false);
+
   const [warning, setWarning] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState("");
+
+  const { open, handleModal } = useModal();
 
   const form = useForm<RequestFormData>({
     resolver: zodResolver(RequestSchema),
@@ -127,16 +131,16 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
   return (
     <>
       <div className="sticky bottom-2 left-0 right-0">
-        <CustomButton type="button" onClick={() => setOpen(true)}>
+        <CustomButton type="button" onClick={() => handleModal(true)}>
           Send Request
         </CustomButton>
       </div>
 
       {open &&
         <div
-          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-40 max-w-[480px] bg-white shadow-2xl shadow-accent-foreground rounded-xl p-5 border-t-4 border-primary")}
+          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-40 max-w-[320px] sm:max-w-[480px] bg-white shadow-2xl shadow-accent-foreground rounded-xl p-5 border-t-4 border-primary")}
         >
-          <div className="animate-in slide-in-from-bottom-10 max-h-[85vh] min-w-[320px] overflow-y-auto">
+          <div className="animate-in slide-in-from-bottom-10 min-w-[280px] max-h-full overflow-hidden">
             <div>
               <h3 className="text-xl font-bold text-red-700 text-center">
                 Send a Request
@@ -164,98 +168,107 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                 </p>
                 <Button
                   className="mt-4 bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => setOpen(false)}
+                  onClick={() => handleModal(false)}
                 >
                   Close
                 </Button>
               </div>
             ) : (
+
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4 mt-4 text-sm"
+                    className="space-y-3 mt-4 text-sm w-full h-full"
                 >
-                  {/* Fullname */}
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <ScrollArea className="max-h-[70%] overflow-y-auto">
+                      <div className="space-y-3">
+                        {/* Fullname */}
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="John Doe" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                  {/* Email */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="you@example.com"
-                            type="email"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        {/* Email */}
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="you@example.com"
+                                  type="email"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                  {/* Phone Number */}
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number (optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+234 810 000 0000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        {/* Phone Number */}
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone Number (optional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="+234 810 000 0000" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                  {/* Message */}
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Message *</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Type your message here..."
-                            rows={4}
-                            {...field}
-                            className="min-h-[100px] max-h-[100px] text-sm overflow-auto resize-none"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        {/* Message */}
+                        <FormField
+                          control={form.control}
+                          name="message"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Message *</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Type your message here..."
+                                  rows={4}
+                                  {...field}
+                                  className="min-h-[90px] max-h-[90px] text-sm overflow-auto resize-none"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                  {/* <ReCAPTCHA */}                 
-                  <div className="flex justify-end">
-                    <ReCAPTCHA                      
-                      sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
-                      onChange={(token: string | null) => setCaptchaToken(token)}
-                    />
-                  </div>
+                        {/* <ReCAPTCHA */}
+                        <div className="relative flex justify-end min-h-10">
+                          <div className="absolute">
+                            <ReCAPTCHA
+                              sitekey={process.env.NEXT_PUBLIC_GOOGLE_reCAPTCHA_SITE_KEY!}
+                              onChange={(token: string | null) => setCaptchaToken(token)}
+                            />
+                          </div>
+                        </div>
 
-                  {captchaError && (
-                    <p className="text-primary text-sm mb-3">{captchaError}</p>
-                  )}
+                        {captchaError && (
+                          <p className="text-primary text-sm mb-3">{captchaError}</p>
+                        )}
+                      </div>
+                      <ScrollBar />
+                    </ScrollArea>
 
+                    {/* Footer */}
                   <div className="mt-4">
                     <div className="flex flex-col w-full gap-3">
                       {!loading ? (
@@ -264,7 +277,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                             type="button"
                             variant="outline"
                             className="cursor-pointer w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700"
-                            onClick={() => setOpen(false)}
+                              onClick={() => handleModal(false)}
 
                           >
                             Close
@@ -283,6 +296,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                       )}
                     </div>
                   </div>
+
                 </form>
               </Form>
             )}

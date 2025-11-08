@@ -52,7 +52,8 @@ export async function POST(req: Request) {
         const notify: NotificationTypes = {
             to: id,
             title: `Property status - ${availability}`,
-            message: `Your property has been ${availability}.`,
+            message: availability === "Accepted" || availability === "Rejected" ?
+                `Your property -${refId} has been ${availability}.` : `Your property -${refId} is under ${availability}.`,
             type: "Property",
             viewed: false,
             createdAt: new Date(),

@@ -2,7 +2,7 @@
 
 import SearchForm from "../components/SearchForm";
 import backgroundimage from "../../public/images/home_hero_image.jpg";
-import { Building2, ThumbsUp, Users, Star } from "lucide-react";
+import { Building2, ThumbsUp, Users, Star, ChevronsRight } from "lucide-react";
 import CountUp from "react-countup";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -13,9 +13,9 @@ import GroundLoader from "@/components/loaders/GroundLoader";
 
 
 export default function Home() {
-  const {  properties, loading } = useClientStore();
+  const { properties, loading } = useClientStore();
 
-  
+
   // Filtering logic (including date filter)
   const filteredProperties = useMemo(() => {
     return properties.sort(
@@ -26,20 +26,25 @@ export default function Home() {
   return <div className="relative">
     {/* Hero */}
     <section
-      className="relative bg-cover bg-center h-[500px] md:rounded-sm"
+      className="relative bg-cover bg-center h-[600px] md:rounded-sm text-white"
       style={{ backgroundImage: `url(${typeof backgroundimage === "string" ? backgroundimage : backgroundimage?.src})` }}
     >
-      <div className="absolute top-0 left-0 right-0 bottom-0 bg-black opacity-50 rounded-sm"></div>
-      <div className="absolute -top-7 sm:top-0 left-0 right-0 bottom-0 text-white mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center z-20">
-
-        <h1 className="text-4xl md:text-5xl font-bold mb-2">Find Your Dream House</h1>
-        <p className="text-lg mb-8">Buy, Rent, or Short let properties with trusted agents.</p>
+      <div className="absolute top-0 left-0 right-0 bottom-0 bg-black opacity-50 rounded-sm" />
+      {/* Hero call to action */}
+      <div className="relative w-full h-full z-20 flex justify-center items-center">
+        <div className="absolute top-12 md:top-20 left-1/2 -translate-x-1/2 flex flex-col justify-center items-center min-w-[380px]">
+          <h1 className="text-3xl md:text-5xl font-bold mb-2">Find Your Dream House</h1>
+          <p className="text-base md:text-lg mb-4">Buy, Rent, or Sale properties with us.</p>
+          <Button variant="ghost" type="button" size="lg" className="border">
+            <Link href="/properties" className="w-full flex gap-1 items-center">
+              Properties <ChevronsRight size={20} />
+            </Link>
+          </Button>
+        </div>
       </div>
-    </section>
 
-    {/* Search form */}
-    <section className="w-full flex justify-center -mt-40 px-2 relative z-20">
-      <div className="w-full max-w-4xl bg-white p-4 rounded-lg shadow-lg">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 max-w-[480px] flex justify-center z-20">
+        {/* Search form */}
         <SearchForm />
       </div>
     </section>
@@ -168,7 +173,7 @@ export default function Home() {
                 return <ClientCard key={p.id} property={p} />
               }
               ) :
-               <GroundLoader loading={loading} />
+              <GroundLoader loading={loading} />
           }
         </div>
         <div className="flex justify-end mt-10">
@@ -181,7 +186,7 @@ export default function Home() {
         </div>
       </div>
     </section>
-    
+
   </div>
 }
 

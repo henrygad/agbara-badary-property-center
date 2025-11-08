@@ -36,15 +36,16 @@ export const PROPERTY_TYPES = [
     "Detached",
     "Shop",
     "Office",
-    "Warehouse",
-    "Plot",
+    "Warehouse",    
     "Hotel",
     "Short Let",
+    "land",
+    "Filling Station",
     "Others"
 ];
 
-export const PROPERTY_CATEGORIES = ["Residential", "Commercial", "Land", "Short Let"];
-export const STATUS = ["Rent", "Sale", "Lease", "Rented", "Sold", "Leased", "Short Let"];
+export const PROPERTY_CATEGORIES = ["Residential", "Commercial", "Industrial"];
+export const STATUS = ["Rent", "Sale", "Lease", "Rented", "Sold", "Leased"];
 export const FURNISHING = ["Furnished", "Semifurnished", "Unfurnished"];
 export const CONDITION = ["New", "Renovated", "Fairly Used", "Needs Renovation"];
 export const PRICE_FREQUENCY = [   
@@ -171,9 +172,9 @@ export const DEFAULT_PROPERTY_FORM: PropertyTypes = {
     seoSlug: "",
     priorityRank: null,
     //others    
-    accountType: "",
+    accountType: "Admin",
 
     // amenities
     createdAt: new Date(),
-    updatedAt: undefined,
+    updatedAt: new Date(),
 }

@@ -45,7 +45,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
     const router = useRouter();
 
     const [showMore, setShowMore] = useState(false);
-    //const locationRef = useRef<HTMLInputElement | null>(null);
+    const [showTriangle, setShowTriangle] = useState<"Buy" | "Rent">("Buy");
 
 
     const handleChange = (field: keyof SearchTypes, value: string) => {
@@ -98,44 +98,46 @@ export default function SearchForm({ setOpen = () => null }: Props) {
             router.push(`/search?${params}`);
         }, 300);
     };
-    
+
     return (
-        <div className="w-full">
+        <div className="w-full space-y-4 min-w-[320px] sm:min-w-[480px] md:min-w-4xl">
             {/* Tabs */}
             <Tabs
                 value={search.status}
                 onValueChange={(v: string) => handleChange("status", v)}
-                className="w-full mb-4"
             >
-                <TabsList className="grid grid-cols-3 w-full">
-                    <TabsTrigger value="Sale" className="data-[state=active]:bg-red-700 data-[state=active]:text-white">
-                        Buy
+                <TabsList className="grid grid-cols-2 text-base w-full max-w-ful h-full">
+                    <TabsTrigger
+                        value="Sale"
+                        className="data-[state=active]:bg-red-700 data-[state=active]:text-white cursor-pointer"
+                        onClick={() => setShowTriangle("Buy")}
+                    >
+                        BUY
                     </TabsTrigger>
-                    <TabsTrigger value="Rent" className="data-[state=active]:bg-red-700 data-[state=active]:text-white">
-                        Rent
-                    </TabsTrigger>
-                    <TabsTrigger value="Short Let" className="data-[state=active]:bg-red-700 data-[state=active]:text-white">
-                        Short Let
+                    <TabsTrigger
+                        value="Rent"
+                        className="data-[state=active]:bg-red-700 data-[state=active]:text-white cursor-pointer"
+                        onClick={() => setShowTriangle("Rent")}
+                    >
+                        RENT
                     </TabsTrigger>
                 </TabsList>
             </Tabs>
 
+            {/* Tri angle */}
+            <div className="relative flex justify-around items-center">
+                {showTriangle === "Buy" && <div className="h-7 w-7 rotate-45 border-2 bg-gray-50 -mb-11" />}
+                <div className="bg-transparent h-7 w-7 rotate-45 -mb-11" />
+                {showTriangle === "Rent" && <div className="h-7 w-7 rotate-45 border-2 bg-gray-50 -mb-11" />}
+            </div>
+
             {/* Form */}
             <form
                 onSubmit={handleSubmit}
-                className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4"
+                className="grid grid-col-2 sm:grid-cols-4 gap-4 w-full max-w-full"
             >
                 {/* Location */}
-                <div className="col-span-2">
-                    <Label id="location" className="text-sm mb-1">Location</Label>
-                    {/* <Input
-                        id="location"
-                        ref={locationRef}
-                        value={search.location}
-                        onChange={(e) => handleChange("location", e.target.value)}
-                        placeholder="Enter state, city, or area"
-                        className="text-sm w-full py-3 px-4 rounded-full"
-                    /> */}
+                <div className="col-span-2 sm:col-span-4">
                     <LocationSearch
                         id="location"
                         value={search.location}
@@ -150,7 +152,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                         value={search.type}
                         onValueChange={(val) => handleChange("type", val)}
                     >
-                        <SelectTrigger id="type" className="text-sm w-full p-3">
+                        <SelectTrigger id="type" className="text-sm w-full p-5 text-black">
                             <SelectValue placeholder="All Types" />
                         </SelectTrigger>
                         <SelectContent>
@@ -170,7 +172,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                         value={search.bedrooms}
                         onValueChange={(val) => handleChange("bedrooms", val)}
                     >
-                        <SelectTrigger id="bedroom" className="text-sm w-full p-3">
+                        <SelectTrigger id="bedroom" className="text-sm w-full p-5 text-black">
                             <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent>
@@ -181,7 +183,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                             ))}
                         </SelectContent>
                     </Select>
-                </div>                
+                </div>
 
                 {/* Min price */}
                 <div>
@@ -190,7 +192,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                         value={search.minPrice}
                         onValueChange={(val) => handleChange("minPrice", val)}
                     >
-                        <SelectTrigger id="min-price" className="text-sm w-full p-3">
+                        <SelectTrigger id="min-price" className="text-sm w-full p-5 text-black">
                             <SelectValue placeholder="No Min" />
                         </SelectTrigger>
                         <SelectContent>
@@ -210,18 +212,18 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                         value={search.maxPrice}
                         onValueChange={(val) => handleChange("maxPrice", val)}
                     >
-                        <SelectTrigger id="max-price" className="text-sm w-full p-3">
+                        <SelectTrigger id="max-price" className="text-sm w-full p-5 text-black">
                             <SelectValue placeholder="Max Price" />
                         </SelectTrigger>
                         <SelectContent>
-                            {[100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 15000000 ].map((p) => (
+                            {[100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 15000000].map((p) => (
                                 <SelectItem key={p} value={`${p}`}>
                                     ₦{p.toLocaleString()}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-                </div>                
+                </div>
 
                 {/* More filters dropdown */}
                 <AnimatePresence>
@@ -231,84 +233,85 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.25 }}
-                            className="overflow-hidden flex flex-col sm:grid sm:grid-cols-3 sm:col-span-3 gap-4"
+                            className="overflow-hidden col-span-2 sm:col-span-4"
                         >
-                            {/* Toilet */}
-                            <Select
-                                value={search.toilets}
-                                onValueChange={(val) => handleChange("toilets", val)}
-                            >
-                                <SelectTrigger id="toilet" className="text-sm w-full p-3">
-                                    <SelectValue placeholder="Toilets" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {[1, 2, 3, 4, 5].map((n) => (
-                                        <SelectItem key={n} value={`${n}`}>
-                                            {n} Toilet{n > 1 ? "s" : ""}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {/* Furnishing */}
-                            <Select
-                                value={search.furnishing}
-                                onValueChange={(val) => handleChange("furnishing", val)}
-                            >
-                                <SelectTrigger className="text-sm w-full p-3">
-                                    <SelectValue placeholder="Furnishing" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {
-                                        FURNISHING.map(f =>
-                                            <SelectItem key={f} value={f}>{f}</SelectItem>
-                                        )
-                                    }
-                                </SelectContent>
-                            </Select>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                {/* Toilet */}
+                                <Select
+                                    value={search.toilets}
+                                    onValueChange={(val) => handleChange("toilets", val)}
+                                >
+                                    <SelectTrigger id="toilet" className="text-sm w-full p-5 text-black">
+                                        <SelectValue placeholder="Toilets" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {[1, 2, 3, 4, 5].map((n) => (
+                                            <SelectItem key={n} value={`${n}`}>
+                                                {n} Toilet{n > 1 ? "s" : ""}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {/* Furnishing */}
+                                <Select
+                                    value={search.furnishing}
+                                    onValueChange={(val) => handleChange("furnishing", val)}
+                                >
+                                    <SelectTrigger className="text-sm w-full p-5 text-black">
+                                        <SelectValue placeholder="Furnishing" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {
+                                            FURNISHING.map(f =>
+                                                <SelectItem key={f} value={f}>{f}</SelectItem>
+                                            )
+                                        }
+                                    </SelectContent>
+                                </Select>
 
-                            {/* Conditon */}
-                            <Select
-                                value={search.condition}
-                                onValueChange={(val) => handleChange("condition", val)}
-                            >
-                                <SelectTrigger className="text-sm w-full p-3">
-                                    <SelectValue placeholder="Condition" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {
-                                        CONDITION.map((cd) =>
-                                            <SelectItem key={cd} value={cd}>{cd}</SelectItem>
-                                        )
-                                    }
-                                </SelectContent>
-                            </Select>
+                                {/* Conditon */}
+                                <Select
+                                    value={search.condition}
+                                    onValueChange={(val) => handleChange("condition", val)}
+                                >
+                                    <SelectTrigger className="text-sm w-full p-5 text-black">
+                                        <SelectValue placeholder="Condition" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {
+                                            CONDITION.map((cd) =>
+                                                <SelectItem key={cd} value={cd}>{cd}</SelectItem>
+                                            )
+                                        }
+                                    </SelectContent>
+                                </Select>
 
-                            {/* Category */}
-                            <Select
-                                value={search.category}
-                                onValueChange={(val) => handleChange("category", val)}
-                            >
-                                <SelectTrigger className="text-sm w-full p-3">
-                                    <SelectValue placeholder="Property Use" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {
-                                        PROPERTY_CATEGORIES.map(c =>
-                                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                                {/* Category */}
+                                <Select
+                                    value={search.category}
+                                    onValueChange={(val) => handleChange("category", val)}
+                                >
+                                    <SelectTrigger className="text-sm w-full p-5 text-black">
+                                        <SelectValue placeholder="Property Use" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {
+                                            PROPERTY_CATEGORIES.map(c =>
+                                                <SelectItem key={c} value={c}>{c}</SelectItem>
 
-                                        )
-                                    }
-                                </SelectContent>
-                            </Select>
+                                            )
+                                        }
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 {/* More Filters Toggle */}
                 <div className="flex items-center justify-center">
-                    <Button
+                    <button
                         type="button"
-                        variant="ghost"
                         className="flex text-sm items-center justify-center gap-2"
                         onClick={() => setShowMore(!showMore)}
                     >
@@ -317,37 +320,29 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                             size={16}
                             className={`transition-transform ${showMore ? "rotate-180" : ""}`}
                         />
-                    </Button>
+                    </button>
                 </div>
 
-                {/* Search Button */}                
+                {/* Search Button */}
                 <Button
                     type="submit"
-                    className="text-sm bg-red-700 hover:bg-red-800 text-white col-span-2"
+                    className="sm:col-span-3 text-sm bg-primary hover:bg-red-600 text-white"
                 >
                     Search
                 </Button>
 
                 {/* Reset Button */}
-                <div className="col-span-3 flex justify-center">
+                <div className="flex justify-center col-span-2 sm:col-span-4">
                     <Button
                         type="button"
                         variant="ghost"
                         onClick={handleReset}
-                        className="text-sm flex items-center justify-center gap-2 text-gray-600 hover:text-red-700"
+                        className="text-sm flex items-center justify-center gap-2 hover:text-red-700"
                     >
                         <RotateCcw size={16} /> Reset
                     </Button>
                 </div>
-
             </form>
         </div>
     );
-}
-
-/* 
-
-Use OpenStreetMap (OSM) or Leaflet.js (totally free, no card)
-
-Use Mapbox — they offer free tiers with no card required (and nice UI)
-*/
+};
