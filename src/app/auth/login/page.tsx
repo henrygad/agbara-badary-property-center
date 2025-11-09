@@ -41,6 +41,7 @@ export default function Login() {
   const { setUser } = useUserStore();
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState("");
+  const [captchaSuccess, setCaptchaSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -55,12 +56,18 @@ export default function Login() {
   });
 
   const verifyCaptchaToken = async () => {
+
+    if (captchaSuccess) {
+      return true;
+    }
+
     setCaptchaError("");
 
     if (!captchaToken) {
-      setCaptchaError("Please verify that you're not a robot.");
-      throw new Error("Please verify that you're not a robot.")
+      setCaptchaError("Please verify that you're not a robot.");        
+      throw new Error("Please verify that you're not a robot.");
     }
+
     // Send captchaToken to backend for verification
     const res = await fetch("/api/reCAPTCHA", {
       method: "POST",
@@ -70,10 +77,11 @@ export default function Login() {
 
     const captchaData = await res.json();
     if (!captchaData?.success) {
-      setCaptchaError("reCAPTCHA verification failed. Try again.");
-      throw new Error("reCAPTCHA verification failed. Try again.")
+      setCaptchaError("reCAPTCHA verification failed. Try again.");      
+      throw new Error("reCAPTCHA verification failed. Try again.");
     }
 
+    setCaptchaSuccess(true);
     return true;
   };
 
@@ -83,6 +91,7 @@ export default function Login() {
     setError("");
 
     try {
+
       await verifyCaptchaToken();
 
       const payload = data;
