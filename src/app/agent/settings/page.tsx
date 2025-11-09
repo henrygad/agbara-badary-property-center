@@ -40,7 +40,7 @@ const sections = [
   {
     title: "Account",
     items: [
-      { icon: User, label: "Edit Profile", href: "/agent/profile/dit-profile" },
+      { icon: User, label: "Edit Profile", href: "/agent/profile/edit-profile" },
       { icon: Mail, label: "Change Email", href: "/agent/change-email" },
     ],
   },
