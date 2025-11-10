@@ -91,10 +91,11 @@ export default function Navbar() {
         >
           <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
 
-          {unreadCount > 0 &&
+          {unreadCount > 0 ?
             <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
               {unreadCount}
-            </span>
+            </span> :
+            <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center" />                         
           }
 
           {/* <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span> */}

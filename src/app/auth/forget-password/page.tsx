@@ -78,10 +78,11 @@ export default function ForgetPassword() {
                 {/* Header */}
                 <div className="space-y-1 text-center">
                     <h2 className="text-primary text-xl md:text-2xl font-semibold">
-                        Reset Password
+                        Need help with your
+                        account?
                     </h2>
                     <p className="text-gray-600 text-sm">
-                        {"Enter your email and we'll send you OTP and reset link"}
+                        Enter the email address associated with your account and we will send you a link to reset your password.
                     </p>
                 </div>
 
