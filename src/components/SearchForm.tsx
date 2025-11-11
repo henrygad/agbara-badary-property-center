@@ -66,6 +66,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
             condition: "",
             category: "",
         });
+        setShowTriangle("Buy");
     };
 
     // Handle submit
@@ -100,7 +101,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
     };
 
     return (
-        <div className="w-full space-y-4 min-w-[320px] sm:min-w-[480px] md:min-w-4xl">
+        <div className="w-full space-y-3 min-w-[320px] sm:min-w-[480px] md:min-w-4xl">
             {/* Tabs */}
             <Tabs
                 value={search.status}
@@ -235,7 +236,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                             transition={{ duration: 0.25 }}
                             className="overflow-hidden col-span-2 sm:col-span-4"
                         >
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 {/* Toilet */}
                                 <Select
                                     value={search.toilets}

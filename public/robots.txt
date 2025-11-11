@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://agbarabadagrypropertycenter.com
+
+# Sitemaps
+Sitemap: https://agbarabadagrypropertycenter.com/sitemap.xml

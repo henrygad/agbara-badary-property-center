@@ -1,18 +1,41 @@
-"use client";
 
 import ContactForm from "@/components/ContactForm";
 import FAQ from "@/components/FAQ";
 import SocialMedia from "@/components/SocialMedia";
 import { Clock3, Headset, Mail, MapPinHouse, PhoneCall } from "lucide-react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
+import type { Metadata } from "next";
+import Script from "next/script";
+import ClientContact from "./ClientContact";
+
+export const metadata: Metadata = {
+    title: "Contact Us | Agbara Badagry Property Center",
+    description:
+        "Get in touch with Agbara Badagry Property Center. Reach out to our agents for property inquiries, sales, rentals, or support.",
+    openGraph: {
+        title: "Contact Agbara Badagry Property Center",
+        description:
+            "Reach out to our agents for property inquiries, sales, rentals, or support in Agbara, Badagry, and surrounding areas.",
+        url: "https://agbarabadagrypropertycenter.com/contact",
+    },
+};
 
 export default function Contact() {
 
-    // Import the Map dynamically (no SSR)
-    const ContactMap = dynamic(() => import("@/components/ContactMap"), {
-        ssr: false,
-    });
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "RealEstateAgent",
+        name: "Agbara Badagry Property Center",
+        url: "https://agbarabadagrypropertycenter.com",
+        logo: "https://agbarabadagrypropertycenter.com/logo.png",
+        image: "https://agbarabadagrypropertycenter.com/og-image.png",
+        description:
+            "Reach out to Agbara Badagry Property Center for property inquiries, rentals, sales, or support.",
+        areaServed: ["Agbara", "Badagry", "Lusada", "Atan", "Ibereko"],
+        telephone: "+2348012345678",
+        contactType: "Customer Support",
+    };
 
     return <div>
 
@@ -25,7 +48,7 @@ export default function Contact() {
                         <span className="text-sm">24/7 Customer Support</span>
                     </div>
                 </div>
-                <h2 className="text-2xl font-semibold mb-4">Get in Touch With Our Expert Team</h2>
+                <h1 className="text-2xl font-semibold mb-4">Get in Touch With Our Expert Team</h1>
                 <p className="max-w-3xl mx-auto text-base">Our experienced professionals are here to guide you through every step of your real estate journey in Agbara Badagary.</p>
             </div>
         </section>
@@ -35,7 +58,7 @@ export default function Contact() {
             <div className="mx-auto px-6">
                 <div className="grid lg:grid-cols-2 gap-12">
                     <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
-                        <h2 className="text-2xl font-bold mb-8 text-primary">Contact Information</h2>
+                        <h1 className="text-2xl font-bold mb-8 text-primary">Contact Information</h1>
                         <div className="space-y-8">
                             <div className="flex items-start space-x-4">
                                 <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
@@ -85,7 +108,7 @@ export default function Contact() {
                         </div>
                     </div>
                     <div className="bg-gray-200 dark:bg-gray-700 rounded-xl shadow-md flex min-h-[420px]">
-                       <ContactMap />
+                       <ClientContact />
                     </div>
                 </div>
             </div>
@@ -120,6 +143,11 @@ export default function Contact() {
             </div>
         </section>
         
+        <Script
+            id="contact-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
     </div>
 
 }

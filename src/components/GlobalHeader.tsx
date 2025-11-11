@@ -22,19 +22,19 @@ export default function GlobalHeader() {
           className="hover:text-primary"
           href={{ pathname: "/properties", query: { tab: "Sale" } }}
         >
-          Buy
+          BUY
         </Link>
         <Link
           className="hover:text-primary"
           href="/auth/register"
         >
-          Sell
+          SELL
         </Link>
         <Link
           className="hover:text-primary"
           href={{ pathname: "/properties", query: { tab: "Rent" } }}
         >
-          Rent
+          RENT
         </Link>
       </nav>
       {/* Desktop header right end nav */}
@@ -66,9 +66,9 @@ export default function GlobalHeader() {
 
 
 const links = [
-  { name: "Buy", href: "/properties" },
-  { name: "Sell", href: "/auth/register" },
-  { name: "Rent", href: "/properties" },
+  { name: "BUY", href: "/properties?tab=Sale" },
+  { name: "SELL", href: "/auth/register" },
+  { name: "RENT", href: "/properties?tab=Rent" },
   { name: "Login", href: "/auth/login" },
   { name: "Register", href: "/auth/register" },
   { name: "Contact", href: "/contact" },

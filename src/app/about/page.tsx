@@ -1,4 +1,10 @@
-import React from 'react'
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us | Agbara Badagry Property Center",
+  description:
+    "Learn about Agbara Badagry Property Center — your trusted property hub for homes, lands, and rentals along the Agbara–Badagry expressway.",
+};
 
 export default function page() {
   return (
@@ -6,9 +12,9 @@ export default function page() {
       {/* Hero */}
       <section className="py-6">
         <div className="mx-auto text-center">
-          <h2 className="text-2xl font-semibold mb-3">
+          <h1 className="text-2xl font-semibold mb-3">
             About
-          </h2>
+          </h1>
           <p className='max-w-3xl mx-auto text-base'>Agbara Badagry Property Center</p>
         </div>
       </section>

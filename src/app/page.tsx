@@ -10,11 +10,24 @@ import ClientCard from "@/components/property/ClientCard";
 import { useMemo } from "react";
 import { useClientStore } from "@/store/useClientStore";
 import GroundLoader from "@/components/loaders/GroundLoader";
+import Script from "next/script";
 
 
 export default function Home() {
-  const { properties, loading } = useClientStore();
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: "Agbara Badagry Property Center",
+    url: "https://agbarabadagrypropertycenter.com",
+    logo: "https://agbarabadagrypropertycenter.com/images/logo_png.png",
+    image: "https://agbarabadagrypropertycenter.com/images/logo_png.png",
+    description: "Find verified real estate listings in Agbara, Badagry, and Lusada areas. Buy, sell, or rent property easily.",
+    areaServed: ["Agbara", "Badagry", "Lusada", "Atan", "Ibereko"],
+    telephone: "+2348012345678",
+  };
+  
+  const { properties, loading } = useClientStore();
 
   // Filtering logic (including date filter)
   const filteredProperties = useMemo(() => {
@@ -23,7 +36,8 @@ export default function Home() {
     )
   }, [properties]);
 
-  return <div className="relative">
+  return <div className="relative">   
+
     {/* Hero */}
     <section
       className="relative bg-cover bg-center h-[600px] md:rounded-sm text-white"
@@ -32,9 +46,11 @@ export default function Home() {
       <div className="absolute top-0 left-0 right-0 bottom-0 bg-black opacity-50 rounded-sm" />
       {/* Hero call to action */}
       <div className="relative w-full h-full z-20 flex justify-center items-center">
-        <div className="absolute top-12 md:top-20 left-1/2 -translate-x-1/2 flex flex-col justify-center items-center min-w-[380px]">
-          <h1 className="text-3xl md:text-5xl font-bold mb-2">Find Your Dream House</h1>
-          <p className="text-base md:text-lg mb-4">Buy, Rent, or Sale properties with us.</p>
+        <div className="absolute top-10 md:top-20 left-0 right-0 flex flex-col justify-center items-center gap-3 min-w-[320px]">
+          <h1 className="text-2xl md:text-4xl font-bold text-wrap text-center">
+            Your Gateway to verified Properties in <span className="whitespace-pre text-nowrap">Agbara-Badagry</span>
+          </h1>
+          <p className="text-sm md:text-base">Buy, Rent, Sale Properties With US Today.</p>
           <Button variant="ghost" type="button" size="lg" className="border">
             <Link href="/properties" className="w-full flex gap-1 items-center">
               Properties <ChevronsRight size={20} />
@@ -186,7 +202,11 @@ export default function Home() {
         </div>
       </div>
     </section>
-
+    <Script
+      id="real-estate-schema"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
   </div>
 }
 

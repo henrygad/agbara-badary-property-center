@@ -55,38 +55,89 @@ export const PRICE_FREQUENCY = [
     " Daily",
 ];
 
+// export const REGIONAL_TOWNS = [
+//     {
+//         state: "Lagos",
+//         cities: [
+//             "Agbara",
+//             "Ijanikin",
+//             "Iba",
+//             "Ilogbo-Eremi",
+//             "Araromi",
+//             "Ajido",
+//             "Topo",
+//             "Mowo",
+//             "Badagry",
+//             "Seme Border",
+//         ]
+//     },
+//     {
+//         state: "Ogun",
+//         cities: [
+//             "Agbara",
+//             "Igbesa",
+//             "Opic Estate",
+//             "Ejila Awori",
+//             "Iyesi",
+//             "Ilogbo",
+//             "Atan-Ota",
+//             "Lusada",
+//             "Ado-Odo",
+//             "Idiroko",
+//         ]
+//     },
+// ];
+
 export const REGIONAL_TOWNS = [
-    {
-        state: "Lagos",
-        cities: [
-            "Agbara",
-            "Ijanikin",                      
-            "Iba",
-            "Ilogbo-Eremi",
-            "Araromi",
-            "Ajido",
-            "Topo",
-            "Mowo",
-            "Badagry",
-            "Seme Border",
-        ]
-    },
     {
         state: "Ogun",
         cities: [
             "Agbara",
-            "Igbesa",
-            "Opic Estate",
-            "Ejila Awori",
-            "Iyesi",
-            "Ilogbo",
-            "Atan-Ota",
             "Lusada",
-            "Ado-Odo",
-            "Idiroko",
-        ]
+            "Atan-Ota",
+            "Igbesa",
+            "Obele",
+            "Iyana-Iyesi",
+            "Ijoko",
+            "Ogunfayo",
+            "Ejinrin",
+            "Alapoti",
+            "Ketu Adie Owe",
+            "Oko Afo (Ogun side)",
+            "Opic Estate",
+            "Idanyin",
+            "Agbo-Malu",
+            "Ilogbo",
+            "Ijagba",
+            "Mowo-Nla",
+        ],
+    },
+    {
+        state: "Lagos",
+        cities: [
+            "Badagry",
+            "Okokomaiko",
+            "Iyana Era",
+            "Iyana Iba",
+            "Agboju",
+            "Alaba International",
+            "Volks",
+            "Ojo",
+            "Trade Fair",
+            "Abule Oshun",
+            "Iyana Oba",
+            "Ajangbadi",
+            "Mowo",
+            "Aradagun",
+            "Ibereko",
+            "Ajido",
+            "Topo",
+            "Gbaji",
+            "Seme Border",
+        ],
     },
 ];
+
 export const AVAILABILITY = [    
     {
         name: "Pending",
