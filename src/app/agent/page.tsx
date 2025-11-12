@@ -74,7 +74,7 @@ export default function AdminDashboard() {
                     <button onClick={verifyEmailSendOtp}>
                         <div
                             className={cn(
-                                "flex items-center justify-between rounded-lg border px-4 py-3 transition hover:bg-red-50 cursor-pointer",
+                                "flex items-center gap-3 rounded-lg border px-4 py-3 transition hover:bg-red-50 cursor-pointer",
                                 "border-red-200 bg-red-100/50"
                             )}
                         >
@@ -91,13 +91,13 @@ export default function AdminDashboard() {
                 {/* Account Pending Approval */}
                 {user &&
                     user.accountStatus === "Pending" &&
-                    <div className="flex items-center justify-between rounded-lg border border-yellow-200 bg-yellow-100/50 px-4 py-3">
+                    <div className="rounded-lg border border-yellow-200 bg-yellow-100/50 px-4 py-3">
                         <div className="flex items-center gap-2 text-sm text-yellow-700">
                             <Clock className="h-5 w-5 text-yellow-600" />
                             <span>Your account is still pending admin approval.</span>
                         </div>
                         <span className="text-xs text-yellow-700 font-medium">
-                            Waiting for review
+                            On review
                         </span>
                     </div>
                 }

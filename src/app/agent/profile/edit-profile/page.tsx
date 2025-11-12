@@ -68,7 +68,7 @@ export default function AdminProfilePage() {
     form.setValue("lastName", user?.lastName ?? "");
     form.setValue("gender", user?.gender);
     form.setValue("phone", user?.phone ?? "");
-    form.setValue("phoneCode", user?.phoneCode ?? "");
+    form.setValue("phoneCode", user?.phoneCode ?? "🇳🇬 +234");
     form.setValue("email", user?.email ?? "");
     form.setValue("company", user?.company ?? "");
     form.setValue("bio", user?.bio ?? "");
@@ -253,20 +253,22 @@ export default function AdminProfilePage() {
 
           {/* Phone Number */}
           <div className="flex items-center flex-wrap gap-2">
-            <div>
-              <Label className="text-sm">Code</Label>
-              <Input
-                className="text-sm"
-                placeholder="+234"
-                {...form.register("phoneCode")}
-              />
-              {form.formState.errors.phoneCode && (
-                <p className="text-red-500 text-xs mt-1">{form.formState.errors.phoneCode.message}</p>
-              )}
-            </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Code *</Label>
+                <div
+                  id="phoneCode"
+                  className="flex items-center px-3 py-2 text-sm rounded border">
+                  <span className="mr-1 block">🇳🇬</span>
+                  <span className="font-medium">+234</span>
+                </div>
+                {form.formState.errors.phoneCode && (
+                  <p className="text-red-500 text-xs mt-1">{form.formState.errors.phoneCode.message}</p>
+                )}
+              </div>           
             <div className="flex-1">
               <Label className="text-sm font-medium mb-2">Phone Number</Label>
               <Input
+                type="tel"
                 className="text-sm font-normal"
                 placeholder="08012345678"
                 {...form.register("phone")}

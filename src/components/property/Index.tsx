@@ -76,7 +76,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 <div className="absolute top-4 right-4 z-20">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="bg-gray-300 rounded-4xl p-1">
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -136,7 +136,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 <div className="mt-2 space-y-2">
                     <div className="flex gap-2 text-base mt-2">
                         <p className="text-primary text-2xl font-semibold">{formatCurrency(property.price)}</p>{property.price && <>/ <span className='text-muted-foreground'>{property.priceFrequency}</span></>}
-                    </div> 
+                    </div>
                     {property.negotiable && <Badge variant="outline" className="text-sm text-primary ">Price is Negotiable</Badge>}
                 </div>
 
@@ -160,7 +160,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 </div>
 
                 {/* Description */}
-                <div className="space-y-2 mt-8">
+                <div className="space-y-2 mt-8 w-full">
                     <Tabs defaultValue="description">
                         <TabsList className="flex gap-4 text-sm dark:bg-gray-900">
                             <TabsTrigger
@@ -185,9 +185,9 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                                 Virtual Tour
                             </TabsTrigger>
                         </TabsList>
-                        <ScrollArea className="min-h-[200px] max-h-[400px] w-full">
+                        <ScrollArea className="min-h-[200px] max-h-[300px] overflow-auto w-full">
                             <TabsContent value="description">
-                                <p className="text-base font-normal">{property.description}</p>
+                                <p className="text-sm font-normal text-wrap p-2 leading-normal">{property.description}</p>
                             </TabsContent>
                             <TabsContent value="gallery">
                                 <ImageGallery images={property.images} title="" />
@@ -203,111 +203,113 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                                 )}
                             </TabsContent>
                         </ScrollArea>
-                    </Tabs>                 
+                    </Tabs>
                 </div>
 
                 {/* Details */}
-                <div className="mt-8">
-                    <h2 className="text-xl mb-1 font-semibold">Details</h2>
-                    <CustomCard>
-                        <div className="p-4 grid sm:grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
-                            {property.bedrooms && (
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <Bed className="w-4 h-4 text-muted-foreground" />
-                                    <span>{property.bedrooms} Bedrooms</span>
-                                </div>
-                            )}
-                            {property.bathrooms && (
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <Bath className="w-4 h-4 text-muted-foreground" />
-                                    <span>{property.bathrooms} Bathrooms</span>
-                                </div>
-                            )}
-                            {property.toilets && (
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <Toilet className="w-4 h-4 text-muted-foreground" />
-                                    <span>{property.toilets} Bathrooms</span>
-                                </div>
-                            )}
-                            {property.parkingSpaces && (
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <Car className="w-4 h-4 text-muted-foreground" />
-                                    <span>{property.parkingSpaces} Parking spaces</span>
-                                </div>
-                            )}
-                            {property.size && (
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <Ruler className="w-4 h-4 text-muted-foreground" />
-                                    <span>{property.size} {property.sizeUnit}</span>
-                                </div>
-                            )}
-                            {property.furnishing && (
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <Sofa className="w-4 h-4 text-muted-foreground" />
-                                    <span>{property.furnishing}</span>
-                                </div>
-                            )}
-                            {property.condition && (
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <Hammer className="w-4 h-4 text-muted-foreground" />
-                                    <span>{property.condition}</span>
-                                </div>
-                            )}
-
-                            {/* Commercial Specific */}
-                            <>
-                                {property.floorLevel && (
+                {atLeastOneDetails(property) &&
+                    <div className="mt-8">
+                        <h2 className="text-xl mb-1 font-semibold">Details</h2>
+                        <CustomCard>
+                            <div className="p-4 grid sm:grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+                                {property.bedrooms && (
                                     <div className="flex shrink-0 items-center gap-2">
-                                        <Layers className="w-4 h-4 text-muted-foreground" />
-                                        <span>{property.floorLevel} Floor level</span>
+                                        <Bed className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.bedrooms} Bedrooms</span>
                                     </div>
                                 )}
-                                {property.totalFloors && (
+                                {property.bathrooms && (
                                     <div className="flex shrink-0 items-center gap-2">
-                                        <Building2 className="w-4 h-4 text-muted-foreground" />
-                                        <span>{property.totalFloors} Total floors</span>
+                                        <Bath className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.bathrooms} Bathrooms</span>
                                     </div>
                                 )}
-                                {property.propertyUse && (
+                                {property.toilets && (
                                     <div className="flex shrink-0 items-center gap-2">
-                                        <Briefcase className="w-4 h-4 text-muted-foreground" />
-                                        <span>{property.propertyUse} Use</span>
+                                        <Toilet className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.toilets} Bathrooms</span>
                                     </div>
                                 )}
-
-                                {property.parkingCapacity && (
+                                {property.parkingSpaces && (
                                     <div className="flex shrink-0 items-center gap-2">
-                                        <CarFront className="w-4 h-4 text-muted-foreground" />
-                                        <span>{property.parkingCapacity} Parking capacity</span>
+                                        <Car className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.parkingSpaces} Parking spaces</span>
                                     </div>
                                 )}
-                                {property.floorArea && (
-                                    <div className="flex items-center gap-2">
+                                {property.size && (
+                                    <div className="flex shrink-0 items-center gap-2">
                                         <Ruler className="w-4 h-4 text-muted-foreground" />
-                                        <span>{property.floorArea} Floor area</span>
+                                        <span>{property.size} {property.sizeUnit}</span>
                                     </div>
                                 )}
-                            </>
+                                {property.furnishing && (
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <Sofa className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.furnishing}</span>
+                                    </div>
+                                )}
+                                {property.condition && (
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <Hammer className="w-4 h-4 text-muted-foreground" />
+                                        <span>{property.condition}</span>
+                                    </div>
+                                )}
 
-                            {property.yearBuilt && (
-                                <div className="flex items-center gap-2">
-                                    <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                                    <span>Built in {property.yearBuilt}</span>
-                                </div>
-                            )}
-                        </div>
-                    </CustomCard>
-                </div>
+                                {/* Commercial Specific */}
+                                <>
+                                    {property.floorLevel && (
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <Layers className="w-4 h-4 text-muted-foreground" />
+                                            <span>{property.floorLevel} Floor level</span>
+                                        </div>
+                                    )}
+                                    {property.totalFloors && (
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <Building2 className="w-4 h-4 text-muted-foreground" />
+                                            <span>{property.totalFloors} Total floors</span>
+                                        </div>
+                                    )}
+                                    {property.propertyUse && (
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <Briefcase className="w-4 h-4 text-muted-foreground" />
+                                            <span>{property.propertyUse} Use</span>
+                                        </div>
+                                    )}
+
+                                    {property.parkingCapacity && (
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <CarFront className="w-4 h-4 text-muted-foreground" />
+                                            <span>{property.parkingCapacity} Parking capacity</span>
+                                        </div>
+                                    )}
+                                    {property.floorArea && (
+                                        <div className="flex items-center gap-2">
+                                            <Ruler className="w-4 h-4 text-muted-foreground" />
+                                            <span>{property.floorArea} Floor area</span>
+                                        </div>
+                                    )}
+                                </>
+
+                                {property.yearBuilt && (
+                                    <div className="flex items-center gap-2">
+                                        <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                                        <span>Built in {property.yearBuilt}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </CustomCard>
+                    </div>
+                }
 
                 {/*amenities  */}
                 {property.amenities?.length ?
                     <div>
                         <h2 className="text-xl mb-1 font-semibold mt-8">Amenities</h2>
                         <CustomCard>
-                            <div className="p-4 grid sm:grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">                                
-                                    {property.amenities.map((a: string, i: number) => (
-                                        <Badge key={i} variant="secondary">{a}</Badge>
-                                    ))}                              
+                            <div className="p-4 grid sm:grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+                                {property.amenities.map((a: string, i: number) => (
+                                    <Badge key={i} variant="secondary">{a}</Badge>
+                                ))}
                             </div>
                         </CustomCard>
                     </div> :
@@ -315,6 +317,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 }
             </div>
 
+            {/* Fees, Meta Admin view, Meta Client view , Agent details*/}
             <div>
                 {/* Fees */}
                 <div className="mt-8">
@@ -369,7 +372,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                         </div>
                     </CustomCard>
                 </div>
-                }               
+                }
                 {/* Meta Client view */}
                 <div className="mt-8">
                     <CustomCard>
@@ -384,7 +387,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                             </div>
                         </div>
                     </CustomCard>
-                </div>                
+                </div>
 
                 {/* Agent details */}
                 {(placeViewing === "PREVIEW" || viewer === "ADMIN") && <div className="mt-8">
@@ -416,7 +419,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                                         <span>{property.agentEmail}</span>
                                     </div>}
                                 {property.agentCompany &&
-                                    <div className="flex items-center gap-2">  
+                                    <div className="flex items-center gap-2">
                                         <Building2 className="w-4 h-4 text-muted-foreground" />
                                         <p>{property.agentCompany}</p>
                                     </div>}
@@ -424,7 +427,9 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                         </div>
                     </CustomCard>
                 </div>}
+
             </div>
+
         </div>
 
         {/* Spacer */}
@@ -433,4 +438,30 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
             placeViewing === "CLIENT" && <RequestForm property={property} />
         }
     </div>
+};
+
+
+const atLeastOneDetails = (property: PropertyTypes) => {
+    const details = {
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        toilets: property.toilets,
+        parkingSpaces: property.parkingSpaces,
+        size: property.size,
+        furnishing: property.furnishing,
+        condition: property.condition,
+        floorLevel: property.floorLevel,
+        totalFloors: property.totalFloors,
+        propertyUse: property.propertyUse,
+        parkingCapacity: property.parkingCapacity,
+        floorArea: property.floorArea,
+        yearBuilt: property.yearBuilt,
+    };
+
+    const atLeastOneDetail =
+        Object.values({
+            ...details
+        }).some((val) => (val !== "" && val !== undefined && val !== 0 && val !== null));
+
+    return atLeastOneDetail;
 };

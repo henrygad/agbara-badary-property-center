@@ -162,7 +162,7 @@ export default function ContactForm() {
                             <FormItem>
                                 <FormLabel>Phone Number (optional)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="+234 810 000 0000" {...field} />
+                                    <Input type="tel"  placeholder="+234 810 000 0000" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

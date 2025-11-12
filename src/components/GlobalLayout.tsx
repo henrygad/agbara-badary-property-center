@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 import { useClientStore } from "@/store/useClientStore";
 import { getPropertiesDb } from "@/lib/firebase/property_service";
+import Script from "next/script";
 
 export default function GlobalLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -50,7 +51,23 @@ export default function GlobalLayout({ children }: { children: ReactNode }) {
               {!isEmailVerificationroute && <GlobalHeader />}
             <main className=" sm:p-8">{children}</main>
               {!isEmailVerificationroute && <GlobalFooter />}
-          </div>
+            </div>
+            
+            {/* Tawk.to Chat Widget */}
+            <Script id="tawkto-chat" strategy="afterInteractive" type="text/javascript">
+              {`
+            var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+            (function() {
+              var s1 = document.createElement("script"),
+              s0 = document.getElementsByTagName("script")[0];
+              s1.async = true;
+              s1.src = 'https://embed.tawk.to/${process.env.NEXT_PUBLIC_TAWK_PROPERTY_ID}/1j9mfrvtn';              
+              s1.charset = 'UTF-8';
+              s1.setAttribute('crossorigin', '*');
+              s0.parentNode.insertBefore(s1, s0);
+            })();
+          `}
+            </Script>
         </div>
       )}
     </>

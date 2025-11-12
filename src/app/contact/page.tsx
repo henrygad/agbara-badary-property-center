@@ -74,9 +74,10 @@ export default function Contact() {
                                     <PhoneCall size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Phone Numbers</h3>
-                                    <p className="text-gray-600 text-sm">+234 812 345 6789</p>
-                                    <p className="text-gray-600 text-sm">+234 908 765 4321</p>
+                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Phone Numbers</h3>                                    
+                                    <p className="text-gray-600 text-sm">+234 707 235 4095</p>
+                                    <p className="text-gray-600 text-sm">+234 805 052 4419</p>
+                                    <p className="text-gray-600 text-sm">+234 812 307 0785</p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">
@@ -85,7 +86,7 @@ export default function Contact() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-base text-gray-900 dark:text-white">Email Address</h3>
-                                    <p className="text-gray-600 text-sm">info@agbarabadagary.com</p>
+                                    <p className="text-gray-600 text-sm">info@agbarabadagarypropertycenter.com</p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">

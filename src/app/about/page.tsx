@@ -6,6 +6,7 @@ export const metadata: Metadata = {
     "Learn about Agbara Badagry Property Center — your trusted property hub for homes, lands, and rentals along the Agbara–Badagry expressway.",
 };
 
+
 export default function page() {
   return (
     <div className='text-sm'>
@@ -20,16 +21,8 @@ export default function page() {
       </section>
       <section className='p-3 mb-20'>
         <p>
-          Welcome to Agbara Badagry Property Center. By accessing or using agbarabadagrypropertycenter.com (the “Website”), you agree to be bound by these Terms and Conditions. Please read them carefully before using this website.
-          If you do not agree with these Terms, you must not use our Website.
-        </p>
-        <p>
-          <br />
-          Agbara Badagry Property Center is an online real estate platform that provides property listings, sales and rental advertising, property management visibility, and connection services between property owners, agents, and prospective buyers or tenants.
-          In addition to our online platform, we also act as a licensed estate agent in all transactions representing buyers, sellers, landlords, or tenants when make use of our platform and  by whom.
-          We do not collect payments online. All transactions are arranged directly or through our authorized representatives.
-
-        </p>
+          Agbara Badagry Property Center is an online real estate platform that provides property listings, sales and rental advertising, Property Management visibility, and connection services between property Owners, Agents, Prospect investors or Tenancy. In addition to our online platform, we also act as a licensed estate agency in all transactions representing buyer, seller, landlord or tenants when make use of our platform and by whom. We do not collect payments online. All transactions are arranged directly or through our authorized representatives.
+        </p>       
       </section>
     </div>)  
 }

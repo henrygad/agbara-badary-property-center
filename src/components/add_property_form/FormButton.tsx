@@ -3,11 +3,11 @@ import { Spinner } from "../ui/spinner"
 
 
 
-export default function FormButton({ loading, title, accountType, documentType, isDocEdited }:
+export default function FormButton({ loading, title, accountType, documentType, isFormDirty }:
     {
         loading: boolean, title: string, accountType: "ADMIN" | "AGENT"
         documentType: "NEW" | "UPDATE" | "DUPLICATE" | "DRAFT" | "REVIEW",
-        isDocEdited: boolean
+        isFormDirty: boolean
     }
 ) {
 
@@ -32,7 +32,7 @@ export default function FormButton({ loading, title, accountType, documentType, 
                     "Add Property"
             }</>
         </CustomButton>
-    } else if (documentType == "UPDATE" && isDocEdited) {
+    } else if (documentType == "UPDATE" && isFormDirty) {
         return <CustomButton
             disabled={loading}
         >
@@ -44,7 +44,7 @@ export default function FormButton({ loading, title, accountType, documentType, 
         </CustomButton>
 
     }
-    else if (documentType == "REVIEW" && isDocEdited) {
+    else if (documentType == "REVIEW" && isFormDirty) {
         return <CustomButton
             disabled={loading}
         >

@@ -86,7 +86,7 @@ export default function PropertyFormEditor({
 }: Props) {
 
     const { user, loading: loadingUser } = useUserStore();
-    const { addProperty, form, setForm, updateProperty } = usePropertyStore();
+    const { addProperty, form, setForm, updateProperty, isFormDirty } = usePropertyStore();
 
     const [pendingAgentDialogOpen, setpendingAgentDialogOpen] = useState(false);
 
@@ -99,26 +99,10 @@ export default function PropertyFormEditor({
         isError: false,
     });
 
-    const [isDocEdited, setIsDocEdited] = useState(false);
-
     const [chooseCities, setChooseCities] = useState<string[]>(
         REGIONAL_TOWNS[0].cities
     );
 
-    // Form is not empty
-    const isFormDirty =
-        Object.values({
-            title: form.title.trim(),
-            description: form.description.trim(),
-            seoSlug: form.seoSlug.trim(),
-            price: !form.price ? "" : form.price,
-            state: form.state.trim(),
-            category: form.category.trim(),
-            type: form.type.trim(),
-            satus: form.status.trim(),
-            images: form.images.length ? form.images.join(".trim(),") : "",
-            videoUrl: form.videoUrl?.trim(),
-        }).some((val) => val !== "") && isDocEdited;
 
     // Intecept navigation if form is dirty
     const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
@@ -134,7 +118,7 @@ export default function PropertyFormEditor({
     useEffect(() => {
         if (user) {
             setForm((s) => ({
-                ...s,
+                ...s,                
                 agentName: user.firstName + " " + user.lastName,
                 agentEmail: user?.email || "",
                 agentPhoto: user?.profileImage?.url || "",
@@ -172,12 +156,7 @@ export default function PropertyFormEditor({
     function update<K extends keyof typeof form>(
         key: K,
         value: (typeof form)[K]
-    ) {
-        // When data passed to form is edited
-        if (!isDocEdited) {
-            setIsDocEdited(true);
-        }
-
+    ) {       
         setForm((s) => ({ ...s, [key]: value }));
     }
 
@@ -249,29 +228,6 @@ export default function PropertyFormEditor({
         return null;
     }
 
-    async function submitReviewedProperty(payload: PropertyTypes) {
-        if (!payload.id) {
-            throw new Error("Need property id to updated property!");
-        }
-
-        // Simulate API call
-        const property = await updatePropertyDb(payload.id, payload);
-        if (property) {
-            updateProperty(property);
-
-            // Return user back
-            //const clearOut =
-            setTimeout(() => {
-                router.back();
-                // clearTimeout(clearOut);
-            }, 500);
-
-            return property;
-        }
-
-        return null;
-    }
-
     // form submission handler (create new property listing to firestore)
     async function submitForm(e?: React.FormEvent) {
         e?.preventDefault();
@@ -328,7 +284,7 @@ export default function PropertyFormEditor({
                     await addNotificationDb(payload);
                 }
             } else if (documentType === "REVIEW" && payload.referenceId) {
-                property = await submitReviewedProperty(payload);
+                property = await submitUpdatedProperty(payload);
             }
 
             if (!property) return;
@@ -1529,8 +1485,8 @@ export default function PropertyFormEditor({
                     <div className="sticky bottom-4 left-0 right-0">
                         <div className="w-full h-full flex justify-center px-4">
                             <FormButton
-                                loading={loading}
-                                isDocEdited={isDocEdited}
+                                loading={loading}   
+                                isFormDirty={isFormDirty}
                                 documentType={documentType}
                                 accountType={accountType}
                                 title={form.title}                                

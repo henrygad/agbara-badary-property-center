@@ -5,6 +5,7 @@ import SocialMedia from './SocialMedia';
 import { Button } from './ui/button';
 import { ChevronsRight } from 'lucide-react';
 
+
 export default function GlobalFooter() {
 
     return <footer className="bg-primary text-white">
@@ -30,7 +31,7 @@ export default function GlobalFooter() {
                     <div>
                         <CompanyLogo location='Footer' />
                         <div>
-                            <p className="text-sm text-wrap">Your trusted partner in real estate, offering premium services for properties in Agbara-Badagry...</p>
+                            <p className="text-sm text-wrap">Agbara Badagry Property Center is an online real estate platform that provides property listings, sales and rental advertising, Property Management visibility, and...</p>
                             <button className='px-2 py-2 border rounded-sm mt-2'>
                                 <Link href="/about">
                                     <p className='text-xs font-medium  hover:text-foreground'>Read More</p>

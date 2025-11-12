@@ -20,7 +20,7 @@ export default function ListPropertiesPage() {
 
     const [loading, setLoading] = useState(false);
 
-    const filterTrash = useMemo(() => properties.filter(p => p.availability === "Trash" && p.accountType === "Admin"), [properties]);
+    const filterTrash = useMemo(() => properties.filter(p => p.availability === "Trash"), [properties]);
 
     if (loadingProperties) return <PageLoading loading={loadingProperties} />
 

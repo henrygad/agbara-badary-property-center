@@ -4,9 +4,9 @@ export default function page() {
     {/* Hero */}
     <section className="py-6">
       <div className="mx-auto text-center">
-        <h2 className="text-2xl font-semibold">
+        <h1 className="text-2xl font-semibold">
           Disclaimer Notice
-        </h2>
+        </h1>
       </div>
     </section>
     <section className='p-3 mb-20'>     

@@ -138,9 +138,9 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
 
       {open &&
         <div
-          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-40 max-w-[320px] sm:max-w-[480px] bg-white shadow-2xl shadow-accent-foreground rounded-xl p-5 border-t-4 border-primary")}
+          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-40 max-w-[480px] bg-white shadow-2xl shadow-accent-foreground rounded-xl p-5 border-t-4 border-primary")}
         >
-          <div className="animate-in slide-in-from-bottom-10 min-w-[280px] max-h-full overflow-hidden">
+          <div className="animate-in slide-in-from-bottom-10 min-w-[320px] max-h-full min-h-full overflow-hidden">
             <div>
               <h3 className="text-xl font-bold text-red-700 text-center">
                 Send a Request
@@ -224,7 +224,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
                             <FormItem>
                               <FormLabel>Phone Number (optional)</FormLabel>
                               <FormControl>
-                                <Input placeholder="+234 810 000 0000" {...field} />
+                                <Input type="tel" placeholder="+234 810 000 0000" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

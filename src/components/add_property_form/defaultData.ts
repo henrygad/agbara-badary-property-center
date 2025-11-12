@@ -55,39 +55,6 @@ export const PRICE_FREQUENCY = [
     " Daily",
 ];
 
-// export const REGIONAL_TOWNS = [
-//     {
-//         state: "Lagos",
-//         cities: [
-//             "Agbara",
-//             "Ijanikin",
-//             "Iba",
-//             "Ilogbo-Eremi",
-//             "Araromi",
-//             "Ajido",
-//             "Topo",
-//             "Mowo",
-//             "Badagry",
-//             "Seme Border",
-//         ]
-//     },
-//     {
-//         state: "Ogun",
-//         cities: [
-//             "Agbara",
-//             "Igbesa",
-//             "Opic Estate",
-//             "Ejila Awori",
-//             "Iyesi",
-//             "Ilogbo",
-//             "Atan-Ota",
-//             "Lusada",
-//             "Ado-Odo",
-//             "Idiroko",
-//         ]
-//     },
-// ];
-
 export const REGIONAL_TOWNS = [
     {
         state: "Ogun",

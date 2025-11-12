@@ -22,6 +22,7 @@ interface PropertyStoreState {
     selectedProperty: PropertyTypes | null;
     loading: boolean;
     loadingMore: boolean;
+    isFormDirty: boolean
 }
 
 type PropertyStore = PropertyStoreState & PropertyStoreActions;
@@ -33,6 +34,7 @@ export const usePropertyStore = create<PropertyStore>(
         selectedProperty: null,
         loading: false,
         loadingMore: false,
+        isFormDirty: false,
 
         setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
 
@@ -54,9 +56,34 @@ export const usePropertyStore = create<PropertyStore>(
             })),
         setForm: (cb: (p: PropertyTypes) => PropertyTypes) => {
             set((state) => {
-                return { form: cb(state.form) };
+                const form = cb(state.form);
+                const isFormDirty =
+                    Object.values({
+                        ...form,
+                        images: form.images.length ? form.images[0] : "",
+                        amenities: form.amenities.length ? form.amenities[0] : "",
+                        agentName: "",
+                        agentEmail: "",
+                        agentPhoto: "",
+                        agentPhone: "",
+                        agentCompany: "",
+                        accountType: "",
+                        agentId: "",
+                        availability: "",
+                        packageType: "",
+                        showContact: "",
+                        createdAt: "",
+                        updatedAt: "",
+                        priceFrequency: "",
+                        serviceChargeFrequency: "",
+                        currency: "",
+                        sizeUnit: "",
+                    }).some((val) => (val !== "" && val !== undefined && val !== 0 && val !== null));
+
+                return { form, isFormDirty };
             });
         },
+        
         setSelectedProperty: (property: PropertyTypes | null) => set({ selectedProperty: property }),
     })
 );

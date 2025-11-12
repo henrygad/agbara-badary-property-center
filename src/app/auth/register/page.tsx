@@ -87,7 +87,7 @@ export default function Register() {
       firstName: "",
       lastName: "",
       email: "",
-      phoneCode: "+234",
+      phoneCode: "🇳🇬 +234",
       phone: "",
       password: "",
       confirmPassword: "",
@@ -252,20 +252,29 @@ export default function Register() {
             />
 
             {/* Phone + Code */}
-            <div className="grid grid-cols-3 gap-3">
-              <FormField
+            <div className="flex items-center  gap-2 w-full">
+              {/* <FormField
                 control={form.control}
                 name="phoneCode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm">Code *</FormLabel>
                     <FormControl>
-                      <Input className="text-sm" placeholder="+234" {...field} />
+                      <Input readOnly className="text-sm" placeholder="🇳🇬 +234" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
+              <div className="space-y-1">
+                <FormLabel className="text-sm">Code *</FormLabel>
+                <div
+                  id="phoneCode"
+                  className="flex items-center bg-gray-50 px-3 py-2 text-sm rounded border">
+                  <span className="mr-1">🇳🇬</span>
+                  <span className="text-gray-700 font-medium">+234</span>
+               </div>
+              </div>
               <FormField
                 control={form.control}
                 name="phone"
@@ -273,7 +282,7 @@ export default function Register() {
                   <FormItem className="col-span-2">
                     <FormLabel className="text-sm">Phone *</FormLabel>
                     <FormControl>
-                      <Input className="text-sm" placeholder="810 000 0000" {...field} />
+                      <Input type="tel" className="text-sm" placeholder="810 000 0000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

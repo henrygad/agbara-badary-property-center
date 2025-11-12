@@ -92,7 +92,7 @@ export default function Login() {
 
     try {
 
-      await verifyCaptchaToken();
+     await verifyCaptchaToken();
 
       const payload = data;
       const res = await fetch("/api/auth/login", {

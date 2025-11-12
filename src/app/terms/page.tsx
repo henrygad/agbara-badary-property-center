@@ -1,13 +1,13 @@
-import React from 'react'
+
 
 export default function Terms() {
   return <div className='text-sm'>
     {/* Hero */}
     <section className="py-6">
       <div className="mx-auto text-center">
-        <h2 className="text-2xl font-semibold">
+        <h1 className="text-2xl font-semibold">
           Terms and Conditions
-        </h2>
+        </h1>
       </div>
     </section>
     <section className='p-3 mb-20'>
