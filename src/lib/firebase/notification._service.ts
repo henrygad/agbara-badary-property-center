@@ -12,8 +12,7 @@ export function listenToNotifications(userId: string, callback: (data: Notificat
         orderBy("createdAt", "desc")
     );
 
-    return onSnapshot(q, (snapshot) => {
-        console.log(snapshot.docs, "snapshot.docs");
+    return onSnapshot(q, (snapshot) => {        
         const data = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...formatteFireStoreDate(doc.data())

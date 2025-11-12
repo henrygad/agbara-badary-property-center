@@ -43,13 +43,14 @@ import {
 import { usePropertyStore } from "@/store/usePropertyStore";
 import OverlayLoader from "../loaders/OverlayLoader";
 import { useUserStore } from "@/store/useUserStore";
+import { useDraftStore } from "@/store/useDraftStore";
 
 
 type Props = {
     p: PropertyTypes;
     selected?: string[];
     setSelected?: (s: string) => void;
-    placeViewing: "Trash" | "Delete" | "Normal";
+    placeViewing: "Trash" | "Normal" | "Draft";
 };
 
 export default function TableDisplay({
@@ -58,16 +59,18 @@ export default function TableDisplay({
     setSelected = () => { },
     placeViewing
 }: Props) {
+    const router = useRouter();
+
     const { user } = useUserStore();
 
     const { updateProperty, deleteProperty } = usePropertyStore();
+
+    const { deleteDraft } = useDraftStore();
 
     const [displayDialogType, setDisplayDialogType] = useState({
         display: false,
         type: "Approve",
     });
-
-    const router = useRouter();
 
     const [loading, setLoading] = useState(false);
 
@@ -82,7 +85,7 @@ export default function TableDisplay({
                 refId: p.referenceId,
                 availability,
             };
-            
+
             await fetch("/api/agent/property", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -213,23 +216,6 @@ export default function TableDisplay({
         }
     };
 
-    const handleDelete = async (id?: string) => {
-        if (!id) return;
-        setLoading(true);
-        try {
-            const res = await deletePropertyDb(id);
-            if (res) {
-                deleteProperty(id);
-                setDisplayDialogType({ display: false, type: "Delete" });
-                showWarning("Property Delete!");
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleRestore = async (id?: string) => {
         if (!id) return;
         setLoading(true);
@@ -254,18 +240,61 @@ export default function TableDisplay({
         }
     };
 
+    const handleDeleteDraft = (draftId?: string) => {
+        if (!draftId) return;
+
+        const draft = JSON.parse(localStorage.getItem("drafts") || "[]") as PropertyTypes[];
+        if (draft.length) {
+            localStorage.setItem(
+                "drafts",
+                JSON.stringify(draft.filter(d => d.draftId !== draftId))
+            );
+            deleteDraft(draftId);
+        }
+
+    };
+
+    const continueingEditingDraft = (property: PropertyTypes) => {
+        localStorage.setItem("draftProperty", JSON.stringify(property));
+        // Navigate to editor
+        router.push(user?.accountType === "Admin" ?
+            "/admin/add-property" :
+            "/agent/add-property");
+    };
+
+    const handlePermanateDelete = async (id?: string) => {
+        if (!id) return;
+        setLoading(true);
+        try {
+            const res = await deletePropertyDb(id);
+            if (res) {
+                deleteProperty(id);
+                setDisplayDialogType({ display: false, type: "Delete" });
+                showWarning("Property Delete!");
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     return (
         <>
             <tr
-                className={cn("border-t hover:bg-gray-50 dark:hover:bg-gray-800/50", selected?.includes(p.id || "") && "bg-gray-50 dark:bg-gray-800")}
-                onClick={() => setSelected(p.id || "")}
+                className={cn(
+                    "border-t hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                    selected?.includes((p.id || p.draftId || "")) && "bg-gray-50 dark:bg-gray-800"
+                )}
+                onClick={() => setSelected((p.id || p.draftId || ""))}
             >
                 {/* check for selection*/}
                 {selected !== undefined && (
                     <td className="p-3">
                         <Checkbox
-                            checked={selected.includes(p.id || "")}
-                            onCheckedChange={() => setSelected(p.id || "")}
+                            checked={selected.includes((p.id || p.draftId || ""))}
+                            onCheckedChange={() => setSelected((p.id || p.draftId || ""))}
                         />
                     </td>
                 )}
@@ -306,132 +335,147 @@ export default function TableDisplay({
                         >
                             {placeViewing === "Trash" ?
                                 <>
-                                    {/* Trash */}
-                                    {p.availability === "Trash" ? (
-                                        <>
-                                            {/* Restore */}
-                                            <DropdownMenuItem
-                                                className="flex gap-2 items-center"
-                                                onClick={() =>
-                                                    setDisplayDialogType({ display: true, type: "Restore" })
-                                                }
-                                            >
-                                                <RotateCcw className="w-4 h-4 mr-2 text-gray-600" />
-                                                Restore
-                                            </DropdownMenuItem>
-
-                                            {/* Delete */}
-                                            {p.accountType === user?.accountType &&
-                                                <DropdownMenuItem
-                                                    className="text-primary flex gap-2 items-center"
-                                                    onClick={() =>
-                                                        setDisplayDialogType({ display: true, type: "Delete" })
-                                                    }
-                                                >
-                                                    <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
-                                                    Delete
-                                                </DropdownMenuItem>}
-                                        </>
-                                    ) : (
-                                        null
-                                    )}
-                                </> :
-                                <>
-                                    {/* View */}
-                                    {p.availability === "Accepted" &&
-                                        <DropdownMenuItem
-                                            className="flex gap-2 items-center"
-                                            onClick={() => {
-                                                view(p.id || "");
-                                            }}
-                                        >
-                                            <Eye className="w-4 h-4 mr-2 text-gray-600" />
-                                            View live
-                                        </DropdownMenuItem>}
-
-                                    {/* Review */}
-                                    {user?.accountType === "Admin" &&
-                                        p.accountType !== "Admin" &&
-                                        <DropdownMenuItem
-                                            className="flex gap-2 items-center"
-                                            onClick={() => {
-                                                setDisplayDialogType({ display: true, type: "Review" });
-                                            }}
-                                        >
-                                            <ShieldAlert className="w-4 h-4 mr-2 text-gray-600" />
-                                            Review
-                                        </DropdownMenuItem>}
-
-                                    {/* Approve */}
-                                    {user?.accountType === "Admin" &&
-                                        p.accountType !== "Admin" &&
-                                        p.availability !== "Accepted" &&
-                                        <DropdownMenuItem
-                                            className="flex gap-2 items-center"
-                                            onClick={() => {
-                                                setDisplayDialogType({ display: true, type: "Approve" });
-                                            }}
-                                        >
-                                            <CheckCircle className="w-4 h-4 mr-2 text-gray-600" />
-                                            Approve
-                                        </DropdownMenuItem>}
-
-                                    {/* Reject */}
-                                    {user?.accountType === "Admin" &&
-                                        p.accountType !== "Admin" &&
-                                        p.availability !== "Rejected" &&
-                                        <DropdownMenuItem
-                                            className="flex gap-2 items-center"
-                                            onClick={() => {
-                                                setDisplayDialogType({ display: true, type: "Reject" });
-                                            }}
-                                        >
-                                            <XCircle className="w-4 h-4 mr-2 text-gray-600" />
-                                            Reject
-                                        </DropdownMenuItem>}
-
-                                    {/* Copy Link */}
-                                    {p.availability === "Accepted" &&
-                                        <DropdownMenuItem
-                                            onClick={() => handleCopy(p.id)}
-                                            className="flex gap-2 items-center"
-                                        >
-                                            <Clipboard className="w-4 h-4 mr-2 text-gray-600" />
-                                            Copy Link
-                                        </DropdownMenuItem>}
-
-                                    {/* Edit */}
-                                    {p.accountType === user?.accountType &&
-                                        <DropdownMenuItem
-                                            className="flex gap-2 items-center"
-                                            onClick={() => handleEdit(p)}
-                                        >
-                                            <Edit className="w-4 h-4 mr-2 text-gray-600" />
-                                            Edit
-                                        </DropdownMenuItem>}
-
-                                    {/* Duplicate */}
+                                    {/* Restore */}
                                     <DropdownMenuItem
                                         className="flex gap-2 items-center"
-                                        onClick={() => handleDuplicate(p)}
+                                        onClick={() =>
+                                            setDisplayDialogType({ display: true, type: "Restore" })
+                                        }
                                     >
-                                        <Copy className="w-4 h-4 mr-2 text-gray-600" />
-                                        Duplicate
+                                        <RotateCcw className="w-4 h-4 mr-2 text-gray-600" />
+                                        Restore
                                     </DropdownMenuItem>
 
-                                    {/* Trash */}
+                                    {/* Delete */}
                                     {p.accountType === user?.accountType &&
                                         <DropdownMenuItem
                                             className="text-primary flex gap-2 items-center"
                                             onClick={() =>
-                                                setDisplayDialogType({ display: true, type: "Trash" })
+                                                setDisplayDialogType({ display: true, type: "Delete" })
                                             }
                                         >
                                             <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
-                                            Trash
+                                            Delete
+                                        </DropdownMenuItem>}
+                                </> :
+                                placeViewing === "Draft" ?
+                                    <>
+                                        {/* Edit */}
+                                        <DropdownMenuItem
+                                            className="flex gap-2 items-center"
+                                            onClick={() => continueingEditingDraft(p)}
+                                        >
+                                            <Edit className="w-4 h-4 mr-2 text-gray-600" />
+                                            Continue writing
                                         </DropdownMenuItem>
-                                    }
-                                </>
+
+                                        {/* Delete */}
+                                        <DropdownMenuItem
+                                            className="text-primary flex gap-2 items-center"
+                                            onClick={() => handleDeleteDraft(p.draftId)}
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </> :
+                                    placeViewing === "Normal" ?
+                                        <>
+                                            {/* View */}
+                                            {p.availability === "Accepted" &&
+                                                <DropdownMenuItem
+                                                    className="flex gap-2 items-center"
+                                                    onClick={() => {
+                                                        view((p.id || p.draftId || ""));
+                                                    }}
+                                                >
+                                                    <Eye className="w-4 h-4 mr-2 text-gray-600" />
+                                                    View live
+                                                </DropdownMenuItem>}
+
+                                            {/* Review */}
+                                            {user?.accountType === "Admin" &&
+                                                p.accountType !== "Admin" &&
+                                                <DropdownMenuItem
+                                                    className="flex gap-2 items-center"
+                                                    onClick={() => {
+                                                        setDisplayDialogType({ display: true, type: "Review" });
+                                                    }}
+                                                >
+                                                    <ShieldAlert className="w-4 h-4 mr-2 text-gray-600" />
+                                                    Review
+                                                </DropdownMenuItem>}
+
+                                            {/* Approve */}
+                                            {user?.accountType === "Admin" &&
+                                                p.accountType !== "Admin" &&
+                                                p.availability !== "Accepted" &&
+                                                <DropdownMenuItem
+                                                    className="flex gap-2 items-center"
+                                                    onClick={() => {
+                                                        setDisplayDialogType({ display: true, type: "Approve" });
+                                                    }}
+                                                >
+                                                    <CheckCircle className="w-4 h-4 mr-2 text-gray-600" />
+                                                    Approve
+                                                </DropdownMenuItem>}
+
+                                            {/* Reject */}
+                                            {user?.accountType === "Admin" &&
+                                                p.accountType !== "Admin" &&
+                                                p.availability !== "Rejected" &&
+                                                <DropdownMenuItem
+                                                    className="flex gap-2 items-center"
+                                                    onClick={() => {
+                                                        setDisplayDialogType({ display: true, type: "Reject" });
+                                                    }}
+                                                >
+                                                    <XCircle className="w-4 h-4 mr-2 text-gray-600" />
+                                                    Reject
+                                                </DropdownMenuItem>}
+
+                                            {/* Copy Link */}
+                                            {p.availability === "Accepted" &&
+                                                <DropdownMenuItem
+                                                    onClick={() => handleCopy(p.id)}
+                                                    className="flex gap-2 items-center"
+                                                >
+                                                    <Clipboard className="w-4 h-4 mr-2 text-gray-600" />
+                                                    Copy Link
+                                                </DropdownMenuItem>}
+
+                                            {/* Edit */}
+                                            {p.accountType === user?.accountType &&
+                                                <DropdownMenuItem
+                                                    className="flex gap-2 items-center"
+                                                    onClick={() => handleEdit(p)}
+                                                >
+                                                    <Edit className="w-4 h-4 mr-2 text-gray-600" />
+                                                    Edit
+                                                </DropdownMenuItem>}
+
+                                            {/* Duplicate */}
+                                            <DropdownMenuItem
+                                                className="flex gap-2 items-center"
+                                                onClick={() => handleDuplicate(p)}
+                                            >
+                                                <Copy className="w-4 h-4 mr-2 text-gray-600" />
+                                                Duplicate
+                                            </DropdownMenuItem>
+
+                                            {/* Trash */}
+                                            {p.accountType === user?.accountType &&
+                                                <DropdownMenuItem
+                                                    className="text-primary flex gap-2 items-center"
+                                                    onClick={() =>
+                                                        setDisplayDialogType({ display: true, type: "Trash" })
+                                                    }
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2 text-gray-600" />
+                                                    Trash
+                                                </DropdownMenuItem>
+                                            }
+                                        </> :
+                                        null
                             }
 
                         </DropdownMenuContent>
@@ -468,7 +512,7 @@ export default function TableDisplay({
                                 } else if (displayDialogType.type === "Trash") {
                                     handleTrash(p.id);
                                 } else if (displayDialogType.type === "Delete") {
-                                    handleDelete(p.id);
+                                    handlePermanateDelete(p.id);
                                 } else if (displayDialogType.type === "Restore") {
                                     handleRestore(p.id);
                                 }

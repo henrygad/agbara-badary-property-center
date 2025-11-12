@@ -54,8 +54,7 @@ export default function Navbar() {
     if (!user?.id) return;
 
     listenToNotifications(user.accountType === "Admin" ? "Admin" : user?.id,
-      (notic) => {
-        console.log(notic, "new notification");
+      (notic) => {        
       addNotification(notic);
       setPopupNotic(notic);
     });

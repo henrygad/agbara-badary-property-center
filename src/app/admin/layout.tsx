@@ -19,6 +19,8 @@ import { getRequestsDb } from "@/lib/firebase/request_service";
 import { useAgentStore } from "@/store/useAgentStore";
 import UserTypes from "@/types/user.types";
 import { useClientStore } from "@/store/useClientStore";
+import { PropertyTypes } from "@/types/property.types";
+import { useDraftStore } from "@/store/useDraftStore";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -41,8 +43,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const { setLoading: setAgentsLoading, setAgents } = useAgentStore();
 
+  const { setDraft} = useDraftStore();
+
   // Fetch Admin datas
   useEffect(() => {
+
+    // Fetch client draft locally
+    const drafts = JSON.parse(
+      localStorage.getItem("drafts") || "[]"
+    ) as PropertyTypes[]
+
+    setDraft(drafts);    
 
     const fetchAdmin = async () => {
       setAdminLoading(true);
@@ -113,6 +124,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     fetchAdmin();
   }, [
+    setDraft,
     setImageLoading,
     setImages,
     setPropertyLoading,

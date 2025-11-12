@@ -13,7 +13,8 @@ import {
     X,
     Menu,    
     Mails,    
-    FileX2
+    FileX2,
+    FileEdit
     
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,10 +29,11 @@ const adminLinks = [
     { name: "Add Property", href: "/admin/add-property", icon: Plus },
     {
         name: "Properties",
-        href: "/admin/properties",
+        href: "",
         icon: Building2,
         children: [
-            { name: "Drafts", href: "/admin/properties/drafts", icon: FileText },
+            { name: "All", href: "/admin/properties", icon: FileText },
+            { name: "Drafts", href: "/admin/properties/drafts", icon: FileEdit },
             { name: "Trash", href: "/admin/properties/trash", icon: FileX2 },
         ]
     },
@@ -45,10 +47,11 @@ const agentLinks = [
     { name: "Add Property", href: "/agent/add-property", icon: Plus },
     {
         name: "Properties",
-        href: "/agent/properties",
+        href: "",
         icon: Building2,
         children: [
-            { name: "Drafts", href: "/agent/properties/drafts", icon: FileText },
+            { name: "All", href: "/agent/properties", icon: FileText },
+            { name: "Drafts", href: "/agent/properties/drafts", icon: FileEdit },
             { name: "Trash", href: "/agent/properties/trash", icon: FileX2 },
         ]
     },

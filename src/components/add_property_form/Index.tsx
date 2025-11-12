@@ -10,7 +10,7 @@ import {
     PropertyCategory,
     PropertyTypes,
     PropertyType,
-    SizeUnit,    
+    SizeUnit,
 } from "../../types/property.types";
 import {
     AMENITIES,
@@ -21,7 +21,7 @@ import {
     PRICE_FREQUENCY,
     PROPERTY_CATEGORIES,
     PROPERTY_TYPES,
-    SIZE_UNIT,    
+    SIZE_UNIT,
     DEFAULT_PROPERTY_FORM,
     PACKAGE_TYPE,
 } from "./defaultData";
@@ -71,6 +71,7 @@ import OverlayLoader from "../loaders/OverlayLoader";
 import { addNotificationDb } from "@/lib/firebase/notification._service";
 import NotificationTypes from "@/types/notification.types";
 import { PendingApprovalDialog } from "../PendingApprovalDialog";
+import { useDraftStore } from "@/store/useDraftStore";
 
 type Props = {
     accountType: "ADMIN" | "AGENT";
@@ -87,6 +88,7 @@ export default function PropertyFormEditor({
 
     const { user, loading: loadingUser } = useUserStore();
     const { addProperty, form, setForm, updateProperty, isFormDirty } = usePropertyStore();
+    const { deleteDraft, addDraft } = useDraftStore();
 
     const [pendingAgentDialogOpen, setpendingAgentDialogOpen] = useState(false);
 
@@ -103,22 +105,15 @@ export default function PropertyFormEditor({
         REGIONAL_TOWNS[0].cities
     );
 
-
     // Intecept navigation if form is dirty
     const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
-        useUnsavedChanges({
-            when: isFormDirty,
-            onSaveDraft: handleSaveDraft,
-            guardedPaths: user?.accountType === "Admin" ?
-                ["/admin/add-property", "/admin/edit-property"] :
-                ["/agent/add-property", "/agent/edit-property"],
-        });
+        useUnsavedChanges({ when: isFormDirty, onSaveDraft: handleSaveDraft, guardedPaths: user?.accountType === "Admin" ? ["/admin/add-property", "/admin/edit-property"] : ["/agent/add-property", "/agent/edit-property"], });
 
     // Populate agent details if account type is agent
     useEffect(() => {
         if (user) {
             setForm((s) => ({
-                ...s,                
+                ...s,
                 agentName: user.firstName + " " + user.lastName,
                 agentEmail: user?.email || "",
                 agentPhoto: user?.profileImage?.url || "",
@@ -132,23 +127,28 @@ export default function PropertyFormEditor({
     }, [user, setForm]);
 
 
-    if (loadingForm || loadingUser)
-        return (
-            <PageLoading loading={loadingForm || loadingUser} />
-        );
+    if (loadingForm || loadingUser) return <PageLoading loading={loadingForm || loadingUser} />;
+
 
     function handleSaveDraft() {
         const drafts = JSON.parse(
             localStorage.getItem("drafts") || "[]"
-        ) as PropertyTypes[]
+        ) as PropertyTypes[];
+
+        const playLoad = {
+            ...form,
+            availability: "Draft",
+            draftId: String(Date.now() + Math.random()),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        } as PropertyTypes;
 
         localStorage.setItem(
             "drafts",
-            JSON.stringify([
-                ...drafts,
-                { ...form, draftId: String(Date.now() + Math.random()) },
-            ])
+            JSON.stringify([playLoad, ...drafts,])
         );
+
+        addDraft(playLoad);
         setForm(() => DEFAULT_PROPERTY_FORM);
         showSuccess("Draft saved!", "Draft have been saved locally");
     }
@@ -156,7 +156,7 @@ export default function PropertyFormEditor({
     function update<K extends keyof typeof form>(
         key: K,
         value: (typeof form)[K]
-    ) {       
+    ) {
         setForm((s) => ({ ...s, [key]: value }));
     }
 
@@ -192,6 +192,7 @@ export default function PropertyFormEditor({
                 "drafts",
                 JSON.stringify(draft.filter(d => d.draftId !== draftId))
             );
+            deleteDraft(draftId);
         }
 
     };
@@ -345,10 +346,11 @@ export default function PropertyFormEditor({
         }
     };
 
+
     return (
         <div className="w-full bg-inherit">
             {/* Steps */}
-            <menu className="mb-6">              
+            <menu className="mb-6">
                 <div className="flex gap-2">
                     {Array(5)
                         .fill("")
@@ -553,7 +555,7 @@ export default function PropertyFormEditor({
                                             <SelectItem
                                                 className="cursor-pointer text-sm capitalize"
                                                 key={state.state}
-                                                value={state.state}                                                
+                                                value={state.state}
                                             >
                                                 {state.state}
                                             </SelectItem>
@@ -1485,11 +1487,11 @@ export default function PropertyFormEditor({
                     <div className="sticky bottom-4 left-0 right-0">
                         <div className="w-full h-full flex justify-center px-4">
                             <FormButton
-                                loading={loading}   
+                                loading={loading}
                                 isFormDirty={isFormDirty}
                                 documentType={documentType}
                                 accountType={accountType}
-                                title={form.title}                                
+                                title={form.title}
                             />
                         </div>
                     </div>
@@ -1501,41 +1503,41 @@ export default function PropertyFormEditor({
                 open={openPrompt}
                 onOpenChange={setOpenPrompt}
             >
-                    <AlertDialogContent className="sm:max-w-md rounded-2xl">
-                        <div className="flex justify-between items-start">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    You have unsaved data. Save it as a draft before leaving?
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
+                <AlertDialogContent className="sm:max-w-md rounded-2xl">
+                    <div className="flex justify-between items-start">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                You have unsaved data. Save it as a draft before leaving?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
 
-                            <button
-                                onClick={() => setOpenPrompt(false)}
-                                className="p-1 rounded hover:bg-gray-100"
-                            >
-                                <X className="w-5 h-5 text-gray-600" />
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => setOpenPrompt(false)}
+                            className="p-1 rounded hover:bg-gray-100"
+                        >
+                            <X className="w-5 h-5 text-gray-600" />
+                        </button>
+                    </div>
 
-                        <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
-                            <AlertDialogAction
-                                onClick={saveDraftAndLeave}
-                                className="bg-blue-600"
-                            >
-                                Save Draft & Leave
-                            </AlertDialogAction>
-                            <AlertDialogAction
-                                onClick={() => {
-                                    setForm(() => DEFAULT_PROPERTY_FORM);
-                                    leaveWithoutSaving();
-                                }}
-                                className="bg-red-600"
-                            >
-                                Leave Without Saving
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
+                    <AlertDialogFooter className="mt-6 gap-2 sm:justify-end">
+                        <AlertDialogAction
+                            onClick={saveDraftAndLeave}
+                            className="bg-blue-600"
+                        >
+                            Save Draft & Leave
+                        </AlertDialogAction>
+                        <AlertDialogAction
+                            onClick={() => {
+                                setForm(() => DEFAULT_PROPERTY_FORM);
+                                leaveWithoutSaving();
+                            }}
+                            className="bg-red-600"
+                        >
+                            Leave Without Saving
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
             </AlertDialog>
 
             {/* Dialog for pending account */}
@@ -1543,7 +1545,7 @@ export default function PropertyFormEditor({
                 open={pendingAgentDialogOpen}
                 onClose={() => setpendingAgentDialogOpen(false)}
                 onSaveDraft={handleSaveDraft}
-            />    
+            />
 
             <OverlayLoader loading={loading} />
         </div >

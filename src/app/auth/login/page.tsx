@@ -105,9 +105,8 @@ export default function Login() {
 
       if (!resData.success) {        
         setError(resData.message)
-      } else {   
-     
-
+      } else {  
+        
         const agent = resData.agent;
         setUser(agent);
 
@@ -124,6 +123,7 @@ export default function Login() {
     } catch (error) {
       console.error(error);     
       setError("Please Try again later.")
+    } finally {      
       form.reset();
       setLoading(false);
     }
@@ -244,7 +244,7 @@ export default function Login() {
             >
               {loading ? (
                 <>
-                  <Spinner /> Login...
+                  <Spinner /> Logging...
                 </>
               ) : (
                 "Login"

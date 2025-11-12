@@ -254,7 +254,7 @@ export default function AdminProfilePage() {
           {/* Phone Number */}
           <div className="flex items-center flex-wrap gap-2">
               <div className="space-y-1">
-                <Label className="text-sm">Code *</Label>
+                <Label className="text-sm">Code</Label>
                 <div
                   id="phoneCode"
                   className="flex items-center px-3 py-2 text-sm rounded border">

@@ -1,5 +1,4 @@
 
-
 export default function Terms() {
   return <div className='text-sm'>
     {/* Hero */}

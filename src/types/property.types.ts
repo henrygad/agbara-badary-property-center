@@ -48,7 +48,7 @@ export type PropertyType =
     | "Land"
     | "Other";
 
-export type Availability =  "Pending" | "Reviewing" | "Accepted" | "Trash" | "Rejected";
+export type Availability = "Pending" | "Reviewing" | "Accepted" | "Trash" | "Rejected" | "Draft";
 
 export interface PropertyTypes {
     id?: string; // Fire strore iD

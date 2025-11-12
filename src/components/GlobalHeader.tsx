@@ -6,17 +6,21 @@ import { Headset, Menu, X } from "lucide-react";
 import CompanyLogo from "./CompanyLogo";
 import { AnimatePresence, motion } from "framer-motion";
 import useLockScroll from "@/hooks/useLockScroll";
+import { usePathname } from "next/navigation";
 
 export default function GlobalHeader() {
+  const pathname = usePathname();
 
+  // Check current route
+  const isEmailVerificationroute = pathname.startsWith("/auth/verify-email");
 
   return (
     <header className="p-2 sm:px-8 flex justify-between items-center border-b border-gray-200 bg-white">
       <div className="flex items-center justify-start">
         <CompanyLogo location="Header" />
       </div>
-      {/* Desktop header center nav */}
-
+      {!isEmailVerificationroute && <>
+        {/* Desktop header center nav */}
       <nav className="hidden md:flex items-center space-x-6 text-base font-medium">
         <Link
           className="hover:text-primary"
@@ -37,6 +41,7 @@ export default function GlobalHeader() {
           RENT
         </Link>
       </nav>
+
       {/* Desktop header right end nav */}
       <nav className="hidden md:flex gap-4 items-center text-sm md:text-base font-medium pr-2">
         <Link
@@ -59,7 +64,8 @@ export default function GlobalHeader() {
         </Link>
       </nav>
       {/* Mobile header drop down nav */}
-      <MobileDropdown />
+        <MobileDropdown />
+      </>}
     </header>
   );
 };

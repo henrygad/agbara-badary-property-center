@@ -5,7 +5,6 @@ import Draft from "@/components/property/Draft";
 import { PropertyTypes } from "@/types/property.types"
 import { useEffect, useState } from "react"
 
-
 export default function Drafts() {
   const [drafts, setDrafts] = useState<PropertyTypes[]>([]);
 

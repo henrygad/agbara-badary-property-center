@@ -13,7 +13,7 @@ interface PropertyStoreActions {
     updateProperty: (property: PropertyTypes) => void;
     deleteProperty: (id: string) => void;
     setForm: (cb: (p: PropertyTypes) => PropertyTypes) => void;
-    setSelectedProperty: (property: PropertyTypes | null) => void;
+    setSelectedProperty: (property: PropertyTypes | null) => void;    
 }
 
 interface PropertyStoreState {
@@ -54,6 +54,7 @@ export const usePropertyStore = create<PropertyStore>(
             set((state) => ({
                 properties: state.properties.filter((p) => p.id !== id),
             })),
+        
         setForm: (cb: (p: PropertyTypes) => PropertyTypes) => {
             set((state) => {
                 const form = cb(state.form);
@@ -78,6 +79,7 @@ export const usePropertyStore = create<PropertyStore>(
                         serviceChargeFrequency: "",
                         currency: "",
                         sizeUnit: "",
+                        negotiable: "",
                     }).some((val) => (val !== "" && val !== undefined && val !== 0 && val !== null));
 
                 return { form, isFormDirty };
