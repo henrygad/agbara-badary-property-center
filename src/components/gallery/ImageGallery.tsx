@@ -20,7 +20,7 @@ export default function ImageGallery({ images, title }: PropertyImageGalleryProp
         <div className="w-full">
 
             {/* Thumbnail Scroller */}
-            <div className="flex gap-2 flex-wrap justify-center">
+            <div className="flex gap-2 flex-wrap justify-center w-full">
                 {images.map((src, i) => (
                     <div
                         key={i}

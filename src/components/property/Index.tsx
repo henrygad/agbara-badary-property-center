@@ -161,7 +161,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
 
                 {/* Description */}
                 <div className="space-y-2 mt-8 w-full">
-                    <Tabs defaultValue="description">
+                    <Tabs defaultValue="description" className="w-full">
                         <TabsList className="flex gap-4 text-sm dark:bg-gray-900">
                             <TabsTrigger
                                 type="button"
@@ -189,14 +189,14 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                             <TabsContent value="description">
                                 <p className="text-sm font-normal text-wrap p-2 leading-normal">{property.description}</p>
                             </TabsContent>
-                            <TabsContent value="gallery">
+                            <TabsContent value="gallery" className="w-full">
                                 <ImageGallery images={property.images} title="" />
                             </TabsContent>
-                            <TabsContent value="virtual-tour">
+                            <TabsContent value="virtual-tour" className="w-full">
                                 {property.videoUrl && (
                                     <iframe
                                         src={property.videoUrl}
-                                        className="w-full h-[400px] rounded-md"
+                                        className="w-full h-[300px] rounded-md"
                                         allowFullScreen
                                     ></iframe>
 

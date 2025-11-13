@@ -106,7 +106,6 @@ export default function ListPropertiesPage() {
       const res = await updatePropertyDb(id, { availability: "Trash" });
       if (res) {
         updateProperty(res);
-        showWarning("Property moved to Trash!");
       }
     } catch (error) {
       console.log(error);
@@ -115,29 +114,26 @@ export default function ListPropertiesPage() {
     }
   };
 
-  const trashAll = () => {
-    selected.map(s => {
-      handleTrash(s);
-    })
+  const trashAll = async () => {
+    await Promise.all(selected.map(s => handleTrash(s)));
+    showWarning("Property moved to Trash!");
 
   };
+  
 
   return (
     <div className="w-full">
       {/* Filter and Search Bar */}
-      <div
-        className="mb-4 p-4"
-      >
+      <div className="mb-4 w-full">
+
         {selected.length > 0 ? (
-          <div className="relative flex justify-end gap-2 px-2 items-center shadow-sm">
-            <div className="absolute top-1/2 -translate-1/2 left-3">
-              <Button
-                variant="ghost"
-                onClick={() => setSelected([])}
-              >
-                <X size={20} />
-              </Button>
-            </div>
+          <div className="flex justify-between items-center shadow w-full p-3">
+            <Button
+              variant="ghost"
+              onClick={() => setSelected([])}
+            >
+              <X size={20} />
+            </Button>
             <Button
               variant="destructive"
               size="sm"

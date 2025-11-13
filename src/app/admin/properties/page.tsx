@@ -130,9 +130,7 @@ export default function ListPropertiesPage() {
   };
 
   const trashAll = async () => {
-    await Promise.all(selected.map(s => {
-      handleTrash(s);
-    }));
+    await Promise.all(selected.map(s => handleTrash(s)));
     showWarning("Property moved to Trash!");
 
   };
@@ -157,7 +155,7 @@ export default function ListPropertiesPage() {
 
       {/* Filter and Search Bar */}
       <div className="mb-4 w-full">
-
+        
         {selected.length > 0 ? (
           <div className="flex justify-between items-center shadow w-full p-3">
               <Button

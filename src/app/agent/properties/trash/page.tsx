@@ -12,11 +12,10 @@ import { showSuccess, showWarning } from "@/components/ui/toasts";
 import OverlayLoader from "@/components/loaders/OverlayLoader";
 import ItemNotFound from "@/components/ItemNotFound";
 
-export default function ListPropertiesPage() {
+export default function ListPropertiesPage() {    
     const { properties, loading: loadingProperties, deleteProperty, updateProperty } = usePropertyStore();
 
-    const [selected, setSelected] = useState<string[]>([]);
-    const [allChecked, setAllChecked] = useState(false);
+    const [selected, setSelected] = useState<string[]>([]);    
 
     const [loading, setLoading] = useState(false);
 
@@ -24,21 +23,20 @@ export default function ListPropertiesPage() {
 
     if (loadingProperties) return <PageLoading loading={loadingProperties} />
 
+    const allChecked = selected.length === filterTrash.length;
+
     const toggleSelectAll = () => {
         if (allChecked) setSelected([]);
         else {
-            setSelected(filterTrash.map(p => p.id || ""));
-            setAllChecked(true);
+            setSelected(filterTrash.map(p => p.id || ""));          
         }
     };
 
     const toggleSelect = (id: string) => {
         setSelected((pre) =>
             pre.includes(id) ? pre.filter(s => s !== id) : [...pre, id]
-        );
-        setAllChecked(true);
+        );        
     };
-
 
     const handleDelete = async (id?: string) => {
         if (!id) return;
@@ -47,7 +45,6 @@ export default function ListPropertiesPage() {
             const res = await deletePropertyDb(id);
             if (res) {
                 deleteProperty(id);
-                showWarning("Property Delete!");
             }
         } catch (error) {
             console.log(error);
@@ -60,10 +57,9 @@ export default function ListPropertiesPage() {
         if (!id) return;
         setLoading(true);
         try {
-            const res = await updatePropertyDb(id, { availability: "Pending" });
+            const res = await updatePropertyDb(id, { availability: "Pending" });            
             if (res) {
                 updateProperty(res);
-                showSuccess("Property Restore!");
             }
         } catch (error) {
             console.log(error);
@@ -72,46 +68,45 @@ export default function ListPropertiesPage() {
         }
     };
 
-    const deleteAll = () => {
-        selected.map((s) => {
-            handleDelete(s);
-        });
+    const deleteAll = async () => {
+        await Promise.all(selected.map((s) => handleDelete(s)));
+        showWarning("Property Delete!");
     };
 
-    const restoreAll = () => {
-        selected.map(s => {
-            handleRestore(s);
-        })
+    const restoreAll = async () => {
+        await Promise.all(selected.map(s => handleRestore(s)));
+        showSuccess("Property Restore!");
     };
 
 
     return (
         <div className="w-full">
             {selected.length > 0 &&
-                <div className="relative flex justify-end gap-2 px-2 items-center shadow-sm">
-                    <div className="absolute top-1/2 -translate-1/2 left-3">
+                <div className="flex justify-between items-center shadow w-full p-3 mb-4">
+                    <Button
+                        variant="ghost"
+                        onClick={() => setSelected([])}
+                    >
+                        <X size={20} />
+                    </Button>
+                    <div className="flex-1 flex justify-end gap-3 flex-wrap items-center">
                         <Button
-                            variant="ghost"
-                            onClick={() => setSelected([])}
+                            variant="outline"
+                            size="sm"
+                            onClick={restoreAll}
                         >
-                            <X size={20} />
+                            Restore all
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={deleteAll}
+                        >
+                            Delete all
                         </Button>
                     </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={restoreAll}
-                    >
-                        Restore all
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={deleteAll}
-                    >
-                        Delete all
-                    </Button>
-                </div>}
+                </div>
+            }
             <div className="overflow-x-auto rounded-lg border bg-white dark:bg-gray-900">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-100 dark:bg-gray-800">

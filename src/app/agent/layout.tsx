@@ -15,6 +15,8 @@ import { useNotificationStore } from "@/store/useNotificationStore";
 import { getNotificationByUserIdDb } from "@/lib/firebase/notification._service";
 import UserTypes from "@/types/user.types";
 import { useClientStore } from "@/store/useClientStore";
+import { PropertyTypes } from "@/types/property.types";
+import { useDraftStore } from "@/store/useDraftStore";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -31,11 +33,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const { setLoading: setImageLoading, setImages } = useImageStore();
 
+  const {setDraft } = useDraftStore();
+
   const { setLoading: setNotificationLoading, setNotification } = useNotificationStore();
 
 
   // Fetch Admin datas
   useEffect(() => {
+
+    // Fetch client draft locally
+    const drafts = JSON.parse(
+      localStorage.getItem("drafts") || "[]"
+    ) as PropertyTypes[]
+
+    setDraft(drafts);   
 
     const fetchAdmin = async () => {
       setUserLoading(true);
@@ -88,6 +99,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     setUserLoading,
     setNotification,
     setNotificationLoading,
+    setDraft,
   ]);
 
 

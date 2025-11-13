@@ -46,14 +46,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { setDraft} = useDraftStore();
 
   // Fetch Admin datas
-  useEffect(() => {
-
-    // Fetch client draft locally
+  useEffect(() => {     // Fetch client draft locally
     const drafts = JSON.parse(
       localStorage.getItem("drafts") || "[]"
     ) as PropertyTypes[]
 
-    setDraft(drafts);    
+    setDraft(drafts);   
+
+    
 
     const fetchAdmin = async () => {
       setAdminLoading(true);

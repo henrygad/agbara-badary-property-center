@@ -11,11 +11,9 @@ import { deletePropertyDb, updatePropertyDb } from "@/lib/firebase/property_serv
 import { showSuccess, showWarning } from "@/components/ui/toasts";
 import OverlayLoader from "@/components/loaders/OverlayLoader";
 import ItemNotFound from "@/components/ItemNotFound";
-import { useUserStore } from "@/store/useUserStore";
 
 export default function ListPropertiesPage() {
-    const { properties, loading: loadingProperties, deleteProperty, updateProperty } = usePropertyStore();
-    const { user } = useUserStore();
+    const { properties, loading: loadingProperties, deleteProperty, updateProperty } = usePropertyStore();    
 
     const [selected, setSelected] = useState<string[]>([]);   
 
@@ -59,13 +57,8 @@ export default function ListPropertiesPage() {
         if (!id) return;
         setLoading(true);
         try {
-            let res = null;
+            const res = await updatePropertyDb(id, { availability: "Accepted" });                 
 
-            if (user?.accountType === "Admin") {
-                res = await updatePropertyDb(id, { availability: "Accepted" });
-            } else {
-                res = await updatePropertyDb(id, { availability: "Pending" });
-            }           
             if (res) {
                 updateProperty(res);                
             }
@@ -77,16 +70,12 @@ export default function ListPropertiesPage() {
     };
 
     const deleteAll = async () => {
-        await Promise.all(selected.map((s) => {
-            handleDelete(s);
-        }));
+        await Promise.all(selected.map((s) => handleDelete(s)));
         showWarning("Property Delete!");
     };
 
     const restoreAll = async () => {
-        await Promise.all(selected.map(s => {
-            handleRestore(s);
-        }));
+        await Promise.all(selected.map(s => handleRestore(s)));
         showSuccess("Property Restore!");
     };
 
