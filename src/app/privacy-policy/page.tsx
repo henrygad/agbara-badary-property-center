@@ -14,13 +14,12 @@ export default function PrivacyPolicy() {
           <section className='p-3 mb-20'>
               <p>
                   We are committed to safeguarding your privacy and ensuring that your personal data is handled in compliance with the Nigeria Data Protection Regulation (NDPR) 2019 and applicable data privacy laws.
-                  By using our Website, you consent to the practices described in this Privacy Policy. 
+                  By using our Website, you consent to the practices described in this Privacy Policy.
               </p>
               <p>                  
                   <br />
-                  1. Information We Collect <br />
+                  1. Information We Collect <br />                  
                   We may collect and process the following categories of information: <br />
-
                   (a) Personal Information <br />
                   When you contact us, list a property, or make an inquiry, we may collect: <br />
                   •	Full name <br />
@@ -28,7 +27,6 @@ export default function PrivacyPolicy() {
                   •	Phone number <br />
                   •	Property details you submit <br />
                   •	Contact preferences <br />
-
                   (b) Automatically Collected Data <br />
                   When you visit our website, we may automatically collect: <br />
                   •	Your IP address <br />
@@ -37,22 +35,24 @@ export default function PrivacyPolicy() {
                   •	Device information <br />
                   •	Cookies and similar tracking technologies <br />
                   We collect this data for security, analytics, and improvement of user experience. <br />
+
                   <br />
                   2. Purpose of Data Collection <br />
                   We collect and use your personal data for the following purposes: <br />
                   •	To enable you to list, view, or inquire about properties. <br />
                   •	To communicate with you regarding your listings, inquiries, or agency services. <br />
                   •	To verify property ownership or agent authenticity. <br />
-                  •	To improve our website and services. <br />
-                  •	To comply with legal or regulatory obligations. <br />
+                  •	To improve our website and services.<br />
+                  •	To comply with legal or regulatory obligations.<br />
                   We do not sell, rent, or lease your personal information to third parties. <br />
                   <br />
                   3. Legal Basis for Processing <br />
-                  We process your personal data under one or more of the following lawful bases:<br />
+                  We process your personal data under one or more of the following lawful bases: <br />
                   •	Your consent, when you voluntarily provide information via our forms. <br />
                   •	Performance of a contract, when we act as your agent or facilitate property transactions. <br />
                   •	Legal obligation, when required by Nigerian law. <br />
-                  •	Legitimate interest, to improve our services and prevent fraud. <br />    
+                  • Legitimate interest, to improve our services and prevent fraud. <br />
+
                   <br />
                   4. Cookies and Tracking Technologies <br />
                   Our website may use cookies or similar technologies to: <br />

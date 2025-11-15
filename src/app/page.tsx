@@ -162,7 +162,7 @@ export default function Home() {
           variant="destructive"
           className="bg-primary text-white text-base px-8 py-5 rounded-md font-medium cursor-pointer"
         >
-          <Link href="/auth/agent-register" >Get Started</Link>
+          <Link href="/auth/register" >Get Started</Link>
         </Button>
       </div>
     </section>

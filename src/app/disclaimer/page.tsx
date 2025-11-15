@@ -16,16 +16,16 @@ export default function page() {
         We also operate as estate agents, representing buyers, sellers, landlords, or tenants in certain transactions where we are formally engaged.
         All property information provided on our Website is published for general information purposes only.
         We make no guarantees about the accuracy, completeness, reliability, suitability, or availability of any property listed.
-        Users are strongly advised to conduct independent verification before making any financial, contractual, or investment decisions.<br />        
+        Users are strongly advised to conduct independent verification before making any financial, contractual, or investment decisions. <br />
         <br />
         2. No Warranties<br />
-        While we make every effort to ensure that the information on this Website is accurate and up to date, we make no representations or warranties of any kind, express or implied, about: <br />
+        While we make every effort to ensure that the information on this Website is accurate and up to date, we make no representations or warranties of any kind, express or implied, about:
         •	The accuracy or reliability of property descriptions, prices, photographs, or availability. <br />
         •	The quality, condition, or legal status of any property. <br />
         •	The conduct, capability, or authorization of any agent, seller, landlord, or tenant. <br />
         All property listings are subject to change or removal without notice. <br />
         <br />
-        3. Professional  <br />
+        3. Professional Relationship<br />
         Use of our Website does not automatically create an agency, advisory, or fiduciary relationship between the user and Agbara Badagry Property Center.
         An official relationship as estate agent or representative arises only when both parties sign a written Agency Agreement or Listing Agreement.
         We are not responsible for any private dealings or agreements made between users outside our formal involvement. <br />
