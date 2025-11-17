@@ -174,13 +174,13 @@ export default function Register() {
         router.push("/auth/verify-email?email=" + data.email);
       }
 
-
     } catch (error) {
       console.error(error);     
-      setError("Please Try again later.")
+      setError("Please Try again later.")     
+    } finally {
       form.reset();
       setLoading(false);
-    } 
+    }
 
 
   };
