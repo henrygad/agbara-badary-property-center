@@ -9,7 +9,7 @@ export default function page() {
         </h1>
       </div>
     </section>
-    <section className='p-3 mb-20'>     
+    <section className='p-3 mb-20 text-sm'>     
       <p>
         1. General Information <br />
         Agbara Badagry Property Center provides a digital platform for real estate listings, sales, rentals, and property management services.

@@ -20,8 +20,16 @@ export default function page() {
         </div>
       </section>
       <section className='p-3 mb-20'>
-        <p>
-          Agbara Badagry Property Center is an online real estate platform that provides property listings, sales and rental advertising, Property Management visibility, and connection services between property Owners, Agents, Prospect investors or Tenancy. In addition to our online platform, we also act as a licensed estate agency in all transactions representing buyer, seller, landlord or tenants when make use of our platform and by whom. We do not collect payments online. All transactions are arranged directly or through our authorized representatives.
+        <p className="text-sm">
+          Agbara Badagry Property Center is a member of Skybridge Group. Agbara Badagry Property Center services is a real estate platform that provides property listings, sales and rental advertising, property management visibility, connection services between property owners, licensed agents, prospect investors tenants.<br />
+
+          Agbara Badagry Property Center is a licenced real estate agency firm experienced in :- <br />
+          <br />
+          * Property development <br />
+          * Property valuation <br />
+          * Real Estate consulting <br />
+          * Real Estate investment analysis <br />
+          * Legal services <br />
         </p>       
       </section>
     </div>)  

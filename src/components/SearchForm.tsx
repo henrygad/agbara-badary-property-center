@@ -101,7 +101,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
     };
 
     return (
-        <div className="w-full space-y-3 min-w-[320px] sm:min-w-[480px] md:min-w-4xl">
+        <div className="w-full space-y-3 min-w-[320px] sm:min-w-[480px] md:min-w-2xl">
             {/* Tabs */}
             <Tabs
                 value={search.status}
@@ -135,7 +135,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
             {/* Form */}
             <form
                 onSubmit={handleSubmit}
-                className="grid grid-col-2 sm:grid-cols-4 gap-4 w-full max-w-full"
+                className="grid grid-col-2 md:grid-cols-4 gap-4 w-full max-w-full"
             >
                 {/* Location */}
                 <div className="col-span-2 sm:col-span-4">
@@ -236,7 +236,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                             transition={{ duration: 0.25 }}
                             className="overflow-hidden col-span-2 sm:col-span-4"
                         >
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {/* Toilet */}
                                 <Select
                                     value={search.toilets}

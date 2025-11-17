@@ -81,16 +81,16 @@ export default function Contact() {
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">
-                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg">
                                     <Mail size={20} />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-base text-gray-900 dark:text-white">Email Address</h3>
-                                    <p className="text-gray-600 text-sm">info@agbarabadagarypropertycenter.com</p>
+                                    <p className="text-gray-600 text-sm">agbarabadagarypropertycenter@gmail.com</p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">
-                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg">
                                     <Clock3 size={20} />
                                 </div>
                                 <div>

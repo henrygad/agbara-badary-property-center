@@ -31,7 +31,7 @@ export default function GlobalFooter() {
                     <div>
                         <CompanyLogo location='Footer' />
                         <div>
-                            <p className="text-sm text-wrap">Agbara Badagry Property Center is an online real estate platform that provides property listings, sales and rental advertising, Property Management visibility, and...</p>
+                            <p className="text-sm text-wrap">Agbara Badagry Property Center is a member of Skybridge Group. Agbara Badagry Property Center services is a real estate platform that provides property listings, sales and...</p>
                             <button className='px-2 py-2 border rounded-sm mt-2'>
                                 <Link href="/about">
                                     <p className='text-xs font-medium  hover:text-foreground'>Read More</p>
@@ -57,11 +57,11 @@ export default function GlobalFooter() {
                     <div>
                         <h4 className="font-bold mb-4 text-base">Services</h4>
                         <ul className="space-y-2 text-xs">
-                            <li><Link className="hover:text-gray-300" href="#">Property Valuation</Link></li>
-                            <li><Link className="hover:text-gray-300" href="#">Property Management</Link></li>
-                            <li><Link className="hover:text-gray-300" href="#">Legal Support</Link></li>
-                            <li><Link className="hover:text-gray-300" href="#">Real Estate Advisory</Link></li>
-                            <li><Link className="hover:text-gray-300" href="#">Mortgage Services</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/property-valuation">Property Valuation</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/property-management">Property Management</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/legal-support">Legal Support</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/real-estate-advisory">Real Estate Advisory</Link></li>
+                            <li><Link className="hover:text-gray-300" href="/mortgage-services">Mortgage Services</Link></li>
                         </ul>
                     </div>
                 </div>

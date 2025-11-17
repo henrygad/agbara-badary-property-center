@@ -40,14 +40,14 @@ export default function Home() {
 
     {/* Hero */}
     <section
-      className="relative bg-cover bg-center h-[600px] md:rounded-sm text-white"
+      className="relative bg-cover bg-[position:100%] w-full h-[600px] md:rounded-sm text-white"
       style={{ backgroundImage: `url(${typeof backgroundimage === "string" ? backgroundimage : backgroundimage?.src})` }}
     >
       <div className="absolute top-0 left-0 right-0 bottom-0 bg-black opacity-50 rounded-sm" />
       {/* Hero call to action */}
       <div className="relative w-full h-full z-20 flex justify-center items-center">
         <div className="absolute top-10 md:top-20 left-0 right-0 flex flex-col justify-center items-center gap-3 min-w-[320px]">
-          <h1 className="text-2xl md:text-4xl font-bold text-wrap text-center">
+          <h1 className="text-2xl md:text-4xl font-bold text-wrap text-center max-w-[480px] sm:max-w-none">
             Your Gateway to verified Properties in <span className="whitespace-pre text-nowrap">Agbara-Badagry</span>
           </h1>
           <p className="text-sm md:text-base">Buy, Rent, Sale Properties With US Today.</p>

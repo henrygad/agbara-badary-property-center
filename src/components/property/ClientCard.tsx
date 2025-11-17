@@ -15,7 +15,7 @@ export default function ClientCard({ property }: { property: PropertyTypes }) {
 
 
   return <div
-    className="flex  gap-2 flex-col hover:shadow hover:bg-red-50"
+    className="flex gap-2 flex-col hover:shadow hover:bg-red-50"
     onClick={() => router.push("/properties/" + property.id)}
   >
 
@@ -52,7 +52,7 @@ export default function ClientCard({ property }: { property: PropertyTypes }) {
 
       {/* Description */}
       <div className='flex items-center gap-1 mt-1'>
-        <p className="text-xs font-normal text-gray-600 max-h-10 max-w-full truncate line-clamp-3 py-2">
+        <p className="text-sm font-normal text-gray-600 max-w-full truncate py-2">
           {property.description}
         </p>
       </div>
