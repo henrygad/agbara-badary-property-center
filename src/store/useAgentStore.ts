@@ -27,7 +27,7 @@ export const useAgentStore = create<AgentStore>(
 
         setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
 
-        setAgents: (agents: UserTypes[]) => set({ agents }),
+        setAgents: (agents: UserTypes[]) => set({ agents: agents.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) }),
 
         updateAgent: (agent: UserTypes) =>
             set((state) => ({

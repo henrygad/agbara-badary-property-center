@@ -26,7 +26,7 @@ export const useImageStore = create<ImageState>(
 
         setLoading: (loading, loadingMore) => set({ loading, loadingMore }),
 
-        setImages: (images) => set({ images: images }),
+        setImages: (images) => set({ images }),
 
         addImage: (image) =>
             set((state) => ({ images: [image, ...state.images] })),

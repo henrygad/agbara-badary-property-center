@@ -38,7 +38,13 @@ export const usePropertyStore = create<PropertyStore>(
 
         setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
 
-        setProperties: (properties: PropertyTypes[]) => set({ properties }),
+        setProperties: (properties: PropertyTypes[]) => set({
+            properties: properties.sort((a, b) => {
+                const timeA = (a?.createdAt || new Date()).getTime();
+                const timeB = (b?.createdAt || new Date()).getTime();
+
+                return timeB - timeA;
+            }) }),
 
         addProperty: (property: PropertyTypes) =>
             set((state) => ({ properties: [property, ...state.properties] })),

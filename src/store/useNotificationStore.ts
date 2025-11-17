@@ -27,7 +27,7 @@ export const useNotificationStore = create<NotificationStore>(
 
         setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
 
-        setNotification: (notifications: NotificationTypes[]) => set({ notifications }),
+        setNotification: (notifications: NotificationTypes[]) => set({ notifications: notifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) }),
 
         addNotification: (notifications: NotificationTypes[]) =>
             set((state) => ({ notifications: [...notifications, ...state.notifications] })),

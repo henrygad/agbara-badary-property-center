@@ -186,8 +186,6 @@ export default function Register() {
   };
   
 
-  
-
   return (
     <div className="flex justify-center items-center w-full px-3 py-10">
       <div className="space-y-12 bg-white shadow-md rounded-md px-3 py-8 md:p-12 md:max-w-4xl">

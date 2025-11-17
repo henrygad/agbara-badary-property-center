@@ -28,7 +28,7 @@ export const useRequestStore = create<RequestStore>(
 
         setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
 
-        setRequests: (requests: RequestTypes[]) => set({ requests }),
+        setRequests: (requests: RequestTypes[]) => set({ requests: requests.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) }),
 
         addRequest: (request: RequestTypes) =>
             set((state) => ({ requests: [...state.requests, request] })),

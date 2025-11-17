@@ -28,7 +28,9 @@ export const useDraftStore = create<DraftStore>(
 
         setLoading: (loading: boolean, loadingMore: boolean) => set({ loading, loadingMore }),
 
-        setDraft: (properties: PropertyTypes[]) => set({ drafts: properties }),
+        setDraft: (properties: PropertyTypes[]) => set({
+            drafts: properties
+        }),
 
         addDraft: (property: PropertyTypes) =>
             set((state) => ({ drafts: [property, ...state.drafts] })),

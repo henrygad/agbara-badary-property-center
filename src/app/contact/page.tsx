@@ -37,8 +37,7 @@ export default function Contact() {
         contactType: "Customer Support",
     };
 
-    return <div>
-
+    return <div className="w-full">
         {/* Hero */}
         <section className="py-10 md:py-20 bg-primary text-white md:rounded-sm">
             <div className="mx-auto px-6 text-center">
@@ -53,28 +52,28 @@ export default function Contact() {
             </div>
         </section>
 
-        {/* Contact location */}
+        {/* Contact info and location */}
         <section className="py-10 md:py-20">
-            <div className="mx-auto px-6">
+            <div className="mx-auto px-4">
                 <div className="grid lg:grid-cols-2 gap-12">
-                    <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+                    <div className="bg-white p-8 rounded-xl shadow-md">
                         <h1 className="text-2xl font-bold mb-8 text-primary">Contact Information</h1>
                         <div className="space-y-8">
                             <div className="flex items-start space-x-4">
-                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg">
                                     <MapPinHouse size={20} />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-base text-gray-900 dark:text-white">Office Address</h3>
-                                    <p className="text-gray-600 text-sm">Mango bus stop Agbara-Lusada Road <br />Ogun State, Nigeria</p>
+                                    <p className="text-gray-600 text-sm text-wrap">Mango bus stop, Agbara-Lusada Road, <br /><span> Ogun State, Nigeria</span></p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">
-                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg flex-shrink-0">
+                                <div className="bg-red-50 dark:bg-gray-700 p-3 rounded-lg">
                                     <PhoneCall size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Phone Numbers</h3>                                    
+                                    <h3 className="font-semibold text-base text-gray-900 dark:text-white">Phone Numbers</h3>
                                     <p className="text-gray-600 text-sm">+234 707 235 4095</p>
                                     <p className="text-gray-600 text-sm">+234 805 052 4419</p>
                                     <p className="text-gray-600 text-sm">+234 812 307 0785</p>
@@ -86,7 +85,9 @@ export default function Contact() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-base text-gray-900 dark:text-white">Email Address</h3>
-                                    <p className="text-gray-600 text-sm">agbarabadagarypropertycenter@gmail.com</p>
+                                    <p className="text-gray-600 text-sm break-all">
+                                        agbarabadagarypropertycenter@gmail.com
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">
@@ -109,7 +110,7 @@ export default function Contact() {
                         </div>
                     </div>
                     <div className="bg-gray-200 dark:bg-gray-700 rounded-xl shadow-md flex min-h-[420px]">
-                       <ClientContact />
+                        <ClientContact />
                     </div>
                 </div>
             </div>
@@ -121,9 +122,9 @@ export default function Contact() {
                 <div className="text-center mb-12">
                     <h2 className="text-2xl md:text-4xl font-bold text-primary">Frequently Asked Questions</h2>
                     <p className="text-gray-600 text-sm mt-2">Quick answers to common questions about our services.</p>
-                </div>                
+                </div>
                 <div>
-                    <FAQ full={false} />                    
+                    <FAQ full={false} />
                     <div className="flex justify-end items-center mt-4">
                         <Link href="/faq" className="text-base text-primary font-medium">See All FAQ</Link>
                     </div>
@@ -139,11 +140,11 @@ export default function Contact() {
                         <h2 className="text-2xl md:text-4xl font-bold text-primary">Send Us a Message</h2>
                         <p className="text-gray-600 text-sm mt-2">{"Fill out the form below and we'll get back to you within 24 hours."}</p>
                     </div>
-                    <ContactForm />                   
+                    <ContactForm />
                 </div>
             </div>
         </section>
-        
+
         <Script
             id="contact-jsonld"
             type="application/ld+json"
