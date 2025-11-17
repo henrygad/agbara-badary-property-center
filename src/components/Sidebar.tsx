@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/useUserStore";
 
 const adminLinks = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Home", href: "/admin", icon: LayoutDashboard },
     { name: "Add Property", href: "/admin/add-property", icon: Plus },
     {
         name: "Properties",
@@ -43,7 +43,7 @@ const adminLinks = [
 ];
 
 const agentLinks = [
-    { name: "Dashboard", href: "/agent", icon: LayoutDashboard },
+    { name: "Home", href: "/agent", icon: LayoutDashboard },
     { name: "Add Property", href: "/agent/add-property", icon: Plus },
     {
         name: "Properties",

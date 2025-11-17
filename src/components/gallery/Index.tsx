@@ -167,7 +167,7 @@ export default function Gallery({ setGetSelected }: Props) {
                     {/* Upload section */}
                     <div className="flex justify-center items-center">
                         <UploadImage
-                            multiple
+                            multiple={true}
                             accept="image/*"
                             inputRef={inputRef}
                             onDrop={handleDrop}
@@ -184,7 +184,7 @@ export default function Gallery({ setGetSelected }: Props) {
                                     .map((_, i) => (
                                         <ImageLoader
                                             key={`loading-${i}`}
-                                            className="w-auto h-30 sm:h-[280px] flex-shrink-0 rounded-xl"
+                                            className="w-auto h-30 sm:h-[280px] shrink-0 rounded-xl"
                                         />
                                     ))
                                 : null}
@@ -198,7 +198,7 @@ export default function Gallery({ setGetSelected }: Props) {
                                         selected={selected}
                                         setSelected={setSelected}
                                         remove={handleDeleteImageMetaDeta}
-                                        className="w-auto h-30 sm:h-[280px] flex-shrink-0 rounded-xl items-start cursor-pointer"
+                                        className="w-auto h-30 sm:h-[280px] shrink-0 rounded-xl items-start cursor-pointer"
                                     />
                                 ))
                                 : !loading.isLoading && (

@@ -271,6 +271,7 @@ export default function PropertyFormEditor({
                     };
                     await addNotificationDb(payload);
                 }
+                
             } else if (documentType === "UPDATE" && payload.referenceId) {
                 property = await submitUpdatedProperty(payload);
                 if (user?.accountType === "Agent") {

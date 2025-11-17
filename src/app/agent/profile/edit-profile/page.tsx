@@ -181,7 +181,7 @@ export default function AdminProfilePage() {
             />
             <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 cursor-pointer transition">
               <Camera className="text-white w-6 h-6" />
-              <input
+              <input                
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
