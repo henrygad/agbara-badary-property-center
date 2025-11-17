@@ -91,7 +91,7 @@ export default function AdminDashboard() {
                 {/* Account Pending Approval */}
                 {user &&
                     user.accountStatus === "Pending" &&
-                    <div className="rounded-lg border border-yellow-200 bg-yellow-100/50 px-4 py-3">
+                    <div className="flex justify-between gap-4 rounded-lg border border-yellow-200 bg-yellow-100/50 px-4 py-3">
                         <div className="flex items-center gap-2 text-sm text-yellow-700">
                             <Clock className="h-5 w-5 text-yellow-600" />
                             <span>Your account is still pending admin approval.</span>

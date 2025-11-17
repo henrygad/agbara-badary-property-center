@@ -14,8 +14,6 @@ export async function POST(req: Request) {
         const body = (await req.json()) as { email: string, type: "Verify Email" | "Reset Password" };
         const { email, type } = body;
 
-        console.log(body)
-
         // Validate incoming requests
         if (!email || !(type === "Verify Email" || type === "Reset Password")) {
             return NextResponse.json(

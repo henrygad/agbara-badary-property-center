@@ -54,10 +54,10 @@ export default function Navbar() {
     if (!user?.id) return;
 
     listenToNotifications(user.accountType === "Admin" ? "Admin" : user?.id,
-      (notic) => {        
-      addNotification(notic);
-      setPopupNotic(notic);
-    });
+      (notic) => {
+        addNotification(notic);
+        setPopupNotic(notic);
+      });
 
   }, [user, addNotification]);
 
@@ -94,7 +94,7 @@ export default function Navbar() {
             <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
               {unreadCount}
             </span> :
-            <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center" />                         
+            <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center" />
           }
 
           {/* <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span> */}
@@ -107,17 +107,15 @@ export default function Navbar() {
             className="flex items-center gap-2"
           >
             <motion.div
-              whileHover={{ rotate: 5 }}
-              className="h-8 w-8 rounded-full bg-gray-100"
+              whileHover={{ rotate: 5 }}              
             >
-              {user?.profileImage?.url &&
-                <DisplayImage
+              <DisplayImage
                 src={user?.profileImage?.url || "avata.png"}
-                alt={user?.accountType + " " + "Avatar"}
+                alt={user?.accountType + "_" + "Avatar"}
                 useRemove={false}
                 type="Profile"
                 className="h-8 w-8 rounded-full border-primary border-2"
-                />}
+              />
             </motion.div>
 
             <ChevronDown
@@ -139,7 +137,7 @@ export default function Navbar() {
                 <Link
                   href={user?.accountType === "Admin" ? "/admin/profile" : "/agent/profile"}
                   className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
-                  onClick={() => {                    
+                  onClick={() => {
                     setShowMenu(false);
                   }}
                 >
@@ -152,7 +150,7 @@ export default function Navbar() {
                     setShowMenu(false);
                   }}
                 >
-                 Settings
+                  Settings
                 </Link>
               </motion.div>
             )}

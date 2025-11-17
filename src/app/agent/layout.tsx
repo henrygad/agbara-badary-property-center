@@ -86,6 +86,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             
       } catch (error) {
         console.error("Error fetching agent:", error);
+      } finally {
+        setUserLoading(false);
+        setPropertyLoading(false, false);
+        setImageLoading(false, false);
+        setNotificationLoading(false, false);   
       }
     };
 
@@ -129,7 +134,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
 
   return (
-    <div className="break-words text-wrap flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">
+    <div className="text-wrap flex flex-col text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">
       <Sidebar />
       <div className="md:ml-64 flex-1">
         <Navbar />

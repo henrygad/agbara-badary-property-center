@@ -11,7 +11,7 @@ export default function AdminCard({property}: {property: PropertyTypes}) {
     return <div className="flex items-center gap-4">
         <DisplayImage
             className="h-18 w-18 rounded-md object-cover"
-            src={property.images[0] || ""}
+            src={property.images[0] || "image.png"}
             alt={property.title}
             useRemove={false}
         />

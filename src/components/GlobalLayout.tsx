@@ -45,7 +45,7 @@ export default function GlobalLayout({ children }: { children: ReactNode }) {
         <>{children}</>
       ) : (
         <div className="bg-gray-50">
-          <div className="max-w-screen-2xl min-h-screen mx-auto break-words text-wrap">
+            <div className="max-w-screen-2xl min-h-screen mx-auto wrap-break-word text-wrap">
               <GlobalHeader />
             <main className=" sm:p-8">{children}</main>
               <GlobalFooter />

@@ -94,7 +94,7 @@ export default function Drafts() {
             {drafts.length > 0 ? (
               drafts.map((p) => (
                 <TableDisplay
-                  key={p.id}
+                  key={p.draftId}
                   p={p}
                   selected={selected}
                   setSelected={toggleSelect}

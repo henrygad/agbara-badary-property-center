@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import {  z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -87,7 +87,7 @@ export default function Register() {
       firstName: "",
       lastName: "",
       email: "",
-      phoneCode: "🇳🇬 +234",
+      phoneCode: "+234",
       phone: "",
       password: "",
       confirmPassword: "",
@@ -165,7 +165,7 @@ export default function Register() {
 
       const resData = await res.json() as { message: string, success: boolean };
 
-      if (!resData.success) {        
+      if (!resData.success) {
         setError(resData.message)
       } else {
 
@@ -175,8 +175,8 @@ export default function Register() {
       }
 
     } catch (error) {
-      console.error(error);     
-      setError("Please Try again later.")     
+      console.error(error);
+      setError("Please Try again later.")
     } finally {
       form.reset();
       setLoading(false);
@@ -184,8 +184,10 @@ export default function Register() {
 
 
   };
+  
 
   
+
   return (
     <div className="flex justify-center items-center w-full px-3 py-10">
       <div className="space-y-12 bg-white shadow-md rounded-md px-3 py-8 md:p-12 md:max-w-4xl">
@@ -273,7 +275,7 @@ export default function Register() {
                   className="flex items-center bg-gray-50 px-3 py-2 text-sm rounded border">
                   <span className="mr-1">🇳🇬</span>
                   <span className="text-gray-700 font-medium">+234</span>
-               </div>
+                </div>
               </div>
               <FormField
                 control={form.control}
