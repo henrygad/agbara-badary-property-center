@@ -15,7 +15,7 @@ export default function ClientProperties() {
     const { properties, loading: loadingProperties } = useClientStore();
     const query = useSearchParams();
 
-    const [tab, setTab] = useState<"Sale" | "Rent">("Sale");
+    const [tab, setTab] = useState<"Sale" | "Rent" | "Lease">("Sale");
     const [subTab, setSubTab] = useState<"All" | "Residential" | "Commercial" | "Industrial">("All");
 
     const [loadingTab, setLoadingTab] = useState(true);
@@ -75,6 +75,15 @@ export default function ClientProperties() {
                     className="data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white dark:data-[state=active]:text-white cursor-pointer"
                 >
                     Rent
+                </TabsTrigger>
+
+                <TabsTrigger
+                    type="button"
+                    value="Lease"
+                    onClick={() => setTab("Lease")}
+                    className="data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white dark:data-[state=active]:text-white cursor-pointer"
+                >
+                    Lease
                 </TabsTrigger>
             </TabsList>
 

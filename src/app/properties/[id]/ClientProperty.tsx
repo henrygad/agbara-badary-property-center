@@ -57,14 +57,13 @@ export default function ClientProperty() {
         fetchProperty(getPId);
     
       }, [id, router]);
-    
-    
+
       useEffect(() => {
         async function fetchAlsoLike(p: PropertyTypes) {
           try {
             const ps = await searchPropertiesDb({ status: p.status, type: p.type });
             if (ps?.length) {
-              setAlsoLikeProperpies(ps)
+              setAlsoLikeProperpies(ps.filter(p => p.id !== property?.id));
             }
           } catch (error) {
             console.log(error);

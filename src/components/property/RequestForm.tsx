@@ -138,7 +138,7 @@ export default function RequestForm({ property }: { property: PropertyTypes }) {
 
       {open &&
         <div
-          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-40 max-w-[480px] bg-white shadow-2xl shadow-accent-foreground rounded-xl p-5 border-t-4 border-primary")}
+          className={cn("fixed top-1/2 left-1/2 -translate-1/2 z-50 max-w-[420px] sm:max-w-[480px] bg-white shadow-2xl shadow-accent-foreground rounded-xl p-5 border-t-4 border-primary")}
         >
           <div className="animate-in slide-in-from-bottom-10 min-w-[320px] max-h-full min-h-full overflow-hidden">
             <div>

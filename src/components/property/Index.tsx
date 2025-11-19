@@ -66,14 +66,16 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
             plugins={[plugin.current]}
             className="relative min-w-full"
         >
-            <div className="absolute top-4 left-4 flex space-x-2 z-20">
-                <Availability placeViewing={placeViewing} availability={property.availability} />
-                {property.status && <Status status={property.status} />}
-                {property.category && <Badge variant="secondary">{property.category}</Badge>}
-                {property.type && <Badge>{property.type}</Badge>}
+            <div className="absolute top-4 left-4 z-20">
+                <div className="flex flex-col gap-2">
+                    <Availability placeViewing={placeViewing} availability={property.availability} />
+                    {property.status && <Status status={property.status} />}
+                    {property.category && <Badge variant="secondary">{property.category}</Badge>}
+                    {property.type && <Badge>{property.type}</Badge>}
+                </div>
             </div>
             {placeViewing === "CLIENT" &&
-                <div className="absolute top-4 right-4 z-20">
+                <div className="absolute top-3 right-3 z-20">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="bg-gray-300 rounded-4xl p-1">
@@ -124,7 +126,6 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                     </CarouselContent> :
                     <div className="w-full h-[400px] sm:h-[600px] rounded-lg border"></div>
             }
-
             <CarouselPrevious type="button" className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/50 p-2 rounded-full hover:bg-white" />
             <CarouselNext type="button" className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/50 p-2 rounded-full hover:bg-white" />
         </Carousel>
@@ -227,7 +228,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                                 {property.toilets && (
                                     <div className="flex shrink-0 items-center gap-2">
                                         <Toilet className="w-4 h-4 text-muted-foreground" />
-                                        <span>{property.toilets} Bathrooms</span>
+                                        <span>{property.toilets} Toilets</span>
                                     </div>
                                 )}
                                 {property.parkingSpaces && (

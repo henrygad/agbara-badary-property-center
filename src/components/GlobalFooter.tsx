@@ -46,7 +46,7 @@ export default function GlobalFooter() {
                         <ul className="space-y-2 text-xs">
                             <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Sale" } }}>Buy</Link></li>
                             <li><Link className="block hover:text-gray-300" href="/auth/register">Sell</Link></li>
-                            <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Rent" } }}>Rent</Link></li>
+                            <li><Link className="block hover:text-gray-300" href={{ pathname: "/properties", query: { tab: "Rent" } }}>Rent</Link></li>                        
                             <li><Link className="block hover:text-gray-300" href="/about">About US</Link></li>
                             <li><Link className="block hover:text-gray-300" href="/contact">Contact</Link></li>
                             <li><Link className="block hover:text-gray-300" href="/faq">FAQ</Link></li>

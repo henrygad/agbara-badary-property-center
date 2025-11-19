@@ -27,11 +27,7 @@ import Link from "next/link";
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name required"),
   lastName: z.string().min(2, "Last name required"),
-  gender: z.enum(["Male", "Female", "Other"]).optional(),
-  phoneCode: z
-    .string()
-    .min(1, "Country code is required")
-    .max(5, "Invalid country code format"),
+  gender: z.enum(["Male", "Female", "Other"]).optional(), 
   phone: z
     .string()
     .regex(/^[0-9]{11}$/, "Enter a valid 11-digit phone number"),
@@ -67,8 +63,7 @@ export default function AdminProfilePage() {
     form.setValue("firstName", user?.firstName ?? "");
     form.setValue("lastName", user?.lastName ?? "");
     form.setValue("gender", user?.gender);
-    form.setValue("phone", user?.phone ?? "");
-    form.setValue("phoneCode", user?.phoneCode ?? "🇳🇬 +234");
+    form.setValue("phone", user?.phone ?? "");   
     form.setValue("email", user?.email ?? "");
     form.setValue("company", user?.company ?? "");
     form.setValue("bio", user?.bio ?? "");
@@ -260,10 +255,7 @@ export default function AdminProfilePage() {
                   className="flex items-center px-3 py-2 text-sm rounded border">
                   <span className="mr-1 block">🇳🇬</span>
                   <span className="font-medium">+234</span>
-                </div>
-                {form.formState.errors.phoneCode && (
-                  <p className="text-red-500 text-xs mt-1">{form.formState.errors.phoneCode.message}</p>
-                )}
+                </div>                
               </div>           
             <div className="flex-1">
               <Label className="text-sm font-medium mb-2">Phone Number</Label>

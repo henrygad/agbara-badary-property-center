@@ -94,10 +94,8 @@ export default function Navbar() {
             <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
               {unreadCount}
             </span> :
-            <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center" />
-          }
-
-          {/* <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span> */}
+            <span className="absolute -top-1 -right-1  w-4 h-4 rounded-full" />
+          }          
         </button>
 
         {/* Avatar dropdown */}
