@@ -31,7 +31,7 @@ export const formatDate = (date: Date | undefined) => {
     })
 }
 
-export const getCookieFromClient = (req: NextRequest) => {    
+export const getCookieFromClient = (req: NextRequest) => {
     const DNS = process.env.NEXT_PUBLIC_APP_DSN || "agbarabadagrypropertycenter.com";
     const pattern = new RegExp(`__Host-${DNS}_client_id=([^;]+)`);
 
@@ -43,8 +43,11 @@ export const getCookieFromClient = (req: NextRequest) => {
     return clientId
 
 };
- 
+
 export function getOptimizedImage(url: string, width = 1200) {
+    if (!url) {
+        return "/error.png";
+    }
     return url.replace(
         "/upload/",
         `/upload/f_auto,q_auto,w_${width}/`
