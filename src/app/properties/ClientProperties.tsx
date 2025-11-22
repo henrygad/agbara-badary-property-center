@@ -3,10 +3,13 @@
 import ItemNotFound from "@/components/ItemNotFound";
 import PageLoading from "@/components/loaders/PageLoader";
 import ClientCard from "@/components/property/ClientCard";
+import SearchForm from "@/components/SearchForm";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useClientStore } from "@/store/useClientStore";
+import { SearchIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useMemo, useState } from "react";
@@ -14,6 +17,9 @@ import { useEffect, useMemo, useState } from "react";
 export default function ClientProperties() {
     const { properties, loading: loadingProperties } = useClientStore();
     const query = useSearchParams();
+
+    const [openSearchForm, setOpenSearchForm] = useState(false);
+
 
     const [tab, setTab] = useState<"Sale" | "Rent" | "Lease">("Sale");
     const [subTab, setSubTab] = useState<"All" | "Residential" | "Commercial" | "Industrial">("All");
@@ -57,6 +63,28 @@ export default function ClientProperties() {
     };
 
     return <>
+        <div className='w-full mb-3'>
+            <AlertDialog open={openSearchForm} onOpenChange={setOpenSearchForm}>
+                <AlertDialogTrigger asChild>
+                    <button
+                        className='w-full py-2.5 px-4 rounded-full flex justify-start items-center gap-4 text-sm bg-gray-100/70'
+                    >
+                        <SearchIcon size={20} className='text-slate-800' /> Search...
+                    </button>
+                </AlertDialogTrigger >
+
+                <AlertDialogContent className='w-full max-w-none' style={{ maxWidth: "95%" }}>
+                    <AlertDialogTitle className='hidden'></AlertDialogTitle>
+                    <SearchForm open={openSearchForm} setOpen={setOpenSearchForm} />
+                    <AlertDialogFooter>
+                        <AlertDialogCancel type='button'>Close</AlertDialogCancel>
+                    </AlertDialogFooter>
+
+                </AlertDialogContent>
+
+            </AlertDialog>
+        </div>
+
         <Tabs defaultValue={tab}>
             <TabsList className="flex justify-between items-center gap-4 text-sm bg-white min-h-12 p-2 w-full max-w-full overflow-x-auto overflow-y-hidden scroll-smooth">
                 <TabsTrigger

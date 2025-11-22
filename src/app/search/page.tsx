@@ -79,7 +79,8 @@ export default function Search() {
       <menu className="w-full mb-4">
         <ReturnBack />
       </menu>
-      <div className='w-full mb-4'>
+
+      <div className='w-full mb-3'>
         <AlertDialog open={openSearchForm} onOpenChange={setOpenSearchForm}>
           <AlertDialogTrigger asChild>
             <button

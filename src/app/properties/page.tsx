@@ -16,7 +16,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-
 export default function Properties() {
   return (
     <div className="w-full p-2">
