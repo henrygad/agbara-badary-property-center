@@ -40,7 +40,7 @@ export default function Home() {
 
     {/* Hero */}
     <section
-      className="relative bg-cover bg-[position:100%] w-full h-[600px] md:rounded-sm text-white"
+      className="relative bg-cover bg-position-[100%] w-full h-[600px] md:rounded-sm text-white"
       style={{ backgroundImage: `url(${typeof backgroundimage === "string" ? backgroundimage : backgroundimage?.src})` }}
     >
       <div className="absolute top-0 left-0 right-0 bottom-0 bg-black opacity-50 rounded-sm" />
@@ -183,7 +183,7 @@ export default function Home() {
           {
             !loading && filteredProperties.length ?
               filteredProperties.map((p, idx) => {
-                if (idx > 4) {
+                if (idx > 5) {
                   return;
                 }
                 return <ClientCard key={p.id} property={p} />

@@ -10,7 +10,7 @@ import { getPropertyByIdDb } from "@/lib/firebase/property_service";
 import GroundLoader from "@/components/loaders/GroundLoader";
 import { useUserStore } from "@/store/useUserStore";
 import Script from "next/script";
-import { usePropertyStore } from "@/store/usePropertyStore";
+import { useClientStore } from "@/store/useClientStore";
 
 export default function ClientProperty() {
   const { id } = useParams();
@@ -18,19 +18,17 @@ export default function ClientProperty() {
 
   const { user } = useUserStore();
 
-  const { properties, loading: alsoLikePropertiesLoading } = usePropertyStore();
+  const { properties, loading: alsoLikePropertiesLoading } = useClientStore();
 
   const [loading, setLoading] = useState(true);
   const [property, setProperty] = useState<PropertyTypes | undefined>(undefined);
 
 
   const alsoLikeProperties = useMemo(() => {
-    return properties.filter(p =>
-      p.status === property?.status &&
-      p.type === property.type &&
-      p.availability === property.availability
+    return properties.filter(p => p.id !== property?.id &&
+      (p.status === property?.status && p.type === property.type && p.availability === "Accepted")
     );
-  }, [property, properties]);
+  }, [properties, property]);
 
 
   useEffect(() => {
@@ -100,6 +98,7 @@ export default function ClientProperty() {
         placeViewing="CLIENT"
       />
     </section>
+    {/* Similar property */}
     <section className="py-10 bg-white mt-8">
       {!alsoLikePropertiesLoading ?
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -107,7 +106,7 @@ export default function ClientProperty() {
             <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...alsoLikeProperties].map((p) =>
+            {alsoLikeProperties.map((p) =>
               <ClientCard key={p.id} property={p} />
             )
             }

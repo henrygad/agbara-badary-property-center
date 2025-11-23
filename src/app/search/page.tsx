@@ -80,11 +80,12 @@ export default function Search() {
         <ReturnBack />
       </menu>
 
-      <div className='w-full mb-3'>
+      {/* Sarch input */}
+      <div className='w-full mb-4'>
         <AlertDialog open={openSearchForm} onOpenChange={setOpenSearchForm}>
           <AlertDialogTrigger asChild>
             <button
-              className='w-full py-2.5 px-4 rounded-full flex justify-start items-center gap-4 text-sm bg-gray-100/70'
+              className='w-full py-2.5 px-4 rounded-full flex justify-start items-center gap-2 text-sm bg-gray-100/70'
             >
               <SearchIcon size={20} className='text-slate-800' /> Search...
             </button>

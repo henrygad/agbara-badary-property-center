@@ -3,9 +3,9 @@ import { getPropertyByIdDb } from "@/lib/firebase/property_service";
 import ClientProperty from "./ClientProperty";
 import type { Metadata } from "next";
 
-export async function generateMetadata(props: unknown): Promise<Metadata> {
-  const { params } = props as { params: { id: string } };
-  const property = await getPropertyByIdDb(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {  
+  const { id } = await params;
+  const property = await getPropertyByIdDb(id);
 
   if (!property) {
     return { title: "Property Not Found" };
@@ -31,7 +31,7 @@ export async function generateMetadata(props: unknown): Promise<Metadata> {
 }
 
 // Server component page
-export default function PropertyDetailsPage() {
+export default function Page() {
   return (
     <div className="w-full p-2">
       <menu className="w-full mb-4">
