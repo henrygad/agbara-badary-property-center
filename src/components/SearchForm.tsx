@@ -108,7 +108,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                 value={search.status}
                 onValueChange={(v: string) => handleChange("status", v)}
             >
-                <TabsList className="grid grid-cols-3 text-base w-full max-w-ful h-full">
+                <TabsList className="grid grid-cols-3 text-base w-full">
                     <TabsTrigger
                         value="Sale"
                         className="data-[state=active]:bg-red-700 data-[state=active]:text-white cursor-pointer"
@@ -137,13 +137,13 @@ export default function SearchForm({ setOpen = () => null }: Props) {
             <div className="relative">
 
                 {/* should be left */}
-                <div className={cn("absolute left-1/6 -bottom-6 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Buy"? "bg-gray-50 ring-2 ring-gray-50 border-gray-50": "")} />
+                <div className={cn("absolute left-1/6 -translate-1/2 -bottom-9 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Buy"? "bg-primary": "")} />
 
                 {/* should be centerned */}
-                <div className={cn("absolute left-1/2 -bottom-6 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Rent"? "bg-gray-50 ring-2 ring-gray-50 border-gray-50": "")} />
+                <div className={cn("absolute left-1/2 -translate-1/2 -bottom-8 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Rent"? "bg-primary": "")} />
 
                 {/* should be right */}
-                <div className={cn("absolute right-1/6 -bottom-6 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Lease"? "bg-gray-50 ring-2 ring-gray-50 border-gray-50": "")} />
+                <div className={cn("absolute right-1/10 sm:right-1/8 -translate-1/2 -bottom-9 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Lease"? "bg-primary": "")} />
             </div>
 
             {/* Form */}
