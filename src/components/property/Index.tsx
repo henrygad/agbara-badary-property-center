@@ -9,7 +9,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { formatCurrency, formatDate } from "@/utils";
+import { convertToEmbedUrl, formatCurrency, formatDate } from "@/utils";
 import { Bath, Toilet, Bed, CalendarDays, Car, Mail, MapPin, Phone, Ruler, User, Sofa, Hammer, Layers, Building2, Briefcase, CarFront, MoreVertical, Clipboard, Flag } from "lucide-react";
 import DisplayImage from "@/components/gallery/DisplayImage";
 import { PropertyTypes } from "@/types/property.types";
@@ -196,11 +196,12 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                             <TabsContent value="virtual-tour" className="w-full">
                                 {property.videoUrl && (
                                     <iframe
-                                        src={property.videoUrl}
-                                        className="w-full h-[300px] rounded-md"
+                                        src={convertToEmbedUrl(property.videoUrl)}
+                                        className="w-full h-full min-h-[300px] rounded-md"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         allowFullScreen
-                                    ></iframe>
-
+                                        loading="lazy"
+                                    />
                                 )}
                             </TabsContent>
                         </ScrollArea>

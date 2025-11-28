@@ -107,7 +107,13 @@ export default function PropertyFormEditor({
 
     // Intecept navigation if form is dirty
     const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
-        useUnsavedChanges({ when: isFormDirty, onSaveDraft: handleSaveDraft, guardedPaths: user?.accountType === "Admin" ? ["/admin/add-property", "/admin/edit-property"] : ["/agent/add-property", "/agent/edit-property"], });
+        useUnsavedChanges({
+            when: isFormDirty,
+            onSaveDraft: handleSaveDraft,
+            guardedPaths: user?.accountType === "Admin" ?
+                ["/admin/add-property", "/admin/edit-property"] :
+                ["/agent/add-property", "/agent/edit-property"],
+        });
 
     // Populate agent details if account type is agent
     useEffect(() => {
@@ -346,6 +352,7 @@ export default function PropertyFormEditor({
             setLoading(false);
         }
     };
+
 
 
     return (

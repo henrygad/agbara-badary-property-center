@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function GroundLoader({ loading }: { loading: boolean }) {
     return (loading &&
-        <div className="flex items-center justify-center gap-3 py-4 w-full h-full">
+        <div className="flex items-center justify-center py-4 h-full flex-1 w-full">
             <motion.div
                 animate={{ rotate: 360 }}
                 transition={{
@@ -15,7 +15,7 @@ export default function GroundLoader({ loading }: { loading: boolean }) {
             >
                 <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full" />
             </motion.div>
-            <span className="text-gray-500 text-sm">Loading...</span>
+            {/* <span className="text-gray-500 text-sm">Loading...</span> */}
         </div>
     );
 }

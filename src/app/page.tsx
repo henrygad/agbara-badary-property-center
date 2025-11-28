@@ -189,7 +189,9 @@ export default function Home() {
                 return <ClientCard key={p.id} property={p} />
               }
               ) :
-              <GroundLoader loading={loading} />
+              <div className="col-span-3">
+                <GroundLoader loading={loading} />
+              </div>
           }
         </div>
         <div className="flex justify-end mt-10">

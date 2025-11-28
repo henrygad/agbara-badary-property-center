@@ -88,11 +88,13 @@ export default function Navbar() {
           className="relative cursor-pointer"
           onClick={() => router.push(user?.accountType === "Admin" ? "/admin/notifications" : "/agent/notifications")}
         >
-          <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+          <Bell className="h-4 w-5 text-gray-600 dark:text-gray-300" />
 
           {unreadCount > 0 ?
-            <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
-              {unreadCount}
+            <span className="w-4 h-4 flex items-center justify-center absolute -top-1 -right-1 bg-red-700 rounded-full">
+              <span className="text-white text-[9px] font-semibold ">
+                {unreadCount > 99 ? 99 : unreadCount}
+              </span>
             </span> :
             <span className="absolute -top-1 -right-1  w-4 h-4 rounded-full" />
           }          

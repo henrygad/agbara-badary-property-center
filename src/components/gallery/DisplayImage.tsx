@@ -58,13 +58,14 @@ const DisplayImage = ({ src, alt = "Property", type = "Property", imageObjectCov
             <div className="flex flex-col items-center justify-center text-center text-sm text-gray-500">
                 <Placeholder type={type} />
             </div>
-        )}       
+        )}
         {/* Real image */}
         {!isError &&
             <Image
                 src={getOptimizedImage(src, 1200)}
                 alt={alt}
                 fill
+                sizes="100%"
                 // placeholder="blur"
                 // blurDataURL={getOptimizedImage(src, 10)}
                 loading="lazy"

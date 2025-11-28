@@ -21,6 +21,7 @@ import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
 import { SearchTypes } from "@/types/search.types";
 import LocationSearch from "./LocationSearch";
+import { cn } from "@/lib/utils";
 
 const dafaultData: SearchTypes = {
     status: "Sale",
@@ -45,7 +46,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
     const router = useRouter();
 
     const [showMore, setShowMore] = useState(false);
-    const [showTriangle, setShowTriangle] = useState<"Buy" | "Rent">("Buy");
+    const [showTriangle, setShowTriangle] = useState<"Buy" | "Rent" | "Lease">("Buy");
 
 
     const handleChange = (field: keyof SearchTypes, value: string) => {
@@ -101,13 +102,13 @@ export default function SearchForm({ setOpen = () => null }: Props) {
     };
 
     return (
-        <div className="w-full space-y-3 min-w-[320px] sm:min-w-[480px] md:min-w-2xl">
+        <div className="w-full space-y-6 min-w-[320px] sm:min-w-[480px] md:min-w-2xl">
             {/* Tabs */}
             <Tabs
                 value={search.status}
                 onValueChange={(v: string) => handleChange("status", v)}
             >
-                <TabsList className="grid grid-cols-2 text-base w-full max-w-ful h-full">
+                <TabsList className="grid grid-cols-3 text-base w-full max-w-ful h-full">
                     <TabsTrigger
                         value="Sale"
                         className="data-[state=active]:bg-red-700 data-[state=active]:text-white cursor-pointer"
@@ -122,14 +123,27 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                     >
                         RENT
                     </TabsTrigger>
+                    <TabsTrigger
+                        value="Lease"
+                        className="data-[state=active]:bg-red-700 data-[state=active]:text-white cursor-pointer"
+                        onClick={() => setShowTriangle("Lease")}
+                    >
+                        LEASE
+                    </TabsTrigger>
                 </TabsList>
             </Tabs>
 
             {/* Tri angle */}
-            <div className="relative flex justify-around items-center">
-                {showTriangle === "Buy" && <div className="h-7 w-7 rotate-45 border-2 bg-gray-50 -mb-11" />}
-                <div className="bg-transparent h-7 w-7 rotate-45 -mb-11" />
-                {showTriangle === "Rent" && <div className="h-7 w-7 rotate-45 border-2 bg-gray-50 -mb-11" />}
+            <div className="relative">
+
+                {/* should be left */}
+                <div className={cn("absolute left-1/6 -bottom-6 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Buy"? "bg-gray-50 ring-2 ring-gray-50 border-gray-50": "")} />
+
+                {/* should be centerned */}
+                <div className={cn("absolute left-1/2 -bottom-6 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Rent"? "bg-gray-50 ring-2 ring-gray-50 border-gray-50": "")} />
+
+                {/* should be right */}
+                <div className={cn("absolute right-1/6 -bottom-6 h-7 w-7 rotate-45 border-2 border-transparent", showTriangle ==="Lease"? "bg-gray-50 ring-2 ring-gray-50 border-gray-50": "")} />
             </div>
 
             {/* Form */}
@@ -197,7 +211,7 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                             <SelectValue placeholder="No Min" />
                         </SelectTrigger>
                         <SelectContent>
-                            {[50000, 100000, 200000, 500000, 1000000].map((p) => (
+                            {[50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 15000000].map((p) => (
                                 <SelectItem key={p} value={`${p}`}>
                                     ₦{p.toLocaleString()}
                                 </SelectItem>
@@ -217,7 +231,8 @@ export default function SearchForm({ setOpen = () => null }: Props) {
                             <SelectValue placeholder="Max Price" />
                         </SelectTrigger>
                         <SelectContent>
-                            {[100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 15000000].map((p) => (
+                            {[100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000, 35000000, 40000000, 45000000, 50000000, 60000000, 70000000, 80000000, 90000000, 100000000, 150000000, 200000000, 250000000, 300000000]
+                                .map((p) => (
                                 <SelectItem key={p} value={`${p}`}>
                                     ₦{p.toLocaleString()}
                                 </SelectItem>
