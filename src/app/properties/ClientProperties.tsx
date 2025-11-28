@@ -74,7 +74,7 @@ export default function ClientProperties() {
                     </button>
                 </AlertDialogTrigger >
 
-                <AlertDialogContent className='w-full max-w-none' style={{ maxWidth: "95%" }}>
+                <AlertDialogContent className='w-full max-w-none' style={{ maxWidth: "95%", paddingInline: "4px", paddingBlock: "8px" }}>
                     <AlertDialogTitle className='hidden'></AlertDialogTitle>
                     <SearchForm open={openSearchForm} setOpen={setOpenSearchForm} />
                     <AlertDialogFooter>
