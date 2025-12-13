@@ -4,6 +4,14 @@ import { verifyToken } from "./utils";
 
 
 export async function middleware(req: NextRequest) {
+    const isDisable = true;
+
+    if (isDisable) {
+        return new NextResponse(
+            "🚧 Agbara Badagry Property Center is down. We'll be back soon.",
+            { status: 503 }
+        );
+    }
     const { pathname } = req.nextUrl;
     const token = req.cookies.get("auth_token")?.value;
     const url = req.nextUrl.clone();
@@ -74,6 +82,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
     matcher: [
+        "/:path*",
         "/agent/:path*",
         "/admin/:path*",
         "/auth/:path*", 
