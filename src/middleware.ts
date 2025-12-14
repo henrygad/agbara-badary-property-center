@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { verifyToken } from "./utils";
 
 export async function middleware(req: NextRequest) {
-    const isDisable = true;
+    const isDisable = false;
 
     if (isDisable) {
         return new NextResponse(
