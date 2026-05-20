@@ -146,7 +146,7 @@ Script is added via the `_document.tsx` or layout file.
 ## 🧑‍💻 Author
 
 **Agbara Badagry Property Center Team**  
-Built by [Eblognews](mailto:agbarabadagrypropertycenter@gmail.com)
+Built by [Henry loveday](mailto:henrygad.orji@gmail.com)
 
 ---
 
