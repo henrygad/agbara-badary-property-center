@@ -38,7 +38,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
     const router = useRouter();
 
 
-    const plugin = useRef(
+    const pluginRef = useRef(
         Autoplay({
             delay: 8000,
             stopOnInteraction: false,
@@ -52,7 +52,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
     };
 
     const handleCopy = (id?: string) => {
-        navigator.clipboard.writeText(`${window.location.origin}/property/${id}`);
+        navigator.clipboard.writeText(`${window.location.origin}/properties/${id}`);
         showSuccess("Copied", "Property link copied!");
     };
 
@@ -63,7 +63,7 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                 align: "start",
                 loop: true,
             }}
-            plugins={[plugin.current]}
+            plugins={[pluginRef.current]}
             className="relative min-w-full"
         >
             <div className="absolute top-4 left-4 z-20">
@@ -92,14 +92,14 @@ export default function Listings({ property, viewer, placeViewing }: Props) {
                             {/* Copy Link */}
                             <DropdownMenuItem
                                 onClick={() => handleCopy(property.id)}
-                                className="flex gap-2 items-center"
+                                className="flex gap-2 items-centern cursor-pointer"
                             >
                                 <Clipboard className="w-4 h-4 mr-2 text-agray-text-gray-600" />
                                 Copy Link
                             </DropdownMenuItem>
                             {/* Report */}
                             <DropdownMenuItem
-                                className="text-primary flex gap-2 items-center"
+                                className="text-primary flex gap-2 items-center cursor-pointer"
                                 onClick={() => handleReport(property.id)}
                             >
                                 <Flag className="w-4 h-4 mr-2 text-agray-text-gray-600" />

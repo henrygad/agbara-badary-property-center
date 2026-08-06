@@ -4,7 +4,6 @@ import { PropertyTypes } from "@/types/property.types";
 import { SearchTypes } from "@/types/search.types";
 import { formatteFireStoreDate } from "@/utils";
 
-
 export async function searchPropertiesDb(params: SearchTypes) {
     const queries = [];
 

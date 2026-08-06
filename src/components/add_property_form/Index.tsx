@@ -159,10 +159,7 @@ export default function PropertyFormEditor({
         showSuccess("Draft saved!", "Draft have been saved locally");
     }
 
-    function update<K extends keyof typeof form>(
-        key: K,
-        value: (typeof form)[K]
-    ) {
+    function update<K extends keyof typeof form>(key: K,value: (typeof form)[K]) {
         setForm((s) => ({ ...s, [key]: value }));
     }
 
