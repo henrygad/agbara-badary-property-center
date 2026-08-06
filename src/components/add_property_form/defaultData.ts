@@ -1,8 +1,7 @@
 import { Amenity, PropertyTypes } from "../../types/property.types";
 
 export const AMENITIES: Amenity[] = [
-    "Parking Space",
-    "Borehole",
+    "Parking Space",   
     "Generator",
     "CCTV",
     "Electricity",

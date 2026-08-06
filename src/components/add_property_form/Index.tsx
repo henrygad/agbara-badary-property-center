@@ -54,16 +54,16 @@ import { usePropertyStore } from "@/store/usePropertyStore";
 import { useRouter } from "next/navigation";
 import FormButton from "./FormButton";
 import PageLoading from "../loaders/PageLoader";
-import useUnsavedChanges from "@/hooks/useUnsavedChanges";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "../ui/alert-dialog";
+// import useUnsavedChanges from "@/hooks/useUnsavedChanges";
+// import {
+//     AlertDialog,
+//     AlertDialogAction,
+//     AlertDialogContent,
+//     AlertDialogDescription,
+//     AlertDialogFooter,
+//     AlertDialogHeader,
+//     AlertDialogTitle,
+// } from "../ui/alert-dialog";
 import Property from "../property/Index";
 import { useUserStore } from "@/store/useUserStore";
 import { Card } from "../ui/card";
@@ -72,6 +72,8 @@ import { addNotificationDb } from "@/lib/firebase/notification._service";
 import NotificationTypes from "@/types/notification.types";
 import { PendingApprovalDialog } from "../PendingApprovalDialog";
 import { useDraftStore } from "@/store/useDraftStore";
+import CustomButton from "../CustomButton";
+import { Spinner } from "../ui/spinner";
 
 type Props = {
     accountType: "ADMIN" | "AGENT";
@@ -88,7 +90,7 @@ export default function PropertyFormEditor({
 
     const { user, loading: loadingUser } = useUserStore();
     const { addProperty, form, setForm, updateProperty, isFormDirty } = usePropertyStore();
-    const { deleteDraft, addDraft } = useDraftStore();
+    const { deleteDraft, addDraft, updateDraft } = useDraftStore();
 
     const [pendingAgentDialogOpen, setpendingAgentDialogOpen] = useState(false);
 
@@ -106,14 +108,14 @@ export default function PropertyFormEditor({
     );
 
     // Intecept navigation if form is dirty
-    const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
-        useUnsavedChanges({
-            when: isFormDirty,
-            onSaveDraft: handleSaveDraft,
-            guardedPaths: user?.accountType === "Admin" ?
-                ["/admin/add-property", "/admin/edit-property"] :
-                ["/agent/add-property", "/agent/edit-property"],
-        });
+    // const { openPrompt, setOpenPrompt, leaveWithoutSaving, saveDraftAndLeave } =
+    //     useUnsavedChanges({
+    //         when: isFormDirty,
+    //         onSaveDraft: handleSaveDraft,
+    //         guardedPaths: user?.accountType === "Admin" ?
+    //             ["/admin/add-property", "/admin/edit-property"] :
+    //             ["/agent/add-property", "/agent/edit-property"],
+    //     });
 
     // Populate agent details if account type is agent
     useEffect(() => {
@@ -128,6 +130,7 @@ export default function PropertyFormEditor({
                 accountType: user?.accountType,
                 agentId: user?.id || "",
                 availability: user.accountType === "Admin" ? "Accepted" : "Pending",
+                referenceId: "",
             }));
         }
     }, [user, setForm]);
@@ -136,30 +139,7 @@ export default function PropertyFormEditor({
     if (loadingForm || loadingUser) return <PageLoading loading={loadingForm || loadingUser} />;
 
 
-    function handleSaveDraft() {
-        const drafts = JSON.parse(
-            localStorage.getItem("drafts") || "[]"
-        ) as PropertyTypes[];
-
-        const playLoad = {
-            ...form,
-            availability: "Draft",
-            draftId: String(Date.now() + Math.random()),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        } as PropertyTypes;
-
-        localStorage.setItem(
-            "drafts",
-            JSON.stringify([playLoad, ...drafts,])
-        );
-
-        addDraft(playLoad);
-        setForm(() => DEFAULT_PROPERTY_FORM);
-        showSuccess("Draft saved!", "Draft have been saved locally");
-    }
-
-    function update<K extends keyof typeof form>(key: K,value: (typeof form)[K]) {
+    function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
         setForm((s) => ({ ...s, [key]: value }));
     }
 
@@ -186,6 +166,46 @@ export default function PropertyFormEditor({
         window.scrollTo(0, 0);
     }
 
+    function handleSaveDraft() {
+        const drafts = JSON.parse(
+            localStorage.getItem("drafts") || "[]"
+        ) as PropertyTypes[];
+
+        // Check if id already exists in drafts
+        const existingDraftIndex = drafts.findIndex(d => d.draftId === form.draftId);
+        // then update the existing draft
+        if (existingDraftIndex !== -1) {
+            drafts[existingDraftIndex] = { ...form, updatedAt: new Date() } as PropertyTypes;
+            localStorage.setItem(
+                "drafts",
+                JSON.stringify(drafts)
+            );
+            updateDraft(drafts[existingDraftIndex].draftId || "", drafts[existingDraftIndex]);
+            showSuccess("Draft updated!", "Draft have been updated locally");
+        }
+        else {
+
+            // else create a new draft        
+            const payLoad = {
+                ...form,
+                availability: "Draft",
+                draftId: String(Date.now() + Math.random()),
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            } as PropertyTypes;
+
+            localStorage.setItem(
+                "drafts",
+                JSON.stringify([payLoad, ...drafts,])
+            );
+
+            addDraft(payLoad);
+            showSuccess("Draft saved!", "Draft have been saved locally");
+        }
+
+        setForm(() => DEFAULT_PROPERTY_FORM);
+    }
+
     const handleDeleteDraft = (draftId?: string) => {
         if (!draftId) return;
 
@@ -202,13 +222,16 @@ export default function PropertyFormEditor({
 
     async function submitNewProperty(payload: PropertyTypes) {
         // Simulate API call
-        const property = await addPropertyDb(payload);
+        const property = await addPropertyDb({
+            ...payload,
+            seoSlug: payload.seoSlug + "-" + Date.now(),
+            referenceId: `AGB-${Date.now()}`,
+        });
         if (property) {
             addProperty(property);
             return property;
         }
         return null
-
     }
 
     async function submitUpdatedProperty(payload: PropertyTypes) {
@@ -219,14 +242,6 @@ export default function PropertyFormEditor({
         const property = await updatePropertyDb(payload.id, payload);
         if (property) {
             updateProperty(property);
-
-            // Return user back
-            //const clearOut =
-            setTimeout(() => {
-                router.back();
-                //clearTimeout(clearOut);
-            }, 500);
-
             return property;
         }
         return null;
@@ -252,32 +267,29 @@ export default function PropertyFormEditor({
                 throw new Error(error.errorMsg);
             }
 
-            // Prepare payload for your API or Firestore
-            const payload: PropertyTypes = {
-                ...form,
-                seoSlug: form.seoSlug + "-" + Date.now(),
-                referenceId: `AGB-${Date.now()}`,
-            };
+            let payload: PropertyTypes = form;
+
+            // If this is a drafted property            
+            if (payload.availability === 'Draft') {
+                const { draftId, createdAt, updatedAt, ...rest } = payload;
+
+                // delete draft locally
+                handleDeleteDraft(draftId);
+
+                // then modify draft form
+                console.log("Draft property payload: ", payload);   
+                payload = { ...rest, availability: user.accountType === "Admin" ? "Accepted" : "Pending" }
+
+            }
+
 
             let property: PropertyTypes | null = null;
 
-            if (documentType === "NEW") {
-                property = await submitNewProperty(payload);
-                if (user?.accountType === "Agent") {
-                    const payload: NotificationTypes = {
-                        type: "Property",
-                        to: "Admin",
-                        title: `New property by ${user.firstName} ${user.lastName}.`,
-                        message: `A new property - ${property?.referenceId} has been listed by ${user.firstName} ${user.lastName}, and waiting admin aprroval.`,
-                        viewed: false,
-                        createdAt: new Date()
-                    };
-                    await addNotificationDb(payload);
-                }
-                
-            } else if (documentType === "UPDATE" && payload.referenceId) {
+            if (payload.referenceId) {
                 property = await submitUpdatedProperty(payload);
-                if (user?.accountType === "Agent") {
+
+                if (user.accountType === "Agent") {
+
                     const payload: NotificationTypes = {
                         type: "Property",
                         to: "Admin",
@@ -286,21 +298,30 @@ export default function PropertyFormEditor({
                         viewed: false,
                         createdAt: new Date()
                     };
+
                     await addNotificationDb(payload);
                 }
-            } else if (documentType === "REVIEW" && payload.referenceId) {
-                property = await submitUpdatedProperty(payload);
+
             }
+            else {
+                property = await submitNewProperty(payload);
 
-            if (!property) return;
-            // Simulate successful response
+                if (user?.accountType === "Agent") {
 
-            // Was a drafted property
-            const draftId = payload.draftId;
-            if (draftId) {
-                handleDeleteDraft(draftId);
+                    const payload: NotificationTypes = {
+                        type: "Property",
+                        to: "Admin",
+                        title: `New property by ${user.firstName} ${user.lastName}.`,
+                        message: `A new property - ${property?.referenceId} has been listed by ${user.firstName} ${user.lastName}, and waiting admin aprroval.`,
+                        viewed: false,
+                        createdAt: new Date()
+                    };
+
+                    await addNotificationDb(payload);
+                }
+
             }
-
+           
             let heading = "";
             let description = "";
 
@@ -322,10 +343,6 @@ export default function PropertyFormEditor({
             showSuccess(heading, description);
 
             setForm(() => {
-                if (!user) {
-                    return DEFAULT_PROPERTY_FORM;
-                }
-
                 return {
                     ...DEFAULT_PROPERTY_FORM,
                     agentName: user.firstName + " " + user.lastName,
@@ -335,9 +352,8 @@ export default function PropertyFormEditor({
                 };
             });
 
-            setError({ errorMsg: "", isError: false });
-
             setStep(1);
+            if (error.isError) setError({ errorMsg: "", isError: false });
         } catch (err) {
             const errorMsg = err as { message: string };
             showError("Failed to submit", errorMsg.message);
@@ -349,7 +365,6 @@ export default function PropertyFormEditor({
             setLoading(false);
         }
     };
-
 
 
     return (
@@ -1489,8 +1504,18 @@ export default function PropertyFormEditor({
 
                 {/* Create | Update new listing button */}
                 {step === 5 && (
-                    <div className="sticky bottom-4 left-0 right-0">
-                        <div className="w-full h-full flex justify-center px-4">
+                    <div className="flex gap-6 sm:gap-8 flex-wrap sticky bottom-4 left-0 right-0">
+                        <div className="basis-0 flex-1">
+                            {isFormDirty && <CustomButton
+                                disabled={loading}
+                                onClick={handleSaveDraft}
+                                type="button"
+                                className="bg-gray-600 hover:bg-gray-700 text-white text-base px-16 py-3 rounded-md shadow  w-full overflow-hidden cursor-pointer"
+                            >
+                                Save as Draft
+                            </CustomButton>}
+                        </div>
+                        <div className="flex-2">
                             <FormButton
                                 loading={loading}
                                 isFormDirty={isFormDirty}
@@ -1498,13 +1523,14 @@ export default function PropertyFormEditor({
                                 accountType={accountType}
                                 title={form.title}
                             />
+
                         </div>
                     </div>
                 )}
             </form>
 
             {/* Unsaved Changes Alert */}
-            <AlertDialog
+            {/* <AlertDialog
                 open={openPrompt}
                 onOpenChange={setOpenPrompt}
             >
@@ -1543,7 +1569,7 @@ export default function PropertyFormEditor({
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog> */}
 
             {/* Dialog for pending account */}
             <PendingApprovalDialog

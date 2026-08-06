@@ -29,7 +29,7 @@ export default function FormButton({ loading, title, accountType, documentType, 
             <>{
                 loading ?
                     <>< Spinner /> Adding... </> :
-                    "Add Property"
+                    "List Property"
             }</>
         </CustomButton>
     } else if (documentType == "UPDATE" && isFormDirty) {
